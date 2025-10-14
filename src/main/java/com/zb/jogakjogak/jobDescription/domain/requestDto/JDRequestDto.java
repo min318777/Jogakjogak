@@ -57,7 +57,7 @@ public class JDRequestDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "채용 공고는 필수 항목입니다.")
     @MeaningfulText(message = "채용공고 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다.")
-    @Size(min = 300, message = "채용공고의 내용은 300자 이상이어야 합니다.")
+    @Size(min = 200, message = "채용공고의 내용은 200자 이상이어야 합니다.")
     private String content;
     @Schema(description = "채용 공고의 마감일", example = "2025-06-22T10:30:00Z", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime endedAt;
