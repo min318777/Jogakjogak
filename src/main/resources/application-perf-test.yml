@@ -1,0 +1,3 @@
+spring:
+  datasource-main:
+    jdbc-url: ${DB_URL}&rewriteBatchedStatements=true&useServerPrepStmts=false
