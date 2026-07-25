@@ -1,4 +1,6 @@
 # 조각조각
+> 원본 레포지토리: [mallangC/Jogakjogak](https://github.com/mallangC/Jogakjogak)
+
 Gemini 2.0 모델을 사용하여 이력서, JD를 분석 후 부족한 부분을 체크리스트 형식으로 제공하여 취업에 도움 되는 내용을 알려주는 서비스입니다.
 
 ## 기술 스택
