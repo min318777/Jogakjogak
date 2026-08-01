@@ -3,11 +3,11 @@ package com.zb.jogakjogak.security.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
-import com.zb.jogakjogak.global.exception.MemberErrorCode;
+import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.repository.MemberRepository;
+import com.zb.jogakjogak.security.service.BlacklistService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ import java.io.IOException;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
-    private final MemberRepository memberRepository;
+    private final BlacklistService blacklistService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -40,13 +40,20 @@ public class JWTFilter extends OncePerRequestFilter {
         try {
             jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
         } catch (AuthException e) {
-            writeErrorResponse(response, "UNAUTHORIZED", e.getMessage());
+            writeErrorResponse(response, e.getMemberErrorCode().name(), e.getMessage());
             return;
         }
 
-        String userName = jwtUtil.getUsername(accessToken);
-        Member member = memberRepository.findByUsername(userName)
-                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
+        if (blacklistService.isBlacklisted(jwtUtil.getJti(accessToken))) {
+            writeErrorResponse(response, "BLACKLISTED_TOKEN", "로그아웃된 토큰입니다.");
+            return;
+        }
+
+        Member member = Member.builder()
+                .id(Long.parseLong(jwtUtil.getUserId(accessToken)))
+                .username(jwtUtil.getUsername(accessToken))
+                .role(Role.valueOf(jwtUtil.getRole(accessToken)))
+                .build();
 
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(member);
         Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());

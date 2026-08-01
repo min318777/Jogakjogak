@@ -3,8 +3,6 @@ package com.zb.jogakjogak.security.jwt;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
-import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,13 +12,14 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JWTUtil {
 
     private final SecretKey secretKey;
 
-    public JWTUtil(@Value("${jwt.secret-key}")String secret, RefreshTokenRepository refreshTokenRepository){
+    public JWTUtil(@Value("${jwt.secret-key}") String secret) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
@@ -48,10 +47,19 @@ public class JWTUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
+    public Date getExpiration(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration();
+    }
+
+    public String getJti(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getId();
+    }
+
     public String createAccessToken(Long userId, String provider, String username, String role, Long expireMs, Token token){
         return Jwts.builder()
                 .claims()
                     .subject(String.valueOf(userId))
+                    .id(UUID.randomUUID().toString())
                     .add("provider", provider)
                     .add("username", username)
                     .add("role", role)

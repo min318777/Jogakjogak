@@ -7,8 +7,8 @@ import com.zb.jogakjogak.security.jwt.CustomLogoutFilter;
 import com.zb.jogakjogak.security.jwt.JWTFilter;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.oauth2.CustomSuccessHandler;
-import com.zb.jogakjogak.security.repository.MemberRepository;
-import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
+import com.zb.jogakjogak.security.service.BlacklistService;
+import com.zb.jogakjogak.security.service.RefreshTokenRedisService;
 import com.zb.jogakjogak.security.service.CustomOauth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,9 +34,9 @@ public class SecurityConfig {
 
     private final CustomOauth2UserService customOauth2UserService;
     private final CustomSuccessHandler customSuccessHandler;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final MemberRepository memberRepository;
+    private final RefreshTokenRedisService refreshTokenRedisService;
     private final JWTUtil jwtUtil;
+    private final BlacklistService blacklistService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Bean
@@ -71,9 +71,9 @@ public class SecurityConfig {
         http.
                 httpBasic((auth) -> auth.disable());
         http.
-                addFilterAfter(new JWTFilter(jwtUtil, memberRepository), OAuth2LoginAuthenticationFilter.class);
+                addFilterAfter(new JWTFilter(jwtUtil, blacklistService), OAuth2LoginAuthenticationFilter.class);
         http.
-                addFilterBefore(new CustomLogoutFilter(refreshTokenRepository, jwtUtil), LogoutFilter.class);
+                addFilterBefore(new CustomLogoutFilter(refreshTokenRedisService, jwtUtil, blacklistService), LogoutFilter.class);
         http.
                 oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig.userService(customOauth2UserService))

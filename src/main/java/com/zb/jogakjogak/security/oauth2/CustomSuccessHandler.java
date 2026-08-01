@@ -6,10 +6,9 @@ import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.entity.RefreshToken;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.repository.MemberRepository;
-import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
+import com.zb.jogakjogak.security.service.RefreshTokenRedisService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,10 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,7 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JWTUtil jwtUtil;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenRedisService refreshTokenRedisService;
     private final GaMeasurementProtocolService gaService;
     private final MemberRepository memberRepository;
     private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;
@@ -49,7 +46,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Long userId = member.getId();
         String refreshToken = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
 
-        addRefreshToken(username, userId, refreshToken);
+        refreshTokenRedisService.save(userId, refreshToken);
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
 
         String clientId = extractGaClientId(request);
@@ -98,19 +95,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         }
 
         response.addHeader("Set-Cookie", cookieHeader);
-    }
-
-    @Transactional
-    private void addRefreshToken(String username, Long userId, String refresh) {
-        refreshTokenRepository.findByUsername(username)
-                .ifPresent(refreshTokenRepository::delete);
-        RefreshToken refreshToken = RefreshToken.builder()
-                .username(username)
-                .token(refresh)
-                .userId(userId)
-                .expiration(LocalDateTime.now().plusSeconds(REFRESH_TOKEN_EXPIRATION / 1000))
-                .build();
-        refreshTokenRepository.save(refreshToken);
     }
 
     /**

@@ -2,31 +2,31 @@ package com.zb.jogakjogak.security.jwt;
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
+import com.zb.jogakjogak.security.service.BlacklistService;
+import com.zb.jogakjogak.security.service.RefreshTokenRedisService;
 import io.jsonwebtoken.JwtException;
-import jakarta.servlet.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Date;
 
 @Slf4j
 @RequiredArgsConstructor
-public class CustomLogoutFilter extends GenericFilter {
-    private final RefreshTokenRepository refreshTokenRepository;
+public class CustomLogoutFilter extends OncePerRequestFilter {
+    private final RefreshTokenRedisService refreshTokenRedisService;
     private final JWTUtil jwtUtil;
+    private final BlacklistService blacklistService;
     private static final String LOGOUT_URI = "/member/logout";
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
-
-        doFilter((HttpServletRequest) request, (HttpServletResponse) response, filterChain);
-    }
-
-    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         if (!isLogoutRequest(request)){
             filterChain.doFilter(request, response);
@@ -50,10 +50,23 @@ public class CustomLogoutFilter extends GenericFilter {
             response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
-        // 유효한 토큰인 경우 DB에서 refresh token 삭제
         Long userId = Long.parseLong(jwtUtil.getUserId(refreshToken));
-        refreshTokenRepository.deleteByUserId(userId);
+        refreshTokenRedisService.delete(userId);
         log.info("[LogoutFilter] {} 사용자 로그아웃 처리 (refresh token 삭제)", userId);
+
+        // AccessToken 블랙리스트 등록
+        String accessToken = extractAccessToken(request);
+        if (accessToken != null) {
+            try {
+                String jti = jwtUtil.getJti(accessToken);
+                Date expiration = jwtUtil.getExpiration(accessToken);
+                long remainingMs = expiration.getTime() - System.currentTimeMillis();
+                blacklistService.addToBlacklist(jti, remainingMs);
+                log.info("[LogoutFilter] AccessToken 블랙리스트 등록 (jti={}, 남은 TTL: {}ms)", jti, remainingMs);
+            } catch (Exception e) {
+                log.warn("[LogoutFilter] AccessToken 블랙리스트 등록 실패 (무시): {}", e.getMessage());
+            }
+        }
 
         clearRefreshTokenInCookie(response);
         response.setStatus(HttpServletResponse.SC_OK);
@@ -63,6 +76,14 @@ public class CustomLogoutFilter extends GenericFilter {
 
     private boolean isLogoutRequest(HttpServletRequest request) {
         return LOGOUT_URI.equals(request.getRequestURI()) && "POST".equals(request.getMethod());
+    }
+
+    private String extractAccessToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7);
+        }
+        return null;
     }
 
     private String extractRefreshTokenFromCookie(Cookie[] cookies) {

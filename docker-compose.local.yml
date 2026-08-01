@@ -1,0 +1,49 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: jogak-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  jogak_backend_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jogak-backend
+    restart: always
+    depends_on:
+      - redis
+    environment:
+      TZ: Asia/Seoul
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DB_URL: ${DB_URL}
+      DB_META_URL: ${DB_META_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
+      KAKAO_ADMIN_KEY: ${KAKAO_ADMIN_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_API_URL: ${OPENAI_API_URL}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      EMAIL_ID: ${EMAIL_ID}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      KAKAO_REDIRECT_URI: ${KAKAO_REDIRECT_URL}
+      EMAIL_AES_KEY: ${EMAIL_AES_KEY}
+      PHONE_AES_KEY: ${PHONE_AES_KEY}
+      GA4_MEASUREMENT_ID: ${GA4_MEASUREMENT_ID}
+      GA4_API_KEY: ${GA4_API_KEY}
+    ports:
+      - "8080:8080"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "1"

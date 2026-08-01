@@ -21,7 +21,9 @@ public enum MemberErrorCode {
     NOT_FOUND_OAUTH_PROVIDER(HttpStatus.NOT_FOUND, "찾을 수 없는 provider 입니다." ),
 
     EXPIRED_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "google access token이 만료되어 회원탈퇴요청을 할 수 없습니다. 재로그인 해 주세요." ),
-    INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지않은 토큰입니다." ) ;
+    INVALID_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지않은 토큰입니다." ),
+    BLACKLISTED_TOKEN(HttpStatus.UNAUTHORIZED, "로그아웃된 토큰입니다." ),
+    TOKEN_THEFT_DETECTED(HttpStatus.UNAUTHORIZED, "토큰 탈취가 감지되어 로그아웃 처리되었습니다. 다시 로그인해주세요." );
     private final HttpStatus httpStatus;
     private final String message;
 }

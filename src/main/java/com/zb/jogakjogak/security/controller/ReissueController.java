@@ -10,11 +10,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Access Token 관리 API", description = "새로운 access token 발급 관련 API")
@@ -31,7 +29,7 @@ public class ReissueController {
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
         ReissueResultDto reissueResultDto = reissueService.reissue(refreshToken);
         response.setHeader("Authorization", "Bearer " + reissueResultDto.getNewAccessToken());
-        response.addCookie(createCookie("refresh", reissueResultDto.getNewRefreshToken()));
+        response.addCookie(createCookie("refresh", reissueResultDto.getNewRefreshToken(), request));
         return ResponseEntity.ok()
                 .body(
                         new HttpApiResponse<>(reissueResultDto.getNewAccessToken(),
@@ -49,10 +47,10 @@ public class ReissueController {
             return null;
     }
 
-    private Cookie createCookie(String key, String value) {
+    private Cookie createCookie(String key, String value, HttpServletRequest request) {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24 * 60 * 60 * 7);
-        cookie.setSecure(true);
+        cookie.setSecure(!request.getServerName().contains("localhost"));
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         return cookie;
