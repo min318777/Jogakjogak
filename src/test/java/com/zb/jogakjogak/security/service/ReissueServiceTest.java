@@ -67,7 +67,7 @@ class ReissueServiceTest {
 
         when(jwtUtil.getUserId(refreshToken)).thenReturn(userIdStr);
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
-        when(jwtUtil.createAccessToken(userId, provider, username, role, 1000 * 60 * 60 * 24L, Token.ACCESS_TOKEN)).thenReturn(newAccess);
+        when(jwtUtil.createAccessToken(userId, provider, username, role, 1000 * 60 * 30L, Token.ACCESS_TOKEN)).thenReturn(newAccess);
         when(jwtUtil.createRefreshToken(userId, 7 * 24 * 60 * 60 * 1000L, Token.REFRESH_TOKEN)).thenReturn(newRefresh);
         when(refreshTokenRepository.findByUsername(username)).thenReturn(Optional.of(existingToken));
         when(memberRepository.findById(userId)).thenReturn(Optional.of(member));
@@ -106,7 +106,7 @@ class ReissueServiceTest {
         // jwtUtil mock
         when(jwtUtil.getUserId(refreshToken)).thenReturn(userIdStr);
         when(jwtUtil.getRole(refreshToken)).thenReturn(role);
-        when(jwtUtil.createAccessToken(userId, provider, username, role, 1000 * 60 * 60 * 24L, Token.ACCESS_TOKEN)).thenReturn(newAccess);
+        when(jwtUtil.createAccessToken(userId, provider, username, role, 1000 * 60 * 30L, Token.ACCESS_TOKEN)).thenReturn(newAccess);
         when(jwtUtil.createRefreshToken(userId, 7 * 24 * 60 * 60 * 1000L, Token.REFRESH_TOKEN)).thenReturn(newRefresh);
 
         // DB mock

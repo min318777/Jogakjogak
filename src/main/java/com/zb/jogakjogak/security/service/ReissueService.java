@@ -24,7 +24,7 @@ public class ReissueService {
     private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final MemberRepository memberRepository;
-    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60 * 24L;
+    private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 30L;
     private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;
 
     public ReissueResultDto reissue(String refreshToken) {

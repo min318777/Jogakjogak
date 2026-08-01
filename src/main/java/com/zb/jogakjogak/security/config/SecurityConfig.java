@@ -1,6 +1,8 @@
 package com.zb.jogakjogak.security.config;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zb.jogakjogak.global.exception.ErrorResponse;
 import com.zb.jogakjogak.security.jwt.CustomLogoutFilter;
 import com.zb.jogakjogak.security.jwt.JWTFilter;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
@@ -9,6 +11,7 @@ import com.zb.jogakjogak.security.repository.MemberRepository;
 import com.zb.jogakjogak.security.repository.RefreshTokenRepository;
 import com.zb.jogakjogak.security.service.CustomOauth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +37,7 @@ public class SecurityConfig {
     private final RefreshTokenRepository refreshTokenRepository;
     private final MemberRepository memberRepository;
     private final JWTUtil jwtUtil;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -74,6 +78,11 @@ public class SecurityConfig {
                 oauth2Login((oauth2) -> oauth2
                         .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig.userService(customOauth2UserService))
                         .successHandler(customSuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json; charset=UTF-8");
+                            response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse("LOGIN_FAILED", "소셜 로그인에 실패했습니다.")));
+                        })
                 );
         http.
                 authorizeHttpRequests((auth) -> auth
@@ -86,7 +95,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                "/biz/init/**",
+                                "/biz/send/**"
                         ).permitAll()
                         .anyRequest().authenticated());
         http.

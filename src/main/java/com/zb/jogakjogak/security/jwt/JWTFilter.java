@@ -1,6 +1,8 @@
 package com.zb.jogakjogak.security.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zb.jogakjogak.global.exception.AuthException;
+import com.zb.jogakjogak.global.exception.ErrorResponse;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
@@ -17,54 +19,28 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Set;
 
 @RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
     private final MemberRepository memberRepository;
-
-    private static final Set<String> WHITELIST = Set.of(
-            "/actuator/health",
-            "/member/reissue",
-            "/member/logout",
-            "/login/oauth2/code",
-            "/oauth2",
-            "/login/oauth2",
-            "/v3/api-docs",
-            "/swagger-ui",
-            "/swagger-resources",
-            "/webjars"
-    );
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String path = request.getRequestURI();
-
-        if (isWhitelisted(path)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         String accessToken = extractAccessToken(request);
 
         if (accessToken == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json; charset=UTF-8");
-            String json = "{\"AuthException\": \"NOT_FOUND_TOKEN\", \"message\": \"토큰이 없습니다.\"}";
-            response.getWriter().write(json);
+            filterChain.doFilter(request, response);
             return;
         }
 
         try {
             jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
         } catch (AuthException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json; charset=UTF-8");
-            String json = "{\"errorCode\": \"UNAUTHORIZED\", \"message\": \"" + e.getMessage() + "\"}";
-            response.getWriter().write(json);
+            writeErrorResponse(response, "UNAUTHORIZED", e.getMessage());
             return;
         }
 
@@ -79,14 +55,16 @@ public class JWTFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean isWhitelisted(String path) {
-        return WHITELIST.stream().anyMatch(path::startsWith);
+    private void writeErrorResponse(HttpServletResponse response, String errorCode, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json; charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(new ErrorResponse(errorCode, message)));
     }
 
     private String extractAccessToken(HttpServletRequest request){
         String authorization = request.getHeader("Authorization");
         if (authorization != null && authorization.startsWith("Bearer ")) {
-            return  authorization.split(" ")[1];
+            return authorization.substring(7);
         }
         return null;
     }
