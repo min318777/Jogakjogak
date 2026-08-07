@@ -3,22 +3,22 @@
 
 Gemini 2.0 모델을 사용하여 이력서, JD를 분석 후 부족한 부분을 체크리스트 형식으로 제공하여 취업에 도움 되는 내용을 알려주는 서비스입니다.
 
+**프로젝트 기간:** 2025.06 ~ 2025.10
+
+**참여 인원:** PM 2명, 디자이너 2명, FE 2명, BE 3명
+
 ## 기술 스택
-1. Spring JPA
-2. Spring Security
-3. Spring Batch
-4. JWT
-5. OAuth 2.0
-6. MySQL
-7. QueryDSL
-8. Redis
-9. Java Mail Sender
-10. Docker
-11. EC2 & ALB
-12. Route 53
-13. RDS
-14. S3
-15. Swagger
+
+**Backend**
+- Java Spring Boot, Spring JPA, Spring Security, Spring Batch
+- JWT, OAuth 2.0, QueryDSL
+- Java Mail Sender, Swagger
+
+**Database**
+- MySQL, Redis, RDS
+
+**Infrastructure**
+- Docker, EC2, Route 53, S3
 
 ## 아키텍처 설계
 - Java Spring Boot로 백엔드 구현
@@ -74,5 +74,5 @@ Gemini 2.0 모델을 사용하여 이력서, JD를 분석 후 부족한 부분�
 
 
 ## 프로젝트 목표
-다양한 팀과 협업하여 AI 기술을 활용해 취준생에게 도움이 되는 서비스를 제공
+Gemini 2.0 모델을 사용하여 이력서, JD를 분석 후 부족한 부분을 체크리스트 형식으로 제공하여 취업에 도움 되는 내용을 알려주는 서비스입니다.
 
