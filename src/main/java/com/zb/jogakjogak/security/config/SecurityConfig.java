@@ -97,7 +97,8 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**",
                                 "/biz/init/**",
-                                "/biz/send/**"
+                                "/biz/send/**",
+                                "/biz/batch/**"
                         ).permitAll()
                         .anyRequest().authenticated());
         http.

@@ -7,8 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Setter
@@ -23,11 +21,48 @@ public class Notification {
 
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<JD> jdList = new ArrayList<>();
+    @Builder.Default
+    private boolean sent = false;
 
-    @ManyToOne
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    @Builder.Default
+    private NotificationStatus status = NotificationStatus.PENDING;
+
+    @Builder.Default
+    private int attemptCount = 0;
+
+    private LocalDateTime sentAt;
+
+    @Column(length = 500)
+    private String errorMessage;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "jd_id")
+    private JD jd;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
+    public void markSent(LocalDateTime sentAt) {
+        this.status = NotificationStatus.SENT;
+        this.sent = true;
+        this.sentAt = sentAt;
+        this.attemptCount += 1;
+        this.errorMessage = null;
+    }
+
+    public void markFailed(String errorMessage, int maxAttempts) {
+        this.attemptCount += 1;
+        this.errorMessage = truncate(errorMessage);
+        this.status = this.attemptCount >= maxAttempts
+                ? NotificationStatus.DEAD_LETTER
+                : NotificationStatus.FAILED;
+    }
+
+    private String truncate(String s) {
+        if (s == null) return null;
+        return s.length() > 500 ? s.substring(0, 500) : s;
+    }
 }

@@ -13,19 +13,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationService {
+public class NotificationService implements NotificationEmailSender {
     private static final String EMAIL_TITLE = "[조각조각]에서 알림이 도착했습니다.";
     private static final String EMAIL_TEMPLATE_NAME = "notification-email"; // .html 확장자 제외
 
@@ -34,14 +31,11 @@ public class NotificationService {
     private final ToDoListRepository toDoListRepository;
     private final GaMeasurementProtocolService gaService;
 
-    @Async("taskExecutor")
     public void sendNotificationEmail(NotificationDto notificationDto) throws MessagingException {
         String email = notificationDto.getMember().getEmail();
         String userId = notificationDto.getMember().getId().toString();
         String hashedEmail = HashingUtil.sha256(email);
 
-        // 만료된 JD 제거 및 정렬
-        notificationDto.getJdList().removeIf(jd -> jd.getEndedAt().isBefore(LocalDateTime.now()));
         notificationDto.getJdList().sort((jd1, jd2) -> jd1.getEndedAt().compareTo(jd2.getEndedAt()));
 
         String emailType = "notification_jd_reminder";

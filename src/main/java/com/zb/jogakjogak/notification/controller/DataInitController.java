@@ -30,10 +30,9 @@ public class DataInitController {
 
     private static final int TOTAL_MEMBERS = 1_000;
     private static final int ELIGIBLE_JD_PER_MEMBER = 100;   // 알림 대상: 10만건
-    private static final int INELIGIBLE_JD_PER_MEMBER = 0;   // 알림 제외: 없음
+    private static final int LARGE_ELIGIBLE_JD_PER_MEMBER = 500; // 알림 대상: 50만건
     private static final int JDBC_BATCH_SIZE = 5_000;
     private static final String TEST_USERNAME_PREFIX = "perf_test_";
-    private static final String SMALL_TEST_USERNAME_PREFIX = "small_test_";
 
     private final MemberRepository memberRepository;
     private final JdbcTemplate jdbcTemplate;
@@ -95,48 +94,31 @@ public class DataInitController {
         return new ResponseDto("JD " + total + "건 삽입 완료");
     }
 
-    @PostMapping("/small")
-    public ResponseDto initSmall() {
-        long existing = memberRepository.findAll().stream()
-                .filter(m -> m.getUsername() != null && m.getUsername().startsWith(SMALL_TEST_USERNAME_PREFIX))
-                .count();
-        if (existing > 0) {
-            return new ResponseDto("이미 small 테스트 데이터가 존재합니다. /biz/init/clean 후 재시도하세요.");
-        }
-
-        int smallMembers = 3;
-        int eligiblePerMember = 70; // 3 * 70 = 210건 (청크 100 기준 3페이지)
-        List<Member> members = new ArrayList<>(smallMembers);
-        for (int i = 1; i <= smallMembers; i++) {
-            members.add(Member.builder()
-                    .username(SMALL_TEST_USERNAME_PREFIX + i)
-                    .email("small" + i + "@test.com")
-                    .nickname("스몰테스터" + i)
-                    .role(Role.USER)
-                    .isNotificationEnabled(true)
-                    .lastLoginAt(LocalDateTime.now())
-                    .build());
-        }
-        memberRepository.saveAll(members);
-
+@PostMapping("/large")
+    public ResponseDto initLarge() {
         List<Long> memberIds = memberRepository.findAll().stream()
-                .filter(m -> m.getUsername() != null && m.getUsername().startsWith(SMALL_TEST_USERNAME_PREFIX))
+                .filter(m -> m.getUsername() != null && m.getUsername().startsWith(TEST_USERNAME_PREFIX))
                 .map(Member::getId)
                 .toList();
 
-        LocalDateTime now = LocalDateTime.now();
-        bulkInsertJds(memberIds, eligiblePerMember, true, now.minusDays(4), now.plusYears(1), now);
+        if (memberIds.isEmpty()) {
+            return new ResponseDto("테스트 Member가 없습니다. /biz/init/members 먼저 실행하세요.");
+        }
 
-        int total = eligiblePerMember * memberIds.size();
-        log.info("small 테스트 데이터 생성 완료: member {}명, JD {}건", smallMembers, total);
-        return new ResponseDto("small 테스트 데이터 생성 완료 (member: " + smallMembers + "명, eligible JD: " + total + "건)");
+        LocalDateTime now = LocalDateTime.now();
+        int total = LARGE_ELIGIBLE_JD_PER_MEMBER * memberIds.size();
+        log.info("알림 대상 JD {}건 삽입 시작...", total);
+        bulkInsertJds(memberIds, LARGE_ELIGIBLE_JD_PER_MEMBER, true, now.minusDays(4), now.plusYears(1), now);
+
+        log.info("JD 총 {}건 삽입 완료", total);
+        return new ResponseDto("JD " + total + "건 삽입 완료");
     }
 
     @DeleteMapping("/clean")
     public ResponseDto clean() {
         List<Long> memberIds = memberRepository.findAll().stream()
                 .filter(m -> m.getUsername() != null &&
-                        (m.getUsername().startsWith(TEST_USERNAME_PREFIX) || m.getUsername().startsWith(SMALL_TEST_USERNAME_PREFIX)))
+                        m.getUsername().startsWith(TEST_USERNAME_PREFIX))
                 .map(Member::getId)
                 .toList();
 
@@ -144,8 +126,7 @@ public class DataInitController {
             String idList = String.join(",", memberIds.stream().map(String::valueOf).toList());
             jdbcTemplate.update("DELETE FROM notification WHERE member_id IN (" + idList + ")");
             jdbcTemplate.update("DELETE FROM job_description WHERE member_id IN (" + idList + ")");
-            jdbcTemplate.update("DELETE FROM member WHERE username LIKE '" + TEST_USERNAME_PREFIX + "%'" +
-                    " OR username LIKE '" + SMALL_TEST_USERNAME_PREFIX + "%'");
+            jdbcTemplate.update("DELETE FROM member WHERE username LIKE '" + TEST_USERNAME_PREFIX + "%'");
         }
 
         log.info("테스트 데이터 삭제 완료. member: {}명", memberIds.size());

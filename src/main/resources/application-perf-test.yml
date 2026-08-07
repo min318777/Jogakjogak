@@ -1,3 +1,19 @@
 spring:
   datasource-main:
-    jdbc-url: ${DB_URL}&rewriteBatchedStatements=true&useServerPrepStmts=false
+    jdbc-url: ${DB_URL}&rewriteBatchedStatements=true&useServerPrepStmts=false&useCursorFetch=true
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          fetch_size: 1000
+
+logging:
+  level:
+    org.hibernate.SQL: off
+    org.hibernate: off
+    org.springframework.jdbc.core: off
+
+notification:
+  mock:
+    latency-ms: 0

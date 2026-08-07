@@ -144,6 +144,29 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
 
 
     @Override
+    public Page<JD> findTodayNotifiedJds(LocalDateTime todayStart, Pageable pageable) {
+        QJD jd = QJD.jD;
+        QMember member = QMember.member;
+
+        List<JD> content = queryFactory
+                .selectFrom(jd)
+                .join(jd.member, member).fetchJoin()
+                .where(jd.lastNotifiedAt.goe(todayStart))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .orderBy(jd.id.asc())
+                .fetch();
+
+        Long total = queryFactory
+                .select(jd.count())
+                .from(jd)
+                .where(jd.lastNotifiedAt.goe(todayStart))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total != null ? total : 0);
+    }
+
+    @Override
     public Long findAllJdCountByMemberId(Long memberId) {
         QJD jd = QJD.jD;
         return queryFactory.select(jd.count())
