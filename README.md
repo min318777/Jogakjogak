@@ -51,6 +51,26 @@ Gemini 2.0 모델을 사용하여 이력서, JD를 분석 후 부족한 부분�
     - Spring Batch Two-Step 구조로 구성하여 1단계에서 알림 대상 JD 처리, 2단계에서 이메일 발송을 분리한다.
     - 이메일 템플릿에 사용되는 로고, 아이콘 등 정적 이미지는 AWS S3에 업로드된 리소스를 참조한다.
 
+### 성능 개선
+
+**Spring Batch 이메일 알림 배치 최적화**
+
+Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선했습니다.
+
+| 구성 | 10만 건 | 50만 건 |
+|------|---------|---------|
+| JpaPagingItemReader + JpaItemWriter (개선 전) | 2m 53s | 41m 5s |
+| JdbcCursorItemReader + JdbcBatchItemWriter (개선 후) | 22s | 1m 50s |
+
+- **Reader 변경 (JpaPagingItemReader → JdbcCursorItemReader):** JpaPaging은 OFFSET 기반 페이징으로 데이터가 많을수록 쿼리 비용이 급증하지만, JdbcCursor는 커서 방식으로 OFFSET 비용 없이 순차 스캔
+- **Writer 변경 (JpaItemWriter → JdbcBatchItemWriter):** JpaItemWriter는 `em.merge()` 후 청크 단위 flush인 반면, JdbcBatchItemWriter는 `executeBatch()`로 청크 내 쿼리를 단일 네트워크 요청으로 처리. `rewriteBatchedStatements=true` 옵션으로 다건 INSERT/UPDATE를 단일 쿼리로 병합
+
+**JpaPagingItemReader OFFSET 문제로 인한 데이터 누락**
+
+- **문제:** Step2에서 PENDING 상태의 Notification을 읽으면서 이메일 발송 후 SENT로 업데이트하면, 다음 페이지 조회 시 OFFSET이 밀려 일부 데이터가 누락됨
+- **원인:** 청크 처리 후 상태가 PENDING → SENT로 변경되면 전체 결과셋 크기가 줄어들어 OFFSET 계산이 어긋남
+- **해결:** JdbcCursorItemReader로 교체하여 최초 쿼리 실행 시 커서를 고정, 이후 상태 변경과 무관하게 순차적으로 읽도록 변경
+
 ### 팀원 구현 기능
 
 - 이력서
