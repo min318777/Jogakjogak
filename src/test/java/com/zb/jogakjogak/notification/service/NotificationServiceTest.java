@@ -22,6 +22,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -66,7 +67,7 @@ class NotificationServiceTest {
 
         notificationDto = NotificationDto.builder()
                 .member(member)
-                .jdList(List.of(jd))
+                .jdList(new ArrayList<>(List.of(jd)))
                 .build();
     }
 
