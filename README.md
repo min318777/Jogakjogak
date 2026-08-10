@@ -91,7 +91,14 @@ Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선
 | 원인 | 청크 처리 후 상태가 PENDING → SENT로 변경되면 전체 결과셋 크기가 줄어들어 OFFSET 계산이 어긋남 |
 | 해결 | JdbcCursorItemReader로 교체하여 최초 쿼리 실행 시 커서를 고정, 이후 상태 변경과 무관하게 순차적으로 읽도록 변경 |
 
-**4. Redis 기반 인증 보안 강화**
+**4. Spring Batch 메타 DB 분리**
+
+| 항목 | 내용 |
+|------|------|
+| 선택 근거 | Spring Batch 메타테이블을 전용 RDS 인스턴스로 분리하여 배치 I/O 부하가 서비스 DB 쿼리에 미치는 영향을 차단. 메타 DB 장애 시 서비스 DB는 정상 운영되도록 장애 격리 구성 |
+| 트레이드오프 | RDS 인스턴스 추가로 인프라 비용 증가. DataSource, TransactionManager, EntityManagerFactory를 각각 별도 Bean으로 구성해야 하는 설정 복잡도 증가 |
+
+**5. Redis 기반 인증 보안 강화**
 
 **RefreshToken 저장소: RDB → Redis**
 
@@ -126,7 +133,4 @@ Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선
     - todolist 타입은 구조적 보완 계획, 내용 강조 및 재구성 제안, 일정 관리 및 기타 3가지로 분류된다.
     - 각 타입별 todolist는 10개를 초과할 수 없다.
     - 로그인한 사용자는 todolist를 추가, 수정, 삭제할 수 있다.
-
-
-
 
