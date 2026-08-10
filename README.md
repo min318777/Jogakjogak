@@ -85,9 +85,11 @@ Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선
 
 **3. JpaPagingItemReader OFFSET 문제 — 데이터 누락**
 
-- **문제:** Step2에서 PENDING 상태의 Notification을 JpaPagingItemReader로 읽으며 이메일 발송 후 SENT로 업데이트하면, 다음 페이지 OFFSET이 밀려 일부 데이터 누락
-- **원인:** 청크 처리 후 상태가 PENDING → SENT로 변경되면 전체 결과셋 크기가 줄어들어 OFFSET 계산이 어긋남
-- **해결:** JdbcCursorItemReader로 교체하여 최초 쿼리 실행 시 커서를 고정, 이후 상태 변경과 무관하게 순차적으로 읽도록 변경
+| 항목 | 내용 |
+|------|------|
+| 문제 | Step2에서 PENDING 상태의 Notification을 JpaPagingItemReader로 읽으며 이메일 발송 후 SENT로 업데이트하면, 다음 페이지 OFFSET이 밀려 일부 데이터 누락 |
+| 원인 | 청크 처리 후 상태가 PENDING → SENT로 변경되면 전체 결과셋 크기가 줄어들어 OFFSET 계산이 어긋남 |
+| 해결 | JdbcCursorItemReader로 교체하여 최초 쿼리 실행 시 커서를 고정, 이후 상태 변경과 무관하게 순차적으로 읽도록 변경 |
 
 **4. Redis 기반 인증 보안 강화**
 
