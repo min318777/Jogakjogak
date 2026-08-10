@@ -128,6 +128,5 @@ Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선
     - 로그인한 사용자는 todolist를 추가, 수정, 삭제할 수 있다.
 
 
-> 원본 레포지토리: [mallangC/Jogakjogak](https://github.com/mallangC/Jogakjogak)
 
 
