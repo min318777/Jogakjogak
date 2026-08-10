@@ -66,7 +66,7 @@ Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선
 
 | 항목 | 내용 |
 |------|------|
-| 선택 근거 | JpaPaging은 페이지마다 OFFSET 쿼리를 재실행하여 데이터가 많을수록 비용이 급증. JdbcCursor는 최초 쿼리 실행 후 커서를 고정하고 순차 스캔하므로 OFFSET 비용 없음. MySQL에서 TYPE_FORWARD_ONLY + fetchSize 설정으로 서버 메모리 부담 없이 스트리밍 처리 가능 |
+| 선택 근거 | JpaPaging은 페이지마다 OFFSET 쿼리를 재실행하여 데이터가 많을수록 비용이 급증. JdbcCursor는 최초 쿼리 실행 후 커서를 고정하고 순차 스캔하므로 OFFSET 비용 없음. MySQL에서 fetchSize 설정으로 서버 메모리 부담 없이 스트리밍 처리 가능 |
 | 트레이드오프 | JPQL 대신 SQL을 직접 작성해야 하므로 ORM 추상화를 포기. 컬럼명, 조인 조건을 수동 관리해야 하며 엔티티 변경 시 SQL도 함께 수정 필요 |
 
 **Writer: JpaItemWriter → JdbcBatchItemWriter**
