@@ -66,14 +66,14 @@ Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선
 
 | 항목 | 내용 |
 |------|------|
-| 선택 근거 | JpaPaging은 페이지마다 OFFSET 쿼리를 재실행하여 데이터가 많을수록 비용이 급증. JdbcCursor는 최초 쿼리 실행 후 커서를 고정하고 순차 스캔하므로 OFFSET 비용 없음. MySQL에서 fetchSize 설정으로 서버 메모리 부담 없이 스트리밍 처리 가능 |
+| 선택 근거 | JpaPaging은 페이지마다 OFFSET 쿼리를 재실행하여 데이터가 많을수록 비용이 급증. JdbcCursor는 최초 쿼리 실행 후 커서를 고정하고 순차 스캔하므로 OFFSET 비용 없음. MySQL에서 TYPE_FORWARD_ONLY + fetchSize 설정으로 서버 메모리 부담 없이 스트리밍 처리 가능 |
 | 트레이드오프 | JPQL 대신 SQL을 직접 작성해야 하므로 ORM 추상화를 포기. 컬럼명, 조인 조건을 수동 관리해야 하며 엔티티 변경 시 SQL도 함께 수정 필요 |
 
 **Writer: JpaItemWriter → JdbcBatchItemWriter**
 
 | 항목 | 내용 |
 |------|------|
-| 선택 근거 | JpaItemWriter는 청크 내 아이템마다 `em.merge()`를 호출하고 청크 끝에 flush. JdbcBatchItemWriter는 `executeBatch()`로 청크 전체를 단일 네트워크 요청으로 처리. `rewriteBatchedStatements=true` 옵션으로 INSERT/UPDATE를 단일 쿼리로 병합하여 DB 왕복 횟수를 최소화 |
+| 선택 근거 | JpaItemWriter는 청크 내 아이템마다 em.merge()를 호출하고 청크 끝에 flush. JdbcBatchItemWriter는 executeBatch()로 청크 전체를 단일 네트워크 요청으로 처리. rewriteBatchedStatements=true 옵션으로 다건 INSERT/UPDATE를 단일 쿼리로 병합하여 DB 왕복 횟수를 최소화 |
 | 트레이드오프 | 영속성 컨텍스트를 사용하지 않으므로 1차 캐시, 더티체킹, 지연 로딩 등 JPA 기능을 사용할 수 없음. 연관 엔티티가 복잡한 경우 직접 관리 필요 |
 
 **2. Spring Batch Two-Step 구조 선택**
@@ -95,7 +95,7 @@ Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선
 
 | 항목 | 내용 |
 |------|------|
-| 선택 근거 | RDB 저장 시 토큰 재발급마다 DB I/O 발생. Redis는 인메모리 구조로 조회 속도가 빠르며 TTL 설정으로 만료 토큰을 자동 삭제. `refresh:<userId>` 키 구조로 사용자당 하나의 토큰만 유지하여 토큰 탈취 감지(재발급 시 저장된 값과 불일치하면 탈취로 판단, Redis 즉시 삭제) |
+| 선택 근거 | RDB 저장 시 토큰 재발급마다 DB I/O 발생. Redis는 인메모리 구조로 조회 속도가 빠르며 TTL 설정으로 만료 토큰을 자동 삭제. refresh:{userId} 키 구조로 사용자당 하나의 토큰만 유지하여 토큰 탈취 감지(재발급 시 저장된 값과 불일치하면 탈취로 판단, Redis 즉시 삭제) |
 | 트레이드오프 | Redis 장애 시 로그인된 사용자도 재발급 불가. 인프라 의존성 추가로 운영 복잡도 증가 |
 
 **AccessToken 블랙리스트**
