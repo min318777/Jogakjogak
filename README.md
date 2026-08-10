@@ -73,7 +73,7 @@ Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선
 
 | 항목 | 내용 |
 |------|------|
-| 선택 근거 | JpaItemWriter는 청크 내 아이템마다 em.merge()를 호출하고 청크 끝에 flush. JdbcBatchItemWriter는 executeBatch()로 청크 전체를 단일 네트워크 요청으로 처리. rewriteBatchedStatements=true 옵션으로 다건 INSERT/UPDATE를 단일 쿼리로 병합하여 DB 왕복 횟수를 최소화 |
+| 선택 근거 | JpaItemWriter는 청크 내 아이템마다 em.merge()를 호출하고 청크 끝에 flush. JdbcBatchItemWriter는 executeBatch()로 청크 전체를 단일 네트워크 요청으로 처리. rewriteBatchedStatements=true 옵션으로 INSERT/UPDATE를 단일 쿼리로 병합하여 DB 왕복 횟수를 최소화 |
 | 트레이드오프 | 영속성 컨텍스트를 사용하지 않으므로 1차 캐시, 더티체킹, 지연 로딩 등 JPA 기능을 사용할 수 없음. 연관 엔티티가 복잡한 경우 직접 관리 필요 |
 
 **2. Spring Batch Two-Step 구조 선택**
