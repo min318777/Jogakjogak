@@ -1,0 +1,1 @@
+ALTER TABLE resume ADD CONSTRAINT uq_resume_member_id UNIQUE (member_id);
