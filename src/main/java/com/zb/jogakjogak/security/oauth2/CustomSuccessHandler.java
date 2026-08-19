@@ -14,8 +14,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -31,8 +31,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final GaMeasurementProtocolService gaService;
     private final MemberRepository memberRepository;
     private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;
-    @Value("${kakao.redirect-uri}")
-    private String kakaoRedirectUri;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication
@@ -59,12 +57,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         gaService.sendGaEvent(clientId, gaUserId, eventName, eventParams)
                 .subscribe();
 
-        // 환경에 따라 리다이렉트 URL 결정
+        String provider = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
         String redirectUrl;
         if (request.getServerName().contains("localhost")) {
-            redirectUrl = "http://localhost:3000/login/oauth2/code/kakao";
+            redirectUrl = "http://localhost:3000/login/oauth2/code/" + provider;
         } else {
-            redirectUrl = "https://www.jogakjogak.com/login/oauth2/code/kakao";
+            redirectUrl = "https://www.jogakjogak.com/login/oauth2/code/" + provider;
         }
 
         response.sendRedirect(redirectUrl);

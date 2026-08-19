@@ -36,4 +36,12 @@ public class WithdrawalService {
         refreshTokenRedisService.delete(member.getId());
         memberRepository.delete(member);
     }
+
+    public void withdrawByKakaoCallback(String kakaoId) {
+        memberRepository.findByOauth2ProviderAndProviderId("kakao", kakaoId)
+                .ifPresent(member -> {
+                    refreshTokenRedisService.delete(member.getId());
+                    memberRepository.delete(member);
+                });
+    }
 }
