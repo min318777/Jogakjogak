@@ -54,14 +54,14 @@ Gemini 2.0 모델을 사용하여 이력서, JD를 분석 후 부족한 부분�
 
 ### 담당 기능
 
-- 로그인 / 회원가입
+- **로그인 / 회원가입**
     - OAuth 2.0을 이용하여 구글, 카카오 소셜 로그인 시 회원가입이 함께 진행된다.
     - Access Token은 30분, Refresh Token은 7일 후 만료되고 Access Token 만료 시 Refresh Token으로 재발급한다.
     - Refresh Token을 HttpOnly 쿠키에 저장하여 XSS 공격으로 인한 토큰 탈취를 방지한다.
     - Spring Security Stateless 세션 정책을 적용하여 서버 측 세션을 사용하지 않는다.
     - 회원탈퇴 시 Kakao Admin Key 방식, Google Token Revoke 방식으로 토큰 만료와 무관하게 OAuth 연동을 즉시 해제한다.
 
-- 이메일 알림 배치
+- **이메일 알림 배치**
     - 알림 설정이 활성화된 사용자 중 채용공고 To do list를 3일 이상 갱신하지 않은 경우 독려 이메일을 발송한다.
     - 동일 채용공고에 대한 알림은 최대 3회로 제한하고, 마감된 채용공고는 발송 대상에서 자동 제외한다.
     - Spring Batch 스케줄러를 통해 매일 오전 10시에 일괄 발송한다.
