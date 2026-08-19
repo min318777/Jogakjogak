@@ -31,7 +31,7 @@ Gemini 2.0 모델을 사용하여 이력서, JD를 분석 후 부족한 부분�
 - 도메인 주소, HTTPS, RDS 등 배포에 필요한 서비스는 AWS를 이용
 
 ## ERD
-<img width="760" height="587" alt="Image" src="https://github.com/user-attachments/assets/7db7c6d4-0086-42b8-bbf4-5d929440100c" />
+<img width="760" height="587" alt="Image" src="docs/images/erd.png" />
 
 ## 프로젝트 기능 및 설계
 
