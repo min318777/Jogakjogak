@@ -33,6 +33,22 @@ Gemini 2.0 모델을 사용하여 이력서, JD를 분석 후 부족한 부분�
 ## ERD
 <img width="760" height="587" alt="Image" src="docs/images/erd.png" />
 
+## 화면 구성
+
+<img width="900" alt="랜딩 페이지" src="docs/images/screen-01-landing.png" />
+
+<img width="900" alt="조각 상세 (칸반보드)" src="docs/images/screen-02-kanban.png" />
+
+<img width="900" alt="마이페이지 - 채용공고 목록" src="docs/images/screen-03-mypage.png" />
+
+<img width="900" alt="채용공고 등록" src="docs/images/screen-04-add-job.png" />
+
+<img width="900" alt="로그인" src="docs/images/screen-05-login.png" />
+
+<img width="900" alt="AI 분석 중" src="docs/images/screen-06-ai-analyzing.png" />
+
+<img width="900" alt="알림 설정" src="docs/images/screen-07-notification.png" />
+
 ## 프로젝트 기능 및 설계
 
 ### 담당 기능
