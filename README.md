@@ -69,73 +69,29 @@ Gemini 2.0 모델을 사용하여 이력서, JD를 분석 후 부족한 부분�
 
 ### 성능 개선 및 기술 선택 근거
 
-**1. Spring Batch 이메일 알림 배치 최적화**
+**Spring Batch 이메일 알림 배치 최적화**
+- **처리 성능**: Reader/Writer 조합을 JpaPagingItemReader + JpaItemWriter에서 JdbcCursorItemReader + JdbcBatchItemWriter로 변경해 10만 건 기준 2m 53s → 22s, 50만 건 기준 41m 5s → 1m 50s로 단축했습니다.
+- **Reader 선택 근거**: JpaPaging은 페이지마다 OFFSET 쿼리를 재실행해 데이터가 많을수록 비용이 급증하지만, JdbcCursor는 최초 쿼리 실행 후 커서를 고정해 순차 스캔하므로 OFFSET 비용이 없고 fetchSize 설정으로 서버 메모리 부담 없이 스트리밍 처리가 가능합니다. 다만 JPQL 대신 SQL을 직접 작성해야 해 ORM 추상화를 포기하고, 컬럼명·조인 조건을 수동 관리해야 합니다.
+- **Writer 선택 근거**: JpaItemWriter는 청크 내 아이템마다 em.merge()를 호출하고 청크 끝에 flush하지만, JdbcBatchItemWriter는 executeBatch()로 청크 전체를 단일 네트워크 요청으로 처리하고 rewriteBatchedStatements=true 옵션으로 DB 왕복 횟수를 최소화합니다. 다만 영속성 컨텍스트를 사용하지 않아 1차 캐시, 더티체킹, 지연 로딩 등 JPA 기능을 사용할 수 없습니다.
 
-Reader/Writer 조합을 변경하여 대용량 데이터 처리 성능을 개선했습니다.
+**Spring Batch Two-Step 구조 선택**
+- Step1(알림 대상 JD 조회 → Notification 저장)과 Step2(이메일 발송 → 상태 업데이트)를 분리해 Step1 실패 시 Step2가 실행되지 않도록 제어하고, 발송 실패 건만 재시도(3회) 및 Skip(최대 50건)하며 DEAD_LETTER 상태로 관리합니다. 다만 Notification 중간 테이블이 추가되어 스키마 복잡도가 늘고, 배치마다 PENDING 레코드가 쌓여 주기적인 정리 정책이 필요합니다.
 
-| 구성 | 10만 건 | 50만 건 |
-|------|---------|---------|
-| JpaPagingItemReader + JpaItemWriter (개선 전) | 2m 53s | 41m 5s |
-| JdbcCursorItemReader + JdbcBatchItemWriter (개선 후) | 22s | 1m 50s |
+**JpaPagingItemReader OFFSET 문제 — 데이터 누락**
+- **문제**: Step2에서 PENDING 상태의 Notification을 JpaPagingItemReader로 읽으며 발송 후 SENT로 업데이트하면 다음 페이지 OFFSET이 밀려 일부 데이터가 누락됐습니다.
+- **원인**: 청크 처리 후 상태가 PENDING → SENT로 바뀌며 결과셋 크기가 줄어들어 OFFSET 계산이 어긋났습니다.
+- **해결**: JdbcCursorItemReader로 교체해 최초 쿼리 실행 시 커서를 고정하고, 이후 상태 변경과 무관하게 순차적으로 읽도록 변경했습니다.
 
-**Reader: JpaPagingItemReader → JdbcCursorItemReader**
+**Spring Batch 메타 DB 분리**
+- 배치 메타테이블을 전용 RDS 인스턴스로 분리해 배치 I/O 부하가 서비스 DB 쿼리에 미치는 영향을 차단하고, 메타 DB 장애 시에도 서비스 DB는 정상 운영되도록 장애를 격리했습니다. 다만 RDS 인스턴스 추가로 인프라 비용이 늘고, DataSource·TransactionManager·EntityManagerFactory를 각각 별도 Bean으로 구성해야 하는 설정 복잡도가 증가합니다.
 
-| 항목 | 내용 |
-|------|------|
-| 선택 근거 | JpaPaging은 페이지마다 OFFSET 쿼리를 재실행하여 데이터가 많을수록 비용이 급증. JdbcCursor는 최초 쿼리 실행 후 커서를 고정하고 순차 스캔하므로 OFFSET 비용 없음. MySQL에서 fetchSize 설정으로 서버 메모리 부담 없이 스트리밍 처리 가능 |
-| 트레이드오프 | JPQL 대신 SQL을 직접 작성해야 하므로 ORM 추상화를 포기. 컬럼명, 조인 조건을 수동 관리해야 하며 엔티티 변경 시 SQL도 함께 수정 필요 |
+**이력서 중복 등록 방지**
+- **문제**: 회원당 이력서 1개 제한을 애플리케이션 레이어에서만 검증하면 동시 요청 시 두 요청 모두 이력서 없음을 확인한 후 각각 저장해 중복 등록될 수 있었습니다.
+- **해결**: resume.member_id 컬럼에 DB UNIQUE 제약을 추가해 애플리케이션 검증과 DB 레벨 이중 방어를 구성, 동시 요청 환경에서도 데이터 정합성을 보장했습니다.
 
-**Writer: JpaItemWriter → JdbcBatchItemWriter**
-
-| 항목 | 내용 |
-|------|------|
-| 선택 근거 | JpaItemWriter는 청크 내 아이템마다 em.merge()를 호출하고 청크 끝에 flush. JdbcBatchItemWriter는 executeBatch()로 청크 전체를 단일 네트워크 요청으로 처리. rewriteBatchedStatements=true 옵션으로 INSERT/UPDATE를 단일 쿼리로 병합하여 DB 왕복 횟수를 최소화 |
-| 트레이드오프 | 영속성 컨텍스트를 사용하지 않으므로 1차 캐시, 더티체킹, 지연 로딩 등 JPA 기능을 사용할 수 없음. 연관 엔티티가 복잡한 경우 직접 관리 필요 |
-
-**2. Spring Batch Two-Step 구조 선택**
-
-| 항목 | 내용 |
-|------|------|
-| 선택 근거 | Step1(알림 대상 JD 조회 → Notification 저장)과 Step2(이메일 발송 → 상태 업데이트)를 분리하여 Step1 실패 시 Step2를 실행하지 않도록 제어. 발송 실패 건만 재시도(Retry 3회) 및 Skip(최대 50건)이 가능하고 DEAD_LETTER 상태로 관리 |
-| 트레이드오프 | Notification 중간 테이블이 추가되어 스키마 복잡도 증가. 배치 실행마다 PENDING 레코드가 생성되므로 주기적인 정리 정책 필요 |
-
-**3. JpaPagingItemReader OFFSET 문제 — 데이터 누락**
-
-| 항목 | 내용 |
-|------|------|
-| 문제 | Step2에서 PENDING 상태의 Notification을 JpaPagingItemReader로 읽으며 이메일 발송 후 SENT로 업데이트하면, 다음 페이지 OFFSET이 밀려 일부 데이터 누락 |
-| 원인 | 청크 처리 후 상태가 PENDING → SENT로 변경되면 전체 결과셋 크기가 줄어들어 OFFSET 계산이 어긋남 |
-| 해결 | JdbcCursorItemReader로 교체하여 최초 쿼리 실행 시 커서를 고정, 이후 상태 변경과 무관하게 순차적으로 읽도록 변경 |
-
-**4. Spring Batch 메타 DB 분리**
-
-| 항목 | 내용 |
-|------|------|
-| 선택 근거 | Spring Batch 메타테이블을 전용 RDS 인스턴스로 분리하여 배치 I/O 부하가 서비스 DB 쿼리에 미치는 영향을 차단. 메타 DB 장애 시 서비스 DB는 정상 운영되도록 장애 격리 구성 |
-| 트레이드오프 | RDS 인스턴스 추가로 인프라 비용 증가. DataSource, TransactionManager, EntityManagerFactory를 각각 별도 Bean으로 구성해야 하는 설정 복잡도 증가 |
-
-**5. 이력서 중복 등록 방지**
-
-| 항목 | 내용 |
-|------|------|
-| 문제 | 회원당 이력서 1개 제한을 애플리케이션 레이어에서만 검증할 경우 동시 요청 시 두 요청 모두 이력서 없음을 확인한 후 각각 저장하여 중복 등록 가능 |
-| 해결 | resume.member_id 컬럼에 DB UNIQUE 제약을 추가하여 애플리케이션 검증과 DB 레벨 이중 방어 구성, 동시 요청 환경에서도 데이터 정합성 보장 |
-
-**6. Redis 기반 인증 보안 강화**
-
-**RefreshToken 저장소: RDB → Redis**
-
-| 항목 | 내용 |
-|------|------|
-| 선택 근거 | RDB 저장 시 토큰 재발급마다 DB I/O 발생. Redis는 인메모리 구조로 조회 속도가 빠르며 TTL 설정으로 만료 토큰을 자동 삭제. refresh:{userId} 키 구조로 사용자당 하나의 토큰만 유지하여 토큰 탈취 감지(재발급 시 저장된 값과 불일치하면 탈취로 판단, Redis 즉시 삭제) |
-| 트레이드오프 | Redis 장애 시 로그인된 사용자도 재발급 불가. 인프라 의존성 추가로 운영 복잡도 증가 |
-
-**AccessToken 블랙리스트**
-
-| 항목 | 내용 |
-|------|------|
-| 선택 근거 | JWT는 stateless 특성상 발급 후 서버에서 무효화 불가. 로그아웃 시 AccessToken의 JTI(JWT ID)를 Redis에 저장하고 요청마다 블랙리스트 확인하여 즉시 무효화 구현. TTL을 AccessToken 잔여 만료 시간으로 설정하여 불필요한 키 자동 삭제 |
-| 트레이드오프 | 모든 API 요청마다 Redis 조회 1회 추가. 토큰 유효 시간(30분)이 짧아 실질적 영향은 제한적이나, Redis 장애 시 블랙리스트 확인 불가 |
+**Redis 기반 인증 보안 강화**
+- **RefreshToken 저장소 (RDB → Redis)**: RDB 저장은 토큰 재발급마다 DB I/O가 발생하지만, Redis는 인메모리 구조로 조회가 빠르고 TTL로 만료 토큰을 자동 삭제합니다. refresh:{userId} 키 구조로 사용자당 하나의 토큰만 유지해 재발급 시 저장된 값과 불일치하면 탈취로 판단하고 즉시 삭제합니다. 다만 Redis 장애 시 로그인된 사용자도 재발급이 불가능해 인프라 의존성이 늘어납니다.
+- **AccessToken 블랙리스트**: JWT는 stateless 특성상 발급 후 서버에서 무효화할 수 없어, 로그아웃 시 AccessToken의 JTI(JWT ID)를 Redis에 저장하고 요청마다 블랙리스트를 확인해 즉시 무효화합니다. TTL을 AccessToken 잔여 만료 시간으로 설정해 불필요한 키는 자동 삭제됩니다. 다만 모든 API 요청마다 Redis 조회가 1회 추가되는데, 토큰 유효 시간(30분)이 짧아 영향은 제한적입니다.
 
 ### 팀원 구현 기능
 
