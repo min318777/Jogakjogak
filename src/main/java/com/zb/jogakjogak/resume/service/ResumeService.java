@@ -69,8 +69,7 @@ public class ResumeService {
     @Transactional
     public ResumeResponseDto modify(Long resumeId, @Valid ResumeRequestDto requestDto, Member member) {
 
-        Resume resume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
-                .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
+        Resume resume = getAuthorizedResume(resumeId, member);
 
         resume.modify(requestDto);
         Resume savedResume = resumeRepository.save(resume);
@@ -85,8 +84,7 @@ public class ResumeService {
 
     public ResumeResponseDto get(Long resumeId, Member member) {
 
-        Resume resume = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
-                .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
+        Resume resume = getAuthorizedResume(resumeId, member);
 
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
@@ -99,9 +97,21 @@ public class ResumeService {
 
     @Transactional
     public void delete(Long resumeId, Member member) {
-        Resume resumeToDelete = resumeRepository.findResumeWithMemberByIdAndMemberId(resumeId, member.getId())
-                .orElseThrow(() -> new ResumeException(UNAUTHORIZED_ACCESS));
+        Resume resumeToDelete = getAuthorizedResume(resumeId, member);
         resumeRepository.delete(resumeToDelete);
+    }
+
+    /**
+     * 이력서를 조회하고 회원이 접근 권한이 있는지 확인하는 헬퍼 메서드.
+     * 존재하지 않으면 404, 본인 소유가 아니면 403을 던진다.
+     */
+    private Resume getAuthorizedResume(Long resumeId, Member member) {
+        Resume resume = resumeRepository.findResumeWithMemberById(resumeId)
+                .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
+        if (!resume.getMember().getId().equals(member.getId())) {
+            throw new ResumeException(UNAUTHORIZED_ACCESS);
+        }
+        return resume;
     }
 
 

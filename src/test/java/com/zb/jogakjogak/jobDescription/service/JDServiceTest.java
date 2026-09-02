@@ -279,7 +279,7 @@ class JDServiceTest {
                 .build();
         mockJd.addToDoList(toDoList1);
         mockJd.addToDoList(toDoList2);
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
 
         // When
         JDResponseDto result = jdService.getJd(jdId, mockMember);
@@ -311,7 +311,7 @@ class JDServiceTest {
         assertEquals(mockJd.getId(), firstToDo.getJdId());
 
         // Verify
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(jdId);
     }
 
     @Test
@@ -319,14 +319,14 @@ class JDServiceTest {
     void getJd_notFound() {
         // Given
         Long nonExistentJdId = 999L;
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(nonExistentJdId, mockMember.getId())).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsById(nonExistentJdId)).thenReturn(Optional.empty());
 
         // When & Then
         JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId, mockMember));
-        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, thrown.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(nonExistentJdId, mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(nonExistentJdId);
     }
 
     @Test
@@ -341,7 +341,7 @@ class JDServiceTest {
                 .companyName(faker.artist().name())
                 .build();
 
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
         doNothing().when(jdRepository).deleteById(jdId);
 
         // When
@@ -349,7 +349,7 @@ class JDServiceTest {
 
         // Then
         verify(jdRepository, times(1)).deleteById(mockJd.getId());
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(jdId);
     }
 
     @Test
@@ -357,14 +357,14 @@ class JDServiceTest {
     void deleteJd_notFound() {
         // Given
         Long nonExistentJdId = 999L;
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(nonExistentJdId, mockMember.getId())).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsById(nonExistentJdId)).thenReturn(Optional.empty());
 
         // When & Then
         JDException thrown = assertThrows(JDException.class, () -> jdService.deleteJd(nonExistentJdId, mockMember));
-        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, thrown.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(nonExistentJdId, mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(nonExistentJdId);
         verify(jdRepository, never()).deleteById(anyLong());
     }
 
@@ -394,7 +394,7 @@ class JDServiceTest {
                 .isAlarmOn(newAlarmStatus)
                 .build();
 
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId())).thenReturn(Optional.of(mockJd));
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
 
         // When
         JDAlarmResponseDto result = jdService.alarm(jdId, requestDto, mockMember);
@@ -405,7 +405,7 @@ class JDServiceTest {
         assertEquals(newAlarmStatus, result.isAlarmOn());
 
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(jdId, mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(jdId);
         assertEquals(newAlarmStatus, mockJd.isAlarmOn());
     }
 
@@ -418,11 +418,11 @@ class JDServiceTest {
                 .isAlarmOn(true)
                 .build();
 
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(nonExistentJdId, mockMember.getId())).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsById(nonExistentJdId)).thenReturn(Optional.empty());
 
         // When & Then
         JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto, mockMember));
-        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, thrown.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
     }
 
@@ -523,7 +523,7 @@ class JDServiceTest {
     void updateBookmarkStatus_success_toTrue() {
         // Given
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.of(testJd));
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
         BookmarkResponseDto response = jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember);
@@ -535,7 +535,7 @@ class JDServiceTest {
         assertTrue(testJd.isBookmark());
 
         // Mock 객체의 메서드 호출 검증
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
     }
 
     @Test
@@ -544,7 +544,7 @@ class JDServiceTest {
         // Given
         testJd.updateBookmarkStatus(true);
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(false).build();
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.of(testJd));
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
         BookmarkResponseDto response = jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember);
@@ -555,7 +555,7 @@ class JDServiceTest {
         assertFalse(response.isBookmark());
         assertFalse(testJd.isBookmark());
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
     }
 
     @Test
@@ -563,14 +563,14 @@ class JDServiceTest {
     void updateBookmarkStatus_fail_jdNotFound() {
         // Given
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.empty());
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
                 () -> jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember));
-        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
         verify(jdRepository, never()).save(any(JD.class));
     }
 
@@ -581,7 +581,7 @@ class JDServiceTest {
         BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
         Member requestMember = Member.builder().id(200L).username("otherUser").build();
 
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), requestMember.getId())).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
 
         // When & Then
@@ -589,7 +589,7 @@ class JDServiceTest {
                 () -> jdService.updateBookmarkStatus(testJd.getId(), dto, requestMember));
         assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), requestMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
         verify(jdRepository, never()).save(any(JD.class));
     }
 
@@ -598,7 +598,7 @@ class JDServiceTest {
     @DisplayName("지원 완료 상태 토글 성공 - null에서 현재 시간으로 변경")
     void toggleApplyStatus_success_fromNullToNow() {
         // Given
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.of(testJd));
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
         ApplyStatusResponseDto response = jdService.toggleApplyStatus(testJd.getId(), mockMember);
@@ -609,7 +609,7 @@ class JDServiceTest {
         assertNotNull(response.getApplyAt());
         assertNotNull(testJd.getApplyAt());
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
     }
 
     @Test
@@ -617,7 +617,7 @@ class JDServiceTest {
     void toggleApplyStatus_success_fromNowToNull() {
         // Given
         testJd.markJdAsApplied();
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.of(testJd));
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
         ApplyStatusResponseDto response = jdService.toggleApplyStatus(testJd.getId(), mockMember);
@@ -628,21 +628,21 @@ class JDServiceTest {
         assertNull(response.getApplyAt());
         assertNull(testJd.getApplyAt());
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
     }
 
     @Test
     @DisplayName("지원 완료 상태 토글 실패 - JD를 찾을 수 없음")
     void toggleApplyStatus_fail_jdNotFound() {
         // Given
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(anyLong(), eq(mockMember.getId()))).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsById(anyLong())).thenReturn(Optional.empty());
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
                 () -> jdService.toggleApplyStatus(testJd.getId(), mockMember));
-        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(anyLong(), eq(mockMember.getId()));
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(anyLong());
         verify(jdRepository, never()).save(any(JD.class));
     }
 
@@ -651,14 +651,14 @@ class JDServiceTest {
     void toggleApplyStatus_fail_unauthorizedAccess() {
         // Given
         Member otherMember = Member.builder().id(200L).username("otherUser").build();
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), otherMember.getId())).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
                 () -> jdService.toggleApplyStatus(testJd.getId(), otherMember));
         assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), otherMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
         verify(jdRepository, never()).save(any(JD.class));
     }
 
@@ -671,7 +671,7 @@ class JDServiceTest {
                 .build();
 
         // Mock repository calls
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.of(testJd));
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
         MemoResponseDto result = jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember);
@@ -682,7 +682,7 @@ class JDServiceTest {
         assertEquals(memoRequestDto.getMemo(), result.getMemo());
         assertEquals(memoRequestDto.getMemo(), testJd.getMemo());
 
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
 
     }
 
@@ -694,16 +694,16 @@ class JDServiceTest {
                 .memo("새로운 메모")
                 .build();
 
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(anyLong(), eq(mockMember.getId()))).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsById(anyLong())).thenReturn(Optional.empty());
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
                 () -> jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember));
 
-        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
+        assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
         // Verify interactions
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(anyLong(), eq(mockMember.getId()));
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(anyLong());
         verify(jdRepository, never()).save(any(JD.class));
     }
 
@@ -720,7 +720,7 @@ class JDServiceTest {
                 .username("unauthorizedUser")
                 .build();
 
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), unauthorizedMember.getId())).thenReturn(Optional.empty());
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
@@ -729,7 +729,7 @@ class JDServiceTest {
         assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
 
         // Verify interactions
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), unauthorizedMember.getId());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
     }
 
     @DisplayName("JD 업데이트 성공")
@@ -745,7 +745,7 @@ class JDServiceTest {
                 .build();
 
         // Mock repository calls
-        when(jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(testJd.getId(), mockMember.getId())).thenReturn(Optional.of(testJd));
+        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
         JDResponseDto result = jdService.updateJd(testJd.getId(), dto, mockMember);

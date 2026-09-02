@@ -297,7 +297,11 @@ public class JDService {
      * JD를 검색하고 회원이 접근 권한이 있는지 확인하는 헬퍼 메서드.
      */
     private JD getAuthorizedJd(Long jdId, Member member) {
-        return jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, member.getId())
-                .orElseThrow(() -> new JDException(JDErrorCode.UNAUTHORIZED_ACCESS));
+        JD jd = jdRepository.findJdWithMemberAndToDoListsById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
+        if (!jd.getMember().getId().equals(member.getId())) {
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        return jd;
     }
 }

@@ -119,8 +119,12 @@ public class ToDoListService {
      * 회원과 JD의 권한을 확인하고, 유효한 JD 객체를 반환하는 헬퍼 메서드.
      */
     private JD getAuthorizedJd(Long jdId, Member member) {
-        return jdRepository.findJdWithMemberAndToDoListsByIdAndMemberId(jdId, member.getId())
-                .orElseThrow(() -> new JDException(JDErrorCode.UNAUTHORIZED_ACCESS));
+        JD jd = jdRepository.findJdWithMemberAndToDoListsById(jdId)
+                .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
+        if (!jd.getMember().getId().equals(member.getId())) {
+            throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
+        }
+        return jd;
     }
 
     /**

@@ -4,7 +4,12 @@ package com.zb.jogakjogak.security.controller;
 import com.zb.jogakjogak.global.HttpApiResponse;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.service.WithdrawalService;
+import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,7 +25,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "회원 탈퇴 API", description = "사용자 회원 탈퇴 API")
+@Tag(name = "회원 관리 API", description = "회원 정보 조회/수정, 알림 설정, 탈퇴 등 회원 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/member/withdrawal")
@@ -28,7 +33,13 @@ public class WithdrawalController {
 
     private final WithdrawalService withdrawalService;
 
-    @Operation(summary = "회원 탈퇴", description = "로그인된 사용자가 회원을 탈퇴합니다")
+    @Operation(summary = "회원 탈퇴", description = "로그인된 사용자가 회원을 탈퇴합니다. 인증되지 않았거나 구글 access token이 만료되었으면 401, 회원 또는 소셜 로그인 정보가 존재하지 않으면 404, 소셜 계정 연결 해제에 실패하면 417을 반환합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원탈퇴 완료"),
+            @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자, 또는 구글 access token 만료", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "존재하지 않는 회원 또는 소셜 로그인 정보", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "417", description = "카카오/구글 계정 연결 해제 실패로 회원탈퇴 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @DeleteMapping
     public ResponseEntity<HttpApiResponse<?>> oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

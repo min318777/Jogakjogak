@@ -17,6 +17,12 @@ public interface JDRepositoryCustom {
     Optional<JD> findJdWithMemberAndToDoListsByIdAndMemberId(Long jdId, Long memberId);
 
     /**
+     * JD ID만으로 JD, Member, ToDoList를 즉시 로딩하여 조회합니다.
+     * 존재 여부(404)와 소유권(403)을 구분해서 검증할 때 사용합니다.
+     */
+    Optional<JD> findJdWithMemberAndToDoListsById(Long jdId);
+
+    /**
      * 특정 Member의 모든 JD 목록을 페이징하여 조회합니다.
      * 각 JD와 연관된 ToDoList를 즉시 로딩하여 N+1 문제를 방지합니다.
      *
