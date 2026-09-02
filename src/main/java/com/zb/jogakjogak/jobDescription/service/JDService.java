@@ -74,7 +74,7 @@ public class JDService {
 
         JD savedJd = jdRepository.save(jd);
 
-        return JDResponseDto.fromEntity(savedJd, member);
+        return JDResponseDto.from(savedJd, member);
     }
 
     /**
@@ -133,7 +133,7 @@ public class JDService {
             eventRepository.save(event);
         }
 
-        return JDResponseDto.fromEntity(savedJd, member);
+        return JDResponseDto.from(savedJd, member);
     }
 
     private JD createdJd(JDRequestDto jdRequestDto, Member member, boolean isCreatedWithResume) {
@@ -155,9 +155,10 @@ public class JDService {
     public JDResponseDto getJd(Long jdId, Member member) {
 
         JD jd = getAuthorizedJd(jdId, member);
-        return JDResponseDto.fromEntity(jd, member);
+        return JDResponseDto.from(jd, member);
     }
 
+    @Transactional
     public void deleteJd(Long jdId, Member member) {
 
         JD jd = getAuthorizedJd(jdId, member);
@@ -213,7 +214,7 @@ public class JDService {
         }
 
         List<AllGetJDResponseDto> dtos = jdEntitiesPage.getContent().stream()
-                .map(this::convertToDto)
+                .map(AllGetJDResponseDto::from)
                 .collect(Collectors.toList());
         int allJdCount = dtos.size();
 
@@ -221,31 +222,6 @@ public class JDService {
 
         return new PagedJdResponseDto(page, member, allJdCount, applyJdCount,
                 completedPiecesCount, totalPiecesCount, perfectJdCount);
-    }
-
-    /**
-     * JD엔티티를 AllGetJDResponseDto로 변환합니다.
-     * 이 과정에서 JD에 연결된 ToDoList의 총 개수와 완료된 개수를 계산하여 DTO에 포함합니다.
-     */
-    private AllGetJDResponseDto convertToDto(JD jd) {
-        long totalPieces = jd.getToDoLists().size();
-        long completedPieces = jd.getToDoLists().stream()
-                .filter(ToDoList::isDone)
-                .count();
-
-        return AllGetJDResponseDto.builder()
-                .jd_id(jd.getId())
-                .title(jd.getTitle())
-                .isBookmark(jd.isBookmark())
-                .isAlarmOn(jd.isAlarmOn())
-                .companyName(jd.getCompanyName())
-                .completedPieces(completedPieces)
-                .totalPieces(totalPieces)
-                .applyAt(jd.getApplyAt())
-                .createdAt(jd.getCreatedAt())
-                .updatedAt(jd.getUpdatedAt())
-                .endedAt(jd.getEndedAt())
-                .build();
     }
 
     @Transactional
@@ -289,7 +265,7 @@ public class JDService {
     public JDResponseDto updateJd(Long jdId, JDUpdateRequestDto jdUpdateRequestDto, Member member) {
         JD jd = getAuthorizedJd(jdId, member);
         jd.updateJd(jdUpdateRequestDto);
-        return JDResponseDto.fromEntity(jd, member);
+        return JDResponseDto.from(jd, member);
     }
 
     /**

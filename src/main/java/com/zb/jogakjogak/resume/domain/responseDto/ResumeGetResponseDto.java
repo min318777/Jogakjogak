@@ -72,7 +72,7 @@ public class ResumeGetResponseDto {
     @Schema(description = "스킬 리스트")
     private List<String> skillList;
 
-    public static ResumeGetResponseDto of(Resume resume) {
+    public static ResumeGetResponseDto from(Resume resume) {
         List<Career> careerList = new ArrayList<>();
         List<Education> educationList = new ArrayList<>();
         List<Skill> skillList = new ArrayList<>();
@@ -89,7 +89,7 @@ public class ResumeGetResponseDto {
         return toResponseDto(resume, careerList, educationList, skillList);
     }
 
-    public static ResumeGetResponseDto of(Resume resume, List<Career> careers, List<Education> educations, List<Skill> skills) {
+    public static ResumeGetResponseDto from(Resume resume, List<Career> careers, List<Education> educations, List<Skill> skills) {
         List<Career> careerList = new ArrayList<>();
         List<Education> educationList = new ArrayList<>();
         List<Skill> skillList = new ArrayList<>();
@@ -124,10 +124,10 @@ public class ResumeGetResponseDto {
                 .createdAt(resume.getCreatedAt())
                 .updatedAt(resume.getUpdatedAt())
                 .careerDtoList(careerList.stream()
-                        .map(CareerDto::of)
+                        .map(CareerDto::from)
                         .toList())
                 .educationDtoList(educationList.stream()
-                        .map(EducationDto::of)
+                        .map(EducationDto::from)
                         .toList())
                 .skillList(skillList.stream()
                         .map(Skill::getContent)

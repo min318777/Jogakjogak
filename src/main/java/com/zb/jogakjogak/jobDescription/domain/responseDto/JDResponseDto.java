@@ -76,14 +76,14 @@ public class JDResponseDto {
     @Schema(description = "전체 todolist 리스트")
     private List<ToDoListResponseDto> toDoLists;
 
-    public static JDResponseDto fromEntity(JD jd, Member member) {
+    public static JDResponseDto from(JD jd, Member member) {
         List<ToDoListResponseDto> mappedToDoLists = List.of();
         int completedPiecesCount = 0;
         int totalPiecesCount = 0;
         if (jd.getToDoLists() != null) {
             List<ToDoList> toDoLists = jd.getToDoLists();
             mappedToDoLists = toDoLists.stream()
-                    .map(ToDoListResponseDto::fromEntity)
+                    .map(ToDoListResponseDto::from)
                     .collect(Collectors.toList());
             completedPiecesCount = (int) toDoLists.stream()
                     .filter(ToDoList::isDone)

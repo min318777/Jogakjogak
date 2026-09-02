@@ -70,14 +70,14 @@ public class ResumeAddResponseDto {
     @Schema(description = "스킬 리스트")
     private List<String> skillList;
 
-    public static ResumeAddResponseDto of(Resume resume, List<Career> careerList, List<Education> educationList, List<Skill> skillList) {
+    public static ResumeAddResponseDto from(Resume resume, List<Career> careerList, List<Education> educationList, List<Skill> skillList) {
         return ResumeAddResponseDto.builder()
                 .isNewcomer(resume.isNewcomer())
                 .content(resume.getContent())
                 .createdAt(resume.getCreatedAt())
                 .updatedAt(resume.getUpdatedAt())
-                .careerDtoList(careerList.stream().map(CareerDto::of).toList())
-                .educationDtoList(educationList.stream().map(EducationDto::of).toList())
+                .careerDtoList(careerList.stream().map(CareerDto::from).toList())
+                .educationDtoList(educationList.stream().map(EducationDto::from).toList())
                 .skillList(skillList.stream().map(Skill::getContent).toList())
                 .build();
     }

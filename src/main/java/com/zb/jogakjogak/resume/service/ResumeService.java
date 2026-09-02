@@ -44,6 +44,7 @@ public class ResumeService {
      * @return 이력서 id, 이력서 이름, 이력서 번호
      */
 
+    @Transactional
     public ResumeResponseDto register(ResumeRequestDto requestDto, Member member) {
 
         if (member.getResume() != null) {
@@ -152,7 +153,7 @@ public class ResumeService {
         Resume resume = resumeRepository.findResumeWithCareerAndEducationAndSkill(member.getId())
                 .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
 
-        return ResumeGetResponseDto.of(resume);
+        return ResumeGetResponseDto.from(resume);
     }
 
     @Transactional
@@ -201,6 +202,6 @@ public class ResumeService {
             savedSkillList = skillRepository.saveAll(skillList);
         }
 
-        return ResumeGetResponseDto.of(resume, savedCareerList, savedEducationList, savedSkillList);
+        return ResumeGetResponseDto.from(resume, savedCareerList, savedEducationList, savedSkillList);
     }
 }

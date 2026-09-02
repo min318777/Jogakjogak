@@ -24,7 +24,7 @@ public class CareerDto {
     @NotBlank(message = "담당 업무와 주요 성과를 입력해주세요.")
     private String workPerformance;
 
-    public static CareerDto of(Career career) {
+    public static CareerDto from(Career career) {
         return CareerDto.builder()
                 .joinedAt(career.getJoinedAt())
                 .quitAt(career.getQuitAt())

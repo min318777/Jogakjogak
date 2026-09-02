@@ -23,7 +23,7 @@ public class EventResponseDto {
     @Schema(description = "최초 조회 여부 (최초 조회 시 true, 이후 조회부터는 false)", example = "true")
     private Boolean isFirst;
 
-    public static EventResponseDto of(Event event) {
+    public static EventResponseDto from(Event event) {
         return EventResponseDto.builder()
                 .id(event.getId())
                 .code(event.getCode())

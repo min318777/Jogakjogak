@@ -31,7 +31,7 @@ public class ToDoListResponseDto {
     @Schema(description = "todolist 수정 일시", example = "2025-06-22T10:30:00Z")
     private LocalDateTime updatedAt;
 
-    public static ToDoListResponseDto fromEntity(ToDoList toDoList) {
+    public static ToDoListResponseDto from(ToDoList toDoList) {
         return ToDoListResponseDto.builder()
                 .checklist_id(toDoList.getId())
                 .category(toDoList.getCategory())

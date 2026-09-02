@@ -41,6 +41,6 @@ public class EventService {
                     .build();
         }
 
-        return EventResponseDto.of(event);
+        return EventResponseDto.from(event);
     }
 }

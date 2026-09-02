@@ -62,7 +62,7 @@ public class ToDoListService {
 
         ToDoList toDoList = ToDoList.createToDoList(toDoListDto, jd);
         ToDoList savedToDoList = toDoListRepository.save(toDoList);
-        return ToDoListResponseDto.fromEntity(savedToDoList);
+        return ToDoListResponseDto.from(savedToDoList);
     }
 
     /**
@@ -78,7 +78,7 @@ public class ToDoListService {
         jd.setNotificationCount(0);
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
         toDoList.updateFromDto(toDoListDto);
-        return ToDoListResponseDto.fromEntity(toDoList);
+        return ToDoListResponseDto.from(toDoList);
     }
 
     /**
@@ -90,7 +90,7 @@ public class ToDoListService {
         jd.setNotificationCount(0);
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
         toDoList.updateToDoListIsDone(dto.isDone());
-        return ToDoListResponseDto.fromEntity(toDoList);
+        return ToDoListResponseDto.from(toDoList);
     }
 
     /**
@@ -100,7 +100,7 @@ public class ToDoListService {
     public ToDoListResponseDto getToDoList(Long jdId, Long toDoListId, Member member) {
         JD jd = getAuthorizedJd(jdId, member);
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
-        return ToDoListResponseDto.fromEntity(toDoList);
+        return ToDoListResponseDto.from(toDoList);
     }
 
     /**
@@ -180,7 +180,7 @@ public class ToDoListService {
         toDoListRepository.saveAll(updatedLists);
 
         List<ToDoListResponseDto> responseDtoList = updatedLists.stream()
-                .map(ToDoListResponseDto::fromEntity)
+                .map(ToDoListResponseDto::from)
                 .collect(Collectors.toList());
 
         return UpdateIsDoneTodoListsResponseDto.builder()
@@ -199,7 +199,7 @@ public class ToDoListService {
         List<ToDoList> toDoLists = toDoListRepository.findToDoListsByJdIdAndCategoryWithJd(jd.getId(), category);
 
         List<ToDoListResponseDto> responseDtoList = toDoLists.stream()
-                .map(ToDoListResponseDto::fromEntity)
+                .map(ToDoListResponseDto::from)
                 .collect(Collectors.toList());
 
         return ToDoListGetByCategoryResponseDto.builder()

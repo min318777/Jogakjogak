@@ -21,7 +21,7 @@ public class EducationDto {
     @NotBlank(message = "교육 상태를 입력해주세요.")
     private EducationStatus status;
 
-    public static EducationDto of(Education education){
+    public static EducationDto from(Education education){
         return EducationDto.builder()
                 .level(education.getLevel())
                 .majorField(education.getMajorField())
