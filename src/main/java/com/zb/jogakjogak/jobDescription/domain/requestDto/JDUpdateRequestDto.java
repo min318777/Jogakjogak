@@ -24,12 +24,15 @@ public class JDUpdateRequestDto {
     @Schema(description = "채용 공고의 URL", example = "https://jogakjogak.com", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "채용 공고 URL은 필수 입력 항목입니다.")
     @URL(message = "유효한 URL 형식이 아닙니다.")
+    @Size(max = 1000, message = "URL의 최대 길이는 1000자입니다.")
     private String jdUrl;
     @Schema(description = "채용 공고의 회사명", example = "Jogakjogak", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "회사 이름은 필수 항목입니다.")
+    @Size(max = 30, message = "회사 이름의 최대 길이는 30자입니다.")
     private String companyName;
     @Schema(description = "지원하는 직무명", example = "백엔드 개발자", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "직무 이름은 필수 항목입니다.")
+    @Size(max = 30, message = "직무 이름의 최대 길이는 30자입니다.")
     private String job;
     @Schema(description = "채용 공고의 마감일", example = "2025-06-22T10:30:00Z", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime endedAt;

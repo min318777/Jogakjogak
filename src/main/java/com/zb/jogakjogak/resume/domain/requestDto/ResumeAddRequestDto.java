@@ -2,6 +2,7 @@ package com.zb.jogakjogak.resume.domain.requestDto;
 
 import com.zb.jogakjogak.global.validation.MeaningfulText;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -59,7 +60,9 @@ public class ResumeAddRequestDto {
     @Schema(description = "신입 여부", example = "true", requiredMode =  Schema.RequiredMode.REQUIRED)
     @NotNull(message = "신입 여부를 입력해주세요.")
     private Boolean isNewcomer;
+    @Valid
     private List<CareerDto> careerList;
+    @Valid
     private List<EducationDto> educationList;
     private List<String> skillList;
 

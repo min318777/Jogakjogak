@@ -23,13 +23,17 @@ public class JDRequestDto {
     @Size(max = 30, message = "제목의 최대 길이는 30자입니다.")
     private String title;
     @Schema(description = "채용 공고의 URL", example = "https://jogakjogak.com", requiredMode = Schema.RequiredMode.REQUIRED)
-    @URL
+    @NotBlank(message = "채용 공고 URL은 필수 입력 항목입니다.")
+    @URL(message = "유효한 URL 형식이 아닙니다.")
+    @Size(max = 1000, message = "URL의 최대 길이는 1000자입니다.")
     private String jdUrl;
     @Schema(description = "채용 공고의 회사명", example = "Jogakjogak", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "회사 이름은 필수 항목입니다.")
+    @Size(max = 30, message = "회사 이름의 최대 길이는 30자입니다.")
     private String companyName;
     @Schema(description = "지원하는 직무명", example = "백엔드 개발자", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "직무 이름은 필수 항목입니다.")
+    @Size(max = 30, message = "직무 이름의 최대 길이는 30자입니다.")
     private String job;
     @Schema(description = "채용 공고 내용", example =
             "조각조각은 [취준생에게 JD와 이력서를 분석해주고 취업을 돕는 서비스]를 제공하며 빠르게 성장하고 있는 IT 스타트업입니다. 우리는 기술을 통해 **'취업을 위한 조각을 완성하는 즐거움'**이라는 새로운 가치를 만들어가고 있습니다. 함께 뛰어난 서비스를 만들며 성장할 열정적인 백엔드 개발자님을 모십니다." +
@@ -57,7 +61,7 @@ public class JDRequestDto {
             requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "채용 공고는 필수 항목입니다.")
     @MeaningfulText(message = "채용공고 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다.")
-    @Size(min = 200, message = "채용공고의 내용은 200자 이상이어야 합니다.")
+    @Size(min = 200, max = 4000, message = "채용공고의 내용은 200자 이상, 4000자 이하여야 합니다.")
     private String content;
     @Schema(description = "채용 공고의 마감일", example = "2025-06-22T10:30:00Z", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime endedAt;

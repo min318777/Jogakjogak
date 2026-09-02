@@ -9,8 +9,6 @@ import com.zb.jogakjogak.security.config.EmailEncryptor;
 import com.zb.jogakjogak.security.dto.OAuth2ResponseDto;
 import com.zb.jogakjogak.security.dto.UpdateMemberRequestDto;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -29,10 +27,8 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     private String username;
 
-    @Email
     @Convert(converter = EmailEncryptor.class)
     private String email;
 

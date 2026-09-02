@@ -4,6 +4,8 @@ import com.zb.jogakjogak.resume.entity.Education;
 import com.zb.jogakjogak.resume.type.EducationLevel;
 import com.zb.jogakjogak.resume.type.EducationStatus;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,11 +16,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EducationDto {
-    @NotBlank(message = "교육 수준을 입력해주세요.")
+    @NotNull(message = "교육 수준을 입력해주세요.")
     private EducationLevel level;
     @NotBlank(message = "주요 학문 분야를 입력해주세요.")
+    @Size(max = 225, message = "주요 학문 분야의 최대 길이는 225자입니다.")
     private String majorField;
-    @NotBlank(message = "교육 상태를 입력해주세요.")
+    @NotNull(message = "교육 상태를 입력해주세요.")
     private EducationStatus status;
 
     public static EducationDto from(Education education){

@@ -190,7 +190,7 @@ public class JDController {
     @PatchMapping("/jds/{jd_id}/memo")
     public ResponseEntity<HttpApiResponse<MemoResponseDto>> updateMemo(
             @PathVariable("jd_id") Long jdId,
-            @RequestBody MemoRequestDto dto,
+            @Valid @RequestBody MemoRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
@@ -210,7 +210,7 @@ public class JDController {
     @PatchMapping("/jds/{jd_id}")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> updateJd
             (@PathVariable("jd_id") Long jdId,
-             @RequestBody JDUpdateRequestDto dto,
+             @Valid @RequestBody JDUpdateRequestDto dto,
              @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
