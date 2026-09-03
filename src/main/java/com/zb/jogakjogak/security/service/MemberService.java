@@ -37,8 +37,10 @@ public class MemberService {
     public MemberResponseDto updateMember(String username, UpdateMemberRequestDto updateMemberRequestDto){
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-        if(memberRepository.existsByNickname(updateMemberRequestDto.getNickname())){
-           throw new AuthException(MemberErrorCode.ALREADY_EXISTING_NICKNAME);
+        String newNickname = updateMemberRequestDto.getNickname();
+        if (newNickname != null && !newNickname.equals(member.getNickname())
+                && memberRepository.existsByNickname(newNickname)) {
+            throw new AuthException(MemberErrorCode.ALREADY_EXISTING_NICKNAME);
         }
         member.updateMember(updateMemberRequestDto);
         return MemberResponseDto.builder()

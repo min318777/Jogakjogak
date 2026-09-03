@@ -2,6 +2,7 @@ package com.zb.jogakjogak.jobDescription.domain.requestDto;
 
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +19,7 @@ public class TodoListBulkUpdateRequestDto {
     @Schema(description = "todolist 카테고리", example = "STRUCTURAL_COMPLEMENT_PLAN", requiredMode = Schema.RequiredMode.REQUIRED)
     private ToDoListType category;
     @Schema(description = "생성/수정할 todolist")
+    @Valid
     private List<TodoListBulkItemDto> updatedOrCreateToDoLists;
     @Schema(description = "삭제할 todolist 아이디")
     private List<Long> deletedToDoListIds;

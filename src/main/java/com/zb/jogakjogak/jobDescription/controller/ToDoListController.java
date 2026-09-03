@@ -187,7 +187,7 @@ public class ToDoListController {
     @PutMapping("/bulk-update")
     public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> bulkUpdateToDoLists(
             @PathVariable("jd_id")  Long jdId,
-            @RequestBody TodoListBulkUpdateRequestDto dto,
+            @RequestBody @Valid TodoListBulkUpdateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         toDoListService.bulkUpdateToDoLists(jdId, dto, customUser.getMember());
         return ResponseEntity.ok().body(

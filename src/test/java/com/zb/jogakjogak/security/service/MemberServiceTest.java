@@ -128,6 +128,44 @@ class MemberServiceTest {
     }
 
     @Test
+    @DisplayName("my-page - 닉네임을 보내지 않으면 중복 체크 없이 업데이트 성공")
+    void updateMember_nicknameNotProvided_test() {
+        // given
+        UpdateMemberRequestDto dto = UpdateMemberRequestDto.builder()
+                .isNotificationEnabled(false)
+                .build();
+
+        given(memberRepository.findByUsername("testUser")).willReturn(Optional.of(testMember));
+
+        // when
+        MemberResponseDto result = memberService.updateMember("testUser", dto);
+
+        // then
+        assertThat(result.getNickname()).isEqualTo("oldNickname");
+        assertThat(result.isNotificationEnabled()).isFalse();
+        verify(memberRepository, never()).existsByNickname(any());
+    }
+
+    @Test
+    @DisplayName("my-page - 기존과 동일한 닉네임으로 수정해도 중복 예외가 발생하지 않음")
+    void updateMember_sameNicknameAsBefore_test() {
+        // given
+        UpdateMemberRequestDto dto = UpdateMemberRequestDto.builder()
+                .nickname("oldNickname")
+                .isNotificationEnabled(false)
+                .build();
+
+        given(memberRepository.findByUsername("testUser")).willReturn(Optional.of(testMember));
+
+        // when
+        MemberResponseDto result = memberService.updateMember("testUser", dto);
+
+        // then
+        assertThat(result.getNickname()).isEqualTo("oldNickname");
+        verify(memberRepository, never()).existsByNickname(any());
+    }
+
+    @Test
     @DisplayName("updateIsOnboarded - false 상태를 true로 토글")
     void updateIsOnboarded_false_to_true_test() {
         // given
