@@ -8,8 +8,10 @@ import com.zb.jogakjogak.global.exception.ResumeErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeException;
 import com.zb.jogakjogak.resume.domain.requestDto.CareerDto;
 import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDtoV2;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDtoV2;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Career;
@@ -65,7 +67,7 @@ class ResumeServiceTest {
     private ResumeService resumeService;
 
     private Resume sampleResume;
-    private ResumeRequestDto sampleRequestDto;
+    private ResumeCreateRequestDto sampleRequestDto;
     private Faker faker;
     private Member mockMember;
 
@@ -90,7 +92,7 @@ class ResumeServiceTest {
                 .member(mockMember)
                 .build();
 
-        sampleRequestDto = ResumeRequestDto.builder()
+        sampleRequestDto = ResumeCreateRequestDto.builder()
                 .title("새로운 이름")
                 .content("새로운 내용")
                 .build();
@@ -113,7 +115,7 @@ class ResumeServiceTest {
                 .resume(null)
                 .build();
 
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
                 .title(testName)
                 .content(testContent)
                 .build();
@@ -144,7 +146,7 @@ class ResumeServiceTest {
     void createResume_alreadyHaveResume_throwsAuthException() {
         // Given
         String fixedUserName = "testUserWithResume";
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
                 .title("새 이력서")
                 .content("새 내용")
                 .build();
@@ -178,11 +180,16 @@ class ResumeServiceTest {
                 .member(mockMember)
                 .build();
 
+        ResumeUpdateRequestDto sampleUpdateRequestDto = ResumeUpdateRequestDto.builder()
+                .title(sampleRequestDto.getTitle())
+                .content(sampleRequestDto.getContent())
+                .build();
+
         when(resumeRepository.findResumeWithMemberById(1L)).thenReturn(Optional.of(sampleResume));
         when(resumeRepository.save(any(Resume.class))).thenReturn(saveResume);
 
         //When
-        ResumeResponseDto result = resumeService.modify(1L, sampleRequestDto, mockMember);
+        ResumeResponseDto result = resumeService.modify(1L, sampleUpdateRequestDto, mockMember);
 
         //Then
         verify(resumeRepository, times(1)).findResumeWithMemberById(1L);
@@ -201,11 +208,15 @@ class ResumeServiceTest {
     void modify_fail_notFoundResume() {
         //Given
         Long nonExistentResumeId = 99L;
+        ResumeUpdateRequestDto sampleUpdateRequestDto = ResumeUpdateRequestDto.builder()
+                .title(sampleRequestDto.getTitle())
+                .content(sampleRequestDto.getContent())
+                .build();
         when(resumeRepository.findResumeWithMemberById(nonExistentResumeId)).thenReturn(Optional.empty());
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.modify(nonExistentResumeId, sampleRequestDto, mockMember);
+            resumeService.modify(nonExistentResumeId, sampleUpdateRequestDto, mockMember);
         });
 
         // 예외 메시지 또는 에러 코드 검증
@@ -300,7 +311,7 @@ class ResumeServiceTest {
                 .resume(null)
                 .build();
 
-        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+        ResumeCreateRequestDtoV2 requestDto = ResumeCreateRequestDtoV2.builder()
                 .content(testContent)
                 .isNewcomer(isNewcomer)
                 .build();
@@ -343,7 +354,7 @@ class ResumeServiceTest {
                 .resume(null)
                 .build();
 
-        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+        ResumeCreateRequestDtoV2 requestDto = ResumeCreateRequestDtoV2.builder()
                 .content(testContent)
                 .isNewcomer(isNewcomer)
                 .educationList(new ArrayList<>(List.of(
@@ -400,7 +411,7 @@ class ResumeServiceTest {
                 .resume(null)
                 .build();
 
-        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+        ResumeCreateRequestDtoV2 requestDto = ResumeCreateRequestDtoV2.builder()
                 .content(testContent)
                 .isNewcomer(isNewcomer)
                 .careerList(new ArrayList<>(List.of(
@@ -465,7 +476,7 @@ class ResumeServiceTest {
                 .resume(null)
                 .build();
 
-        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+        ResumeCreateRequestDtoV2 requestDto = ResumeCreateRequestDtoV2.builder()
                 .content(testContent)
                 .isNewcomer(isNewcomer)
                 .build();
@@ -611,7 +622,7 @@ class ResumeServiceTest {
                 )))
                 .build();
 
-        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+        ResumeUpdateRequestDtoV2 requestDto = ResumeUpdateRequestDtoV2.builder()
                 .content(faker.lorem().sentence(3))
                 .isNewcomer(false)
                 .careerList(new ArrayList<>(List.of(
@@ -690,7 +701,7 @@ class ResumeServiceTest {
     @DisplayName("(v2)이력서 수정 실패 테스트 - resume을 찾을 수 없음")
     void modifyV2_failure1() {
         //Given
-        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+        ResumeUpdateRequestDtoV2 requestDto = ResumeUpdateRequestDtoV2.builder()
                 .content(faker.lorem().sentence(3))
                 .isNewcomer(false)
                 .careerList(new ArrayList<>(List.of(
@@ -766,10 +777,12 @@ class ResumeServiceTest {
                 )))
                 .build();
         mockMember.setResume(resume);
+        when(resumeRepository.findResumeWithCareerAndEducationAndSkill(mockMember.getId())).thenReturn(Optional.of(resume));
 
-        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+        ResumeUpdateRequestDtoV2 requestDto = ResumeUpdateRequestDtoV2.builder()
                 .content(faker.lorem().sentence(3))
                 .isNewcomer(false)
+                .careerList(new ArrayList<>())
                 .educationList(new ArrayList<>(List.of(
                         EducationDto.builder()
                                 .level(EducationLevel.HIGH_SCHOOL)
@@ -792,7 +805,7 @@ class ResumeServiceTest {
                 resumeService.modifyV2(requestDto, mockMember));
 
         //Then
-        verify(resumeRepository, times(0)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
+        verify(resumeRepository, times(1)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
         assertThat(exception.getErrorCode()).isEqualTo(ResumeErrorCode.NOT_ENTERED_CAREER);
     }
 

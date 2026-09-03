@@ -2,22 +2,23 @@ package com.zb.jogakjogak.resume.domain.requestDto;
 
 import com.zb.jogakjogak.global.validation.MeaningfulText;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Schema(description = "이력서 등록 요청 DTO")
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResumeAddRequestDto {
+public class ResumeCreateRequestDto {
+    @Schema(description = "이력서 제목", example = "6월 20일 이력서", requiredMode=Schema.RequiredMode.NOT_REQUIRED)
+    @NotBlank(message = "이력서 제목은 필수 입력 사항입니다.")
+    @Size(max = 30, message = "이력서 제목은 30자 이내여야 합니다.")
+    private String title;
     @Schema(description = "이력서 내용", example =
             " 핵심 역량" +
             "언어: Java, Python" +
@@ -54,16 +55,7 @@ public class ResumeAddRequestDto {
             "새로운 기술과 지식을 빠르게 습득하고 프로젝트에 적용하는 데 거부감이 없습니다." +
             "오류 발생 시 로그를 분석하고 원인을 파악하여 해결하는 능력을 갖추고 있습니다.",
             requiredMode=Schema.RequiredMode.NOT_REQUIRED)
-    @Size(max = 5000, message = "이력서는 5000자 이내여야 합니다.")
+    @Size(min= 300, max = 5000, message = "이력서는 300자 이상 5000자 이내여야 합니다.")
     @MeaningfulText(message = "이력서 내용이 유효하지 않거나 의미 없는 반복 문자를 포함합니다.")
     private String content;
-    @Schema(description = "신입 여부", example = "true", requiredMode =  Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "신입 여부를 입력해주세요.")
-    private Boolean isNewcomer;
-    @Valid
-    private List<CareerDto> careerList;
-    @Valid
-    private List<EducationDto> educationList;
-    private List<String> skillList;
-
 }

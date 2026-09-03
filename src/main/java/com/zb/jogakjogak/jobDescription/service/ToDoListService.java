@@ -43,7 +43,7 @@ public class ToDoListService {
      * 특정 JD에 새로운 ToDoList를 추가하는 메서드
      */
     @Transactional
-    public ToDoListResponseDto createToDoList(Long jdId, CreateToDoListRequestDto toDoListDto, Member member) {
+    public ToDoListResponseDto createToDoList(Long jdId, TodoListCreateRequestDto toDoListDto, Member member) {
 
         JD jd = getAuthorizedJd(jdId, member);
         jd.setNotificationCount(0);
@@ -71,7 +71,7 @@ public class ToDoListService {
     @Transactional
     public ToDoListResponseDto updateToDoList(Long jdId,
                                               Long toDoListId,
-                                              UpdateToDoListRequestDto toDoListDto,
+                                              TodoListUpdateRequestDto toDoListDto,
                                               Member member) {
 
         JD jd = getAuthorizedJd(jdId, member);
@@ -85,7 +85,7 @@ public class ToDoListService {
      * 특정 JD에 속한 ToDoList에 대한 완료 여부를 수정하는 메서드
      */
     @Transactional
-    public ToDoListResponseDto toggleComplete(Long jdId, Long toDoListId, @Valid ToggleTodolistRequestDto dto, Member member) {
+    public ToDoListResponseDto toggleComplete(Long jdId, Long toDoListId, @Valid TodoListIsDoneUpdateRequestDto dto, Member member) {
         JD jd = getAuthorizedJd(jdId, member);
         jd.setNotificationCount(0);
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
@@ -142,7 +142,7 @@ public class ToDoListService {
      * 특정 JD에 속한 ToDoList들을 일괄적으로 수정, 생성, 삭제.
      */
     @Transactional
-    public void bulkUpdateToDoLists(Long jdId, BulkToDoListUpdateRequestDto dto, Member member) {
+    public void bulkUpdateToDoLists(Long jdId, TodoListBulkUpdateRequestDto dto, Member member) {
         JD jd = getAuthorizedJd(jdId, member);
         jd.setNotificationCount(0);
         ToDoListType targetCategory = dto.getCategory();
@@ -166,7 +166,7 @@ public class ToDoListService {
      * 특정 JD에 속한 특정 카테고리의 TodoList들의 완료여부를 수정하는 메서드
      */
     @Transactional
-    public UpdateIsDoneTodoListsResponseDto updateIsDoneTodoLists(Long jdId, UpdateTodoListsIsDoneRequestDto dto, Member member) {
+    public UpdateIsDoneTodoListsResponseDto updateIsDoneTodoLists(Long jdId, TodoListIsDoneBulkUpdateRequestDto dto, Member member) {
         getAuthorizedJd(jdId, member);
 
         List<ToDoList> updatedLists = new ArrayList<>();
@@ -212,11 +212,11 @@ public class ToDoListService {
     /**
      * 일괄 업데이트 요청에서 생성 또는 수정될 ToDoList들을 처리.
      */
-    private void processUpdatedOrCreateToDoLists(JD jd, ToDoListType targetCategory, List<ToDoListUpdateRequestDto> dtoList) {
+    private void processUpdatedOrCreateToDoLists(JD jd, ToDoListType targetCategory, List<TodoListBulkItemDto> dtoList) {
         List<ToDoList> newToDos = new ArrayList<>();
         List<ToDoList> updatedToDos = new ArrayList<>();
 
-        for (ToDoListUpdateRequestDto dto : dtoList) {
+        for (TodoListBulkItemDto dto : dtoList) {
             if (dto.getId() != null) {
                 ToDoList updateToDoList = toDoListRepository.findToDoListWithJdByIdAndJdId(dto.getId(), jd.getId())
                         .orElseThrow(() -> new ToDoListException(ToDoListErrorCode.UNAUTHORIZED_ACCESS));
@@ -273,7 +273,7 @@ public class ToDoListService {
      * 새로 생성될 항목, 삭제될 항목을 모두 고려하여 최종 개수를 예상합니다.
      */
     private void validateToDoListCount(JD jd, ToDoListType targetCategory,
-                                       List<ToDoListUpdateRequestDto> updatedOrCreateList,
+                                       List<TodoListBulkItemDto> updatedOrCreateList,
                                        List<Long> deletedIds) {
         long currentDbCount = jd.getToDoLists().stream()
                 .filter(toDoList -> toDoList.getCategory() == targetCategory)

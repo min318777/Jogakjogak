@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 import com.zb.jogakjogak.resume.domain.requestDto.CareerDto;
 import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDtoV2;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDto;
 import com.zb.jogakjogak.resume.entity.Career;
 import com.zb.jogakjogak.resume.entity.Education;
 import com.zb.jogakjogak.resume.entity.Resume;
@@ -224,7 +224,7 @@ class ResumeControllerTest {
         // Given
         String testTitle = "테스트 이력서 제목";
         String testContent = generateLongContent(300);
-        ResumeRequestDto requestDto = new ResumeRequestDto(testTitle, testContent);
+        ResumeCreateRequestDto requestDto = new ResumeCreateRequestDto(testTitle, testContent);
         String content = objectMapper.writeValueAsString(requestDto);
 
         // When
@@ -253,7 +253,7 @@ class ResumeControllerTest {
         Long resumeId = createAndSaveResume("원본 이력서");
         String updatedTitle = "수정된 이력서 제목";
         String updatedContent = generateLongContent(300);
-        ResumeRequestDto updateRequestDto = new ResumeRequestDto(updatedTitle, updatedContent);
+        ResumeCreateRequestDto updateRequestDto = new ResumeCreateRequestDto(updatedTitle, updatedContent);
         String content = objectMapper.writeValueAsString(updateRequestDto);
 
         // When
@@ -328,7 +328,7 @@ class ResumeControllerTest {
         // Given
         String testTitle = "유효한 테스트 제목";
         String meaninglessContent = faker.lorem().characters(350, true, false);
-        ResumeRequestDto requestDto = new ResumeRequestDto(testTitle, meaninglessContent);
+        ResumeCreateRequestDto requestDto = new ResumeCreateRequestDto(testTitle, meaninglessContent);
         String requestBody = objectMapper.writeValueAsString(requestDto);
 
         // When
@@ -355,7 +355,7 @@ class ResumeControllerTest {
         }
         String meaninglessKoreanContent = koreanGibberishBuilder.toString().substring(0, 300);
 
-        ResumeRequestDto requestDto = new ResumeRequestDto(testTitle, meaninglessKoreanContent);
+        ResumeCreateRequestDto requestDto = new ResumeCreateRequestDto(testTitle, meaninglessKoreanContent);
         String requestBody = objectMapper.writeValueAsString(requestDto);
 
         // When
@@ -376,7 +376,7 @@ class ResumeControllerTest {
         // Given
         String testContent = generateLongContent(300);
 
-        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+        ResumeCreateRequestDtoV2 requestDto = ResumeCreateRequestDtoV2.builder()
                 .content(testContent)
                 .isNewcomer(true)
                 .educationList(new ArrayList<>(List.of(
@@ -455,7 +455,7 @@ class ResumeControllerTest {
     void modifyResume_successV2() throws Exception {
         // Given
         String testContent = generateLongContent(300);
-        ResumeAddRequestDto requestDto = ResumeAddRequestDto.builder()
+        ResumeCreateRequestDtoV2 requestDto = ResumeCreateRequestDtoV2.builder()
                 .content(testContent)
                 .isNewcomer(false)
                 .careerList(new ArrayList<>(List.of(

@@ -1,8 +1,10 @@
 package com.zb.jogakjogak.resume.controller;
 
 import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDtoV2;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDtoV2;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.service.ResumeService;
@@ -43,7 +45,7 @@ public class ResumeController {
     })
     @PostMapping("/resume")
     public ResponseEntity<HttpApiResponse<ResumeResponseDto>> register(
-            @Valid @RequestBody ResumeRequestDto requestDto,
+            @Valid @RequestBody ResumeCreateRequestDto requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new HttpApiResponse<>(
@@ -61,7 +63,7 @@ public class ResumeController {
      * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용
      * @return data(수정한 이력서 id, 수정된 이력서 이름, 수정된 이력서 내용), 성공 여부 메세지, 상태코드
      */
-    @Operation(summary = "이력서 수정", description = "사용자가 등록한 이력서를 수정합니다. resume_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "이력서 수정", description = "사용자가 등록한 이력서를 수정합니다. 요청 바디에 보낸 필드만 부분 수정되며, 보내지 않은 필드는 기존 값이 유지됩니다. resume_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "이력서 수정 완료"),
             @ApiResponse(responseCode = "400", description = "입력값 검증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -71,7 +73,7 @@ public class ResumeController {
     @PatchMapping("/resume/{resume_id}")
     public ResponseEntity<HttpApiResponse<ResumeResponseDto>> modify(
             @PathVariable("resume_id") Long resumeId,
-            @Valid @RequestBody ResumeRequestDto requestDto,
+            @Valid @RequestBody ResumeUpdateRequestDto requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.ok()
                 .body(
@@ -137,7 +139,7 @@ public class ResumeController {
     })
     @PostMapping("/v2/resume")
     public ResponseEntity<HttpApiResponse<ResumeGetResponseDto>> registerV2(
-            @Valid @RequestBody ResumeAddRequestDto requestDto,
+            @Valid @RequestBody ResumeCreateRequestDtoV2 requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -178,7 +180,7 @@ public class ResumeController {
      * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용
      * @return data(수정한 이력서 id, 수정된 이력서 이름, 수정된 이력서 내용), 성공 여부 메세지, 상태코드
      */
-    @Operation(summary = "(v2) 이력서 수정", description = "사용자가 등록한 이력서를 신입 유무, 경력, 학력, 스킬 목록 형식으로 수정합니다. 등록된 이력서가 없으면 404, 신입이 아닌데 경력이 비어있으면 400을 반환합니다.")
+    @Operation(summary = "(v2) 이력서 수정", description = "사용자가 등록한 이력서를 신입 유무, 경력, 학력, 스킬 목록 형식으로 수정합니다. 요청 바디에 보낸 필드만 부분 수정되며, career/education/skill 목록은 보낸 경우에만 해당 목록 전체가 통째로 교체되고 보내지 않으면 기존 목록이 유지됩니다. 등록된 이력서가 없으면 404, (수정 결과 기준으로) 신입이 아닌데 경력이 비어있으면 400을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "이력서 수정 완료"),
             @ApiResponse(responseCode = "404", description = "등록된 이력서 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -186,7 +188,7 @@ public class ResumeController {
     })
     @PatchMapping("/v2/resume")
     public ResponseEntity<HttpApiResponse<ResumeGetResponseDto>> modifyV2(
-            @Valid @RequestBody ResumeAddRequestDto requestDto,
+            @Valid @RequestBody ResumeUpdateRequestDtoV2 requestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.ok()
                 .body(

@@ -3,8 +3,10 @@ package com.zb.jogakjogak.resume.service;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.global.exception.ResumeException;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDtoV2;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDtoV2;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.entity.Career;
@@ -45,7 +47,7 @@ public class ResumeService {
      */
 
     @Transactional
-    public ResumeResponseDto register(ResumeRequestDto requestDto, Member member) {
+    public ResumeResponseDto register(ResumeCreateRequestDto requestDto, Member member) {
 
         if (member.getResume() != null) {
             throw new AuthException(MemberErrorCode.ALREADY_HAVE_RESUME);
@@ -68,7 +70,7 @@ public class ResumeService {
     }
 
     @Transactional
-    public ResumeResponseDto modify(Long resumeId, @Valid ResumeRequestDto requestDto, Member member) {
+    public ResumeResponseDto modify(Long resumeId, @Valid ResumeUpdateRequestDto requestDto, Member member) {
 
         Resume resume = getAuthorizedResume(resumeId, member);
 
@@ -123,7 +125,7 @@ public class ResumeService {
      * @return 이력서 id, 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트, 생성 일시, 수정 일시
      */
     @Transactional
-    public ResumeGetResponseDto registerV2(ResumeAddRequestDto requestDto, Member member) {
+    public ResumeGetResponseDto registerV2(ResumeCreateRequestDtoV2 requestDto, Member member) {
 
         Resume memberResume = member.getResume();
 
@@ -157,26 +159,58 @@ public class ResumeService {
     }
 
     @Transactional
-    public ResumeGetResponseDto modifyV2(ResumeAddRequestDto requestDto, Member member) {
+    public ResumeGetResponseDto modifyV2(ResumeUpdateRequestDtoV2 requestDto, Member member) {
         if (member.getResume() == null) {
             throw new ResumeException(NOT_FOUND_RESUME);
         }
 
-        if (!requestDto.getIsNewcomer() && requestDto.getCareerList() == null) {
+        Resume resume = resumeRepository.findResumeWithCareerAndEducationAndSkill(member.getId())
+                .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
+
+        List<Career> existingCareerList = resume.getCareerList() != null ? new ArrayList<>(resume.getCareerList()) : new ArrayList<>();
+        List<Education> existingEducationList = resume.getEducationList() != null ? new ArrayList<>(resume.getEducationList()) : new ArrayList<>();
+        List<Skill> existingSkillList = resume.getSkillList() != null ? new ArrayList<>(resume.getSkillList()) : new ArrayList<>();
+
+        boolean willBeNewcomer = requestDto.getIsNewcomer() != null ? requestDto.getIsNewcomer() : resume.isNewcomer();
+        boolean careerWillBeEmpty = requestDto.getCareerList() != null
+                ? requestDto.getCareerList().isEmpty()
+                : existingCareerList.isEmpty();
+        if (!willBeNewcomer && careerWillBeEmpty) {
             throw new ResumeException(NOT_ENTERED_CAREER);
         }
 
-        Resume resume = resumeRepository.findResumeWithCareerAndEducationAndSkill(member.getId())
-                .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
         resume.update(requestDto);
         resumeRepository.save(resume);
-        resumeRepository.deleteResumeDetailsById(resume.getId());
 
-        return saveResumeDetails(resume, requestDto);
+        List<Career> careerList = existingCareerList;
+        if (requestDto.getCareerList() != null) {
+            resumeRepository.deleteCareersByResumeId(resume.getId());
+            careerList = careerRepository.saveAll(requestDto.getCareerList().stream()
+                    .map(dto -> Career.of(dto, resume))
+                    .toList());
+        }
+
+        List<Education> educationList = existingEducationList;
+        if (requestDto.getEducationList() != null) {
+            resumeRepository.deleteEducationsByResumeId(resume.getId());
+            educationList = educationRepository.saveAll(requestDto.getEducationList().stream()
+                    .map(dto -> Education.of(dto, resume))
+                    .toList());
+        }
+
+        List<Skill> skillList = existingSkillList;
+        if (requestDto.getSkillList() != null) {
+            resumeRepository.deleteSkillsByResumeId(resume.getId());
+            skillList = skillRepository.saveAll(requestDto.getSkillList().stream()
+                    .map(content -> Skill.of(content, resume))
+                    .toList());
+        }
+
+        return ResumeGetResponseDto.from(resume, careerList, educationList, skillList);
     }
 
     @Transactional
-    public ResumeGetResponseDto saveResumeDetails(Resume resume, ResumeAddRequestDto requestDto) {
+    public ResumeGetResponseDto saveResumeDetails(Resume resume, ResumeCreateRequestDtoV2 requestDto) {
         List<Career> savedCareerList = new ArrayList<>();
         List<Education> savedEducationList = new ArrayList<>();
         List<Skill> savedSkillList = new ArrayList<>();

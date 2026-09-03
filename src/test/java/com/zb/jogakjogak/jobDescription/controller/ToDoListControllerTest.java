@@ -229,7 +229,7 @@ class ToDoListControllerTest {
                 null);
         Long jdId = jd.getId();
 
-        CreateToDoListRequestDto dto = CreateToDoListRequestDto.builder()
+        TodoListCreateRequestDto dto = TodoListCreateRequestDto.builder()
                 .title("새로운 투두리스트 제목")
                 .content("새로운 투두리스트 내용")
                 .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
@@ -283,7 +283,7 @@ class ToDoListControllerTest {
         ToDoList existingToDoList = toDoListRepository.findAllByJdId(jdId).get(0);
         Long toDoListId = existingToDoList.getId();
 
-        UpdateToDoListRequestDto dto = new UpdateToDoListRequestDto(
+        TodoListUpdateRequestDto dto = new TodoListUpdateRequestDto(
                ToDoListType.SCHEDULE_MISC_ERROR,
                 "수정된 제목",
                 "수정된 내용",
@@ -332,7 +332,7 @@ class ToDoListControllerTest {
         ToDoList existingToDoList = toDoListRepository.findAllByJdId(jdId).get(0);
         Long toDoListId = existingToDoList.getId();
 
-        ToggleTodolistRequestDto dto = new ToggleTodolistRequestDto(true);
+        TodoListIsDoneUpdateRequestDto dto = new TodoListIsDoneUpdateRequestDto(true);
         String content = objectMapper.writeValueAsString(dto);
 
         // When
@@ -517,25 +517,25 @@ class ToDoListControllerTest {
         Long toDoListIdToUpdate = existingToDoLists.get(0).getId();
         Long toDoListIdToDelete = existingToDoLists.get(1).getId();
 
-        ToDoListUpdateRequestDto newToDoList1 = ToDoListUpdateRequestDto.builder()
+        TodoListBulkItemDto newToDoList1 = TodoListBulkItemDto.builder()
                 .title("새로 생성할 투두1")
                 .content("새로운 내용1")
                 .isDone(false)
                 .build();
-        ToDoListUpdateRequestDto newToDoList2 = ToDoListUpdateRequestDto.builder()
+        TodoListBulkItemDto newToDoList2 = TodoListBulkItemDto.builder()
                 .title("새로 생성할 투두2")
                 .content("새로운 내용2")
                 .isDone(false)
                 .build();
 
-        ToDoListUpdateRequestDto updateToDoList = ToDoListUpdateRequestDto.builder()
+        TodoListBulkItemDto updateToDoList = TodoListBulkItemDto.builder()
                 .title("수정된 기존 투두 제목")
                 .content("수정된 기존 투두 내용")
                 .isDone(true)
                 .id(toDoListIdToUpdate)
                 .build();
         // Bulk 요청 DTO 생성
-        BulkToDoListUpdateRequestDto bulkDto = new BulkToDoListUpdateRequestDto(
+        TodoListBulkUpdateRequestDto bulkDto = new TodoListBulkUpdateRequestDto(
                 ToDoListType.STRUCTURAL_COMPLEMENT_PLAN,
                 Arrays.asList(newToDoList1, newToDoList2, updateToDoList),
                 List.of(toDoListIdToDelete)
@@ -570,7 +570,7 @@ class ToDoListControllerTest {
         int initialSize = initialToDoLists.size();
 
         // 빈 Bulk 요청 DTO 생성 (아무런 생성, 수정, 삭제 요청 없음)
-        BulkToDoListUpdateRequestDto bulkDto = new BulkToDoListUpdateRequestDto(
+        TodoListBulkUpdateRequestDto bulkDto = new TodoListBulkUpdateRequestDto(
                 ToDoListType.STRUCTURAL_COMPLEMENT_PLAN,
                 List.of(),
                 List.of()
@@ -648,7 +648,7 @@ class ToDoListControllerTest {
                 .limit(3)
                 .forEach(todo -> System.out.println("ID: " + todo.getId() + ", isDone: " + todo.isDone()));
 
-        UpdateTodoListsIsDoneRequestDto dto = UpdateTodoListsIsDoneRequestDto.builder()
+        TodoListIsDoneBulkUpdateRequestDto dto = TodoListIsDoneBulkUpdateRequestDto.builder()
                 .toDoListIds(toDoListIdsToUpdate)
                 .isDone(true)
                 .build();

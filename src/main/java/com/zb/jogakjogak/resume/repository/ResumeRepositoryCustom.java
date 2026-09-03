@@ -24,5 +24,9 @@ public interface ResumeRepositoryCustom {
 
     Optional<Resume> findResumeWithCareerAndEducationAndSkill(Long memberId);
 
-    void deleteResumeDetailsById(Long resumeId);
+    void deleteCareersByResumeId(Long resumeId);
+
+    void deleteEducationsByResumeId(Long resumeId);
+
+    void deleteSkillsByResumeId(Long resumeId);
 }

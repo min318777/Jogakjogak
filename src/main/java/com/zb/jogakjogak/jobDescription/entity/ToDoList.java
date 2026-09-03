@@ -2,10 +2,10 @@ package com.zb.jogakjogak.jobDescription.entity;
 
 
 import com.zb.jogakjogak.global.BaseEntity;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.CreateToDoListRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.TodoListCreateRequestDto;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.UpdateToDoListRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.TodoListBulkItemDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.TodoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -79,7 +79,7 @@ public class ToDoList extends BaseEntity {
                 .build();
     }
 
-    public static ToDoList fromDto(ToDoListUpdateRequestDto dto, JD jd, ToDoListType category) {
+    public static ToDoList fromDto(TodoListBulkItemDto dto, JD jd, ToDoListType category) {
 
         return ToDoList.builder()
                 .category(category)
@@ -91,7 +91,7 @@ public class ToDoList extends BaseEntity {
                 .build();
     }
 
-    public static ToDoList createToDoList(CreateToDoListRequestDto toDoListDto, JD jd) {
+    public static ToDoList createToDoList(TodoListCreateRequestDto toDoListDto, JD jd) {
         return ToDoList.builder()
                 .category(toDoListDto.getCategory())
                 .title(toDoListDto.getTitle())
@@ -106,14 +106,22 @@ public class ToDoList extends BaseEntity {
         this.jd = jd;
     }
 
-    public void updateFromDto(UpdateToDoListRequestDto dto) {
-        this.category = dto.getCategory();
-        this.title = dto.getTitle();
-        this.content = dto.getContent();
-        this.isDone = dto.isDone();
+    public void updateFromDto(TodoListUpdateRequestDto dto) {
+        if (dto.getCategory() != null) {
+            this.category = dto.getCategory();
+        }
+        if (dto.getTitle() != null) {
+            this.title = dto.getTitle();
+        }
+        if (dto.getContent() != null) {
+            this.content = dto.getContent();
+        }
+        if (dto.getIsDone() != null) {
+            this.isDone = dto.getIsDone();
+        }
     }
 
-    public void updateFromBulkUpdateToDoLists(ToDoListUpdateRequestDto dto, ToDoListType category) {
+    public void updateFromBulkUpdateToDoLists(TodoListBulkItemDto dto, ToDoListType category) {
         this.category = category;
         this.title = dto.getTitle();
         this.content = dto.getContent();

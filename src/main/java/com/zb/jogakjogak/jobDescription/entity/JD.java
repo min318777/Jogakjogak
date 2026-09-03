@@ -2,7 +2,7 @@ package com.zb.jogakjogak.jobDescription.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.JDUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDMemoUpdateRequestDto;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -95,16 +95,26 @@ public class JD extends BaseEntity {
         this.applyAt = null;
     }
 
-    public void updateMemo(MemoRequestDto dto) {
+    public void updateMemo(JDMemoUpdateRequestDto dto) {
         this.memo = dto.getMemo();
     }
 
     public void updateJd(JDUpdateRequestDto dto){
-        this.title = dto.getTitle();
-        this.companyName = dto.getCompanyName();
-        this.job = dto.getJob();
-        this.jdUrl = dto.getJdUrl();
-        this.endedAt = dto.getEndedAt();
+        if (dto.getTitle() != null) {
+            this.title = dto.getTitle();
+        }
+        if (dto.getCompanyName() != null) {
+            this.companyName = dto.getCompanyName();
+        }
+        if (dto.getJob() != null) {
+            this.job = dto.getJob();
+        }
+        if (dto.getJdUrl() != null) {
+            this.jdUrl = dto.getJdUrl();
+        }
+        if (dto.getEndedAt() != null) {
+            this.endedAt = dto.getEndedAt();
+        }
     }
 
     public void markAsUpdated() {

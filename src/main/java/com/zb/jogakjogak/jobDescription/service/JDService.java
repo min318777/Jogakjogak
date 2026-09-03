@@ -41,7 +41,7 @@ public class JDService {
     /**
      * open ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
      */
-    public JDResponseDto analyze(JDRequestDto jdRequestDto, Member member) {
+    public JDResponseDto analyze(JDCreateRequestDto jdRequestDto, Member member) {
 
         if (member.getResume().getContent() == null) {
             throw new ResumeException(ResumeErrorCode.NOT_FOUND_RESUME);
@@ -81,7 +81,7 @@ public class JDService {
      * gemini ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
      */
     @Transactional
-    public JDResponseDto llmAnalyze(JDRequestDto jdRequestDto, Member member) {
+    public JDResponseDto llmAnalyze(JDCreateRequestDto jdRequestDto, Member member) {
 
         long jdCount = jdRepository.findAllJdCountByMemberId(member.getId());
 
@@ -136,7 +136,7 @@ public class JDService {
         return JDResponseDto.from(savedJd, member);
     }
 
-    private JD createdJd(JDRequestDto jdRequestDto, Member member, boolean isCreatedWithResume) {
+    private JD createdJd(JDCreateRequestDto jdRequestDto, Member member, boolean isCreatedWithResume) {
         return JD.builder()
                 .title(jdRequestDto.getTitle())
                 .isBookmark(false)
@@ -166,7 +166,7 @@ public class JDService {
     }
 
     @Transactional
-    public JDAlarmResponseDto alarm(Long jdId, JDAlarmRequestDto dto, Member member) {
+    public JDAlarmResponseDto alarm(Long jdId, JDAlarmUpdateRequestDto dto, Member member) {
 
         JD jd = getAuthorizedJd(jdId, member);
         if (dto.isAlarmOn()) {
@@ -225,7 +225,7 @@ public class JDService {
     }
 
     @Transactional
-    public BookmarkResponseDto updateBookmarkStatus(Long jdId, BookmarkRequestDto dto, Member member) {
+    public BookmarkResponseDto updateBookmarkStatus(Long jdId, JDBookmarkUpdateRequestDto dto, Member member) {
 
         JD jd = getAuthorizedJd(jdId, member);
 
@@ -252,7 +252,7 @@ public class JDService {
     }
 
     @Transactional
-    public MemoResponseDto updateMemo(Long jdId, MemoRequestDto dto, Member member) {
+    public MemoResponseDto updateMemo(Long jdId, JDMemoUpdateRequestDto dto, Member member) {
         JD jd = getAuthorizedJd(jdId, member);
         jd.updateMemo(dto);
         return MemoResponseDto.builder()

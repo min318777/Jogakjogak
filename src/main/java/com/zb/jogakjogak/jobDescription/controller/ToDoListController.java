@@ -44,7 +44,7 @@ public class ToDoListController {
     @PostMapping
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> createToDoList(
             @PathVariable("jd_id") Long jdId,
-            @RequestBody @Valid CreateToDoListRequestDto dto,
+            @RequestBody @Valid TodoListCreateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         ToDoListResponseDto response = toDoListService.createToDoList(jdId, dto, customUser.getMember());
 
@@ -60,7 +60,7 @@ public class ToDoListController {
     /**
      * 특정 JD에 속한 기존 ToDoList의 내용을 수정합니다.
      */
-    @Operation(summary = "특정 분석/카테고리의 Todolist 수정", description = "jd_id와 toDoList_id를 통해 todolist를 수정합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니거나 toDoListId가 해당 jd에 속하지 않으면 403을 반환합니다.")
+    @Operation(summary = "특정 분석/카테고리의 Todolist 수정", description = "jd_id와 toDoList_id를 통해 todolist를 수정합니다. 요청 바디에 보낸 필드만 부분 수정되며, 보내지 않은 필드는 기존 값이 유지됩니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니거나 toDoListId가 해당 jd에 속하지 않으면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "체크리스트 수정 완료"),
             @ApiResponse(responseCode = "400", description = "입력값 검증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
@@ -71,7 +71,7 @@ public class ToDoListController {
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> updateToDoList(
             @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
-            @RequestBody @Valid UpdateToDoListRequestDto toDoListDto,
+            @RequestBody @Valid TodoListUpdateRequestDto toDoListDto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         ToDoListResponseDto response = toDoListService.updateToDoList(jdId, toDoListId, toDoListDto, customUser.getMember());
         return ResponseEntity.ok().body(
@@ -94,7 +94,7 @@ public class ToDoListController {
     public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> toggleComplete(
             @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
-            @RequestBody @Valid ToggleTodolistRequestDto toggleTodolist,
+            @RequestBody @Valid TodoListIsDoneUpdateRequestDto toggleTodolist,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         ToDoListResponseDto response = toDoListService.toggleComplete(jdId, toDoListId, toggleTodolist, customUser.getMember());
         return ResponseEntity.ok().body(
@@ -187,7 +187,7 @@ public class ToDoListController {
     @PutMapping("/bulk-update")
     public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> bulkUpdateToDoLists(
             @PathVariable("jd_id")  Long jdId,
-            @RequestBody BulkToDoListUpdateRequestDto dto,
+            @RequestBody TodoListBulkUpdateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser) {
         toDoListService.bulkUpdateToDoLists(jdId, dto, customUser.getMember());
         return ResponseEntity.ok().body(
@@ -208,7 +208,7 @@ public class ToDoListController {
     @PutMapping("/update-is-done")
     public ResponseEntity<HttpApiResponse<UpdateIsDoneTodoListsResponseDto>> updateIsDoneTodoLists(
             @PathVariable("jd_id")  Long jdId,
-            @RequestBody UpdateTodoListsIsDoneRequestDto dto,
+            @RequestBody TodoListIsDoneBulkUpdateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customUser){
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(

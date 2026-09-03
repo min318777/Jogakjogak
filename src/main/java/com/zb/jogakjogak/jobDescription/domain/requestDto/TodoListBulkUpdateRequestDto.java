@@ -14,11 +14,11 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BulkToDoListUpdateRequestDto {
+public class TodoListBulkUpdateRequestDto {
     @Schema(description = "todolist 카테고리", example = "STRUCTURAL_COMPLEMENT_PLAN", requiredMode = Schema.RequiredMode.REQUIRED)
     private ToDoListType category;
     @Schema(description = "생성/수정할 todolist")
-    private List<ToDoListUpdateRequestDto> updatedOrCreateToDoLists;
+    private List<TodoListBulkItemDto> updatedOrCreateToDoLists;
     @Schema(description = "삭제할 todolist 아이디")
     private List<Long> deletedToDoListIds;
 }

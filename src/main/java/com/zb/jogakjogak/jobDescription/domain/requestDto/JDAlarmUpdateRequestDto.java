@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class JDAlarmRequestDto {
+public class JDAlarmUpdateRequestDto {
     @Schema(description = "분석 알림 설정 여부", example = "true", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonProperty("isAlarmOn")
     private boolean isAlarmOn;

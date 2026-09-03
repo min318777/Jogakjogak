@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.resume.domain;
 
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDto;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -17,7 +17,7 @@ import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-class ResumeRequestDtoTest {
+class ResumeCreateRequestDtoTest {
 
     private Validator validator;
     private Faker faker;
@@ -64,17 +64,17 @@ class ResumeRequestDtoTest {
         }
         longContent = longContent.substring(0, 5001);
 
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
                 .title("테스트의 이력서.")
                 .content(longContent)
                 .build();
 
         // When
-        Set<ConstraintViolation<ResumeRequestDto>> violations = validator.validate(requestDto);
+        Set<ConstraintViolation<ResumeCreateRequestDto>> violations = validator.validate(requestDto);
 
         // Then
         assertThat(violations).hasSize(1);
-        ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
+        ConstraintViolation<ResumeCreateRequestDto> violation = violations.iterator().next();
         assertThat(violation.getPropertyPath().toString()).isEqualTo("content");
         assertThat(violation.getMessage()).isEqualTo("이력서는 300자 이상 5000자 이내여야 합니다.");
     }
@@ -99,13 +99,13 @@ class ResumeRequestDtoTest {
         validContent = validContent.substring(0, 5000);
 
 
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
                 .title("유효한 이름")
                 .content(validContent)
                 .build();
 
         // When
-        Set<ConstraintViolation<ResumeRequestDto>> violations = validator.validate(requestDto);
+        Set<ConstraintViolation<ResumeCreateRequestDto>> violations = validator.validate(requestDto);
 
         // Then
         assertThat(violations).isEmpty();
@@ -115,17 +115,17 @@ class ResumeRequestDtoTest {
     @Test
     void testContentIsBlank() {
         // Given
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
                 .title("유효한 이름")
                 .content("")
                 .build();
 
         // When
-        Set<ConstraintViolation<ResumeRequestDto>> violations = validator.validate(requestDto);
+        Set<ConstraintViolation<ResumeCreateRequestDto>> violations = validator.validate(requestDto);
 
         // Then
         assertThat(violations).hasSize(1);
-        ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
+        ConstraintViolation<ResumeCreateRequestDto> violation = violations.iterator().next();
         assertThat(violation.getPropertyPath().toString()).isEqualTo("content");
         assertThat(violation.getMessage()).isEqualTo("이력서는 300자 이상 5000자 이내여야 합니다.");
     }
@@ -140,17 +140,17 @@ class ResumeRequestDtoTest {
             contentBuilder.append(" "); // 단락 사이에 공백 추가
         }
         String validContent = contentBuilder.toString();
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
                 .title("")
                 .content(validContent)
                 .build();
 
         // When
-        Set<ConstraintViolation<ResumeRequestDto>> violations = validator.validate(requestDto);
+        Set<ConstraintViolation<ResumeCreateRequestDto>> violations = validator.validate(requestDto);
 
         // Then
         assertThat(violations).hasSize(1);
-        ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
+        ConstraintViolation<ResumeCreateRequestDto> violation = violations.iterator().next();
         assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
         assertThat(violation.getMessage()).isEqualTo("이력서 제목은 필수 입력 사항입니다.");
     }
@@ -165,17 +165,17 @@ class ResumeRequestDtoTest {
             contentBuilder.append(" ");
         }
         String validContent = contentBuilder.toString();
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
                 .title(null)
                 .content(validContent)
                 .build();
 
         // When
-        Set<ConstraintViolation<ResumeRequestDto>> violations = validator.validate(requestDto);
+        Set<ConstraintViolation<ResumeCreateRequestDto>> violations = validator.validate(requestDto);
 
         // Then
         assertThat(violations).hasSize(1);
-        ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
+        ConstraintViolation<ResumeCreateRequestDto> violation = violations.iterator().next();
         assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
         assertThat(violation.getMessage()).isEqualTo("이력서 제목은 필수 입력 사항입니다.");
     }
@@ -192,17 +192,17 @@ class ResumeRequestDtoTest {
         String validContent = contentBuilder.toString();
         String longTitle = faker.lorem().paragraph(30);
 
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
                 .title(longTitle)
                 .content(validContent)
                 .build();
 
         // When
-        Set<ConstraintViolation<ResumeRequestDto>> violations = validator.validate(requestDto);
+        Set<ConstraintViolation<ResumeCreateRequestDto>> violations = validator.validate(requestDto);
 
         // Then
         assertThat(violations).hasSize(1);
-        ConstraintViolation<ResumeRequestDto> violation = violations.iterator().next();
+        ConstraintViolation<ResumeCreateRequestDto> violation = violations.iterator().next();
         assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
         assertThat(violation.getMessage()).isEqualTo("이력서 제목은 30자 이내여야 합니다.");
     }
@@ -217,13 +217,13 @@ class ResumeRequestDtoTest {
             contentBuilder.append(" "); // 단락 사이에 공백 추가
         }
         String validContent = contentBuilder.toString();
-        ResumeRequestDto requestDto = ResumeRequestDto.builder()
+        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
                 .title("완벽한 이름")
                 .content(validContent)
                 .build();
 
         // When
-        Set<ConstraintViolation<ResumeRequestDto>> violations = validator.validate(requestDto);
+        Set<ConstraintViolation<ResumeCreateRequestDto>> violations = validator.validate(requestDto);
 
         // Then
         assertThat(violations).isEmpty();

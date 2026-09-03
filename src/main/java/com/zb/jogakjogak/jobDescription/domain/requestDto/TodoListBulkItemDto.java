@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ToDoListUpdateRequestDto {
+public class TodoListBulkItemDto {
     @Schema(description = "todolist 아이디", example = "1")
     @JsonProperty("checklist_id")
     private Long id;

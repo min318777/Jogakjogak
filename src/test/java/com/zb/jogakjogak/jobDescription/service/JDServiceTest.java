@@ -62,7 +62,7 @@ class JDServiceTest {
     @Mock
     private EventRepository eventRepository;
 
-    private JDRequestDto jdRequestDto;
+    private JDCreateRequestDto jdRequestDto;
     private String mockLLMAnalysisJsonString;
     private List<ToDoListDto> mockToDoListDtosForLLM;
     private Faker faker;
@@ -92,7 +92,7 @@ class JDServiceTest {
                 .isOnboarded(false)
                 .build();
 
-        jdRequestDto = JDRequestDto.builder()
+        jdRequestDto = JDCreateRequestDto.builder()
                 .title("시니어 백엔드 개발자 채용")
                 .jdUrl("https://example.com/jd/123")
                 .companyName(faker.company().name())
@@ -376,7 +376,7 @@ class JDServiceTest {
         boolean initialAlarmStatus = false;
         boolean newAlarmStatus = true;
 
-        JDAlarmRequestDto requestDto = JDAlarmRequestDto.builder()
+        JDAlarmUpdateRequestDto requestDto = JDAlarmUpdateRequestDto.builder()
                 .isAlarmOn(newAlarmStatus)
                 .build();
 
@@ -414,7 +414,7 @@ class JDServiceTest {
     void alarm_notFound() {
         // Given
         Long nonExistentJdId = 999L;
-        JDAlarmRequestDto requestDto = JDAlarmRequestDto.builder()
+        JDAlarmUpdateRequestDto requestDto = JDAlarmUpdateRequestDto.builder()
                 .isAlarmOn(true)
                 .build();
 
@@ -522,7 +522,7 @@ class JDServiceTest {
     @DisplayName("북마크 상태 업데이트 성공 - true로 변경")
     void updateBookmarkStatus_success_toTrue() {
         // Given
-        BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
+        JDBookmarkUpdateRequestDto dto = JDBookmarkUpdateRequestDto.builder().isBookmark(true).build();
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
@@ -543,7 +543,7 @@ class JDServiceTest {
     void updateBookmarkStatus_success_toFalse() {
         // Given
         testJd.updateBookmarkStatus(true);
-        BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(false).build();
+        JDBookmarkUpdateRequestDto dto = JDBookmarkUpdateRequestDto.builder().isBookmark(false).build();
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
@@ -562,7 +562,7 @@ class JDServiceTest {
     @DisplayName("북마크 상태 업데이트 실패 - JD를 찾을 수 없음")
     void updateBookmarkStatus_fail_jdNotFound() {
         // Given
-        BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
+        JDBookmarkUpdateRequestDto dto = JDBookmarkUpdateRequestDto.builder().isBookmark(true).build();
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.empty());
 
         // When & Then
@@ -578,7 +578,7 @@ class JDServiceTest {
     @DisplayName("북마크 상태 업데이트 실패 - 권한 없음")
     void updateBookmarkStatus_fail_unauthorizedAccess() {
         // Given
-        BookmarkRequestDto dto = BookmarkRequestDto.builder().isBookmark(true).build();
+        JDBookmarkUpdateRequestDto dto = JDBookmarkUpdateRequestDto.builder().isBookmark(true).build();
         Member requestMember = Member.builder().id(200L).username("otherUser").build();
 
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
@@ -666,7 +666,7 @@ class JDServiceTest {
     @DisplayName("메모 업데이트 성공 테스트")
     void updateMemo_Success() {
         // Given
-        MemoRequestDto memoRequestDto = MemoRequestDto.builder()
+        JDMemoUpdateRequestDto memoRequestDto = JDMemoUpdateRequestDto.builder()
                 .memo("새로운 메모")
                 .build();
 
@@ -690,7 +690,7 @@ class JDServiceTest {
     @DisplayName("메모 업데이트 실패: JD 없음")
     void updateMemo_JDNotFound() {
         // Given
-        MemoRequestDto memoRequestDto = MemoRequestDto.builder()
+        JDMemoUpdateRequestDto memoRequestDto = JDMemoUpdateRequestDto.builder()
                 .memo("새로운 메모")
                 .build();
 
@@ -711,7 +711,7 @@ class JDServiceTest {
     @DisplayName("메모 업데이트 실패: 권한 없음")
     void updateMemo_UnauthorizedAccess() {
         // Given
-        MemoRequestDto memoRequestDto = MemoRequestDto.builder()
+        JDMemoUpdateRequestDto memoRequestDto = JDMemoUpdateRequestDto.builder()
                 .memo("새로운 메모")
                 .build();
 

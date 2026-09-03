@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class JDRequestDto {
+public class JDCreateRequestDto {
     @Schema(description = "생성할 분석 내용의 제목", example = "J사 백엔드 취업 해보자!", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "제목은 필수 입력 항목입니다.")
     @Size(max = 30, message = "제목의 최대 길이는 30자입니다.")

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookmarkRequestDto {
+public class JDBookmarkUpdateRequestDto {
     @Schema(description = "즐겨찾기 설정 여부", example = "true", requiredMode = Schema.RequiredMode.REQUIRED)
     @JsonProperty("isBookmark")
     private boolean isBookmark;

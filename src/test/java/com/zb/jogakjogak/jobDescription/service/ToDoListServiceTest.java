@@ -81,7 +81,7 @@ class ToDoListServiceTest {
     void createToDoList_success() {
         // Given
         JD mockJd = createTestJd(jdId, mockMember, new ArrayList<>());
-        CreateToDoListRequestDto createToDoListDto = CreateToDoListRequestDto.builder()
+        TodoListCreateRequestDto createToDoListDto = TodoListCreateRequestDto.builder()
                 .title("ToDoList 제목")
                 .category(targetCategory)
                 .content("ToDoList 내용")
@@ -121,7 +121,7 @@ class ToDoListServiceTest {
     @DisplayName("ToDoList 생성 실패 - JD를 찾을 수 없음")
     void createToDoList_jdNotFound() {
         // Given
-        CreateToDoListRequestDto createToDoListDto = new CreateToDoListRequestDto();
+        TodoListCreateRequestDto createToDoListDto = new TodoListCreateRequestDto();
         when(jdRepository.findJdWithMemberAndToDoListsById(anyLong())).thenReturn(Optional.empty());
 
         // When & Then
@@ -143,7 +143,7 @@ class ToDoListServiceTest {
             existingToDoLists.add(createTestToDoList((long) i, null, targetCategory, "ToDo " + i));
         }
         JD mockJd = createTestJd(jdId, mockMember, existingToDoLists);
-        CreateToDoListRequestDto createToDoListDto = CreateToDoListRequestDto.builder().category(targetCategory).build();
+        TodoListCreateRequestDto createToDoListDto = TodoListCreateRequestDto.builder().category(targetCategory).build();
 
         when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
 
@@ -169,7 +169,7 @@ class ToDoListServiceTest {
             existingToDoLists.add(createTestToDoList((long) i, null, ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL, "Other ToDo " + i));
         }
         JD mockJd = createTestJd(jdId, mockMember, existingToDoLists);
-        CreateToDoListRequestDto createToDoListDto = CreateToDoListRequestDto.builder().category(targetCategory).build();
+        TodoListCreateRequestDto createToDoListDto = TodoListCreateRequestDto.builder().category(targetCategory).build();
 
         when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
         when(toDoListRepository.save(any(ToDoList.class))).thenAnswer(invocation -> {
@@ -213,7 +213,7 @@ class ToDoListServiceTest {
 
         ToDoList originalToDoList = createTestToDoList(toDoListId, testJd, targetCategory, "Original Title");
         testJd.addToDoList(originalToDoList);
-        UpdateToDoListRequestDto updateToDoListDto = UpdateToDoListRequestDto.builder()
+        TodoListUpdateRequestDto updateToDoListDto = TodoListUpdateRequestDto.builder()
                 .title("새로운 ToDoList 제목")
                 .category(targetCategory)
                 .content("새로운 ToDoList 내용")
@@ -234,7 +234,7 @@ class ToDoListServiceTest {
         assertEquals(updateToDoListDto.getCategory(), result.getCategory());
         assertEquals(updateToDoListDto.getTitle(), result.getTitle());
         assertEquals(updateToDoListDto.getContent(), result.getContent());
-        assertEquals(updateToDoListDto.isDone(), result.isDone());
+        assertEquals(updateToDoListDto.getIsDone(), result.isDone());
         assertEquals(jdId, result.getJdId());
     }
 
@@ -258,7 +258,7 @@ class ToDoListServiceTest {
 
         ToDoList originalToDoList = createTestToDoList(toDoListId, testJd, targetCategory, "Original Title");
         testJd.addToDoList(originalToDoList);
-        ToggleTodolistRequestDto dto = ToggleTodolistRequestDto.builder()
+        TodoListIsDoneUpdateRequestDto dto = TodoListIsDoneUpdateRequestDto.builder()
                 .isDone(true)
                 .build();
         when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(testJd));
@@ -339,7 +339,7 @@ class ToDoListServiceTest {
     void updateToDoList_fail_toDoListNotFoundOrNotBelongToJd() {
         // Given
         JD mockJd = createTestJd(jdId, mockMember, Collections.emptyList());
-        UpdateToDoListRequestDto updateToDoListDto = new UpdateToDoListRequestDto();
+        TodoListUpdateRequestDto updateToDoListDto = new TodoListUpdateRequestDto();
         when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
 
         // When & Then
@@ -385,13 +385,13 @@ class ToDoListServiceTest {
         // Given
         JD mockJd = createTestJd(jdId, mockMember, Collections.emptyList());
         when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
-        ToDoListUpdateRequestDto updateToDoListUpdateReqDto = ToDoListUpdateRequestDto.builder()
+        TodoListBulkItemDto updateToDoListUpdateReqDto = TodoListBulkItemDto.builder()
                 .id(toDoListId) // 존재하지 않는 ID
                 .title("some title")
                 .content("some content")
                 .build();
 
-        BulkToDoListUpdateRequestDto bulkReqWrongJd = BulkToDoListUpdateRequestDto.builder()
+        TodoListBulkUpdateRequestDto bulkReqWrongJd = TodoListBulkUpdateRequestDto.builder()
                 .category(targetCategory)
                 .updatedOrCreateToDoLists(Collections.singletonList(updateToDoListUpdateReqDto))
                 .deletedToDoListIds(Collections.emptyList())
@@ -412,7 +412,7 @@ class ToDoListServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
 
         List<Long> deletedIds = Collections.singletonList(toDoListId); // some random ID
-        BulkToDoListUpdateRequestDto bulkReqDeleteWrongJd = BulkToDoListUpdateRequestDto.builder()
+        TodoListBulkUpdateRequestDto bulkReqDeleteWrongJd = TodoListBulkUpdateRequestDto.builder()
                 .category(targetCategory)
                 .updatedOrCreateToDoLists(Collections.emptyList())
                 .deletedToDoListIds(deletedIds)
@@ -444,7 +444,7 @@ class ToDoListServiceTest {
                 .memo(faker.lorem().sentence())
                 .build();
 
-        ToDoListUpdateRequestDto newToDoListDto = ToDoListUpdateRequestDto.builder()
+        TodoListBulkItemDto newToDoListDto = TodoListBulkItemDto.builder()
                 .id(null)
                 .title(faker.lorem().sentence())
                 .content(faker.lorem().paragraph())
@@ -462,7 +462,7 @@ class ToDoListServiceTest {
                 .jd(testJd)
                 .build();
         testJd.addToDoList(existingToDoListForUpdate);
-        ToDoListUpdateRequestDto updateAnotherDto = ToDoListUpdateRequestDto.builder()
+        TodoListBulkItemDto updateAnotherDto = TodoListBulkItemDto.builder()
                 .id(anotherExistingId)
                 .title("Updated Another Title")
                 .content("Updated Another Content")
@@ -481,7 +481,7 @@ class ToDoListServiceTest {
                 .build();
         testJd.addToDoList(toDoListToDelete);
 
-        BulkToDoListUpdateRequestDto request = BulkToDoListUpdateRequestDto.builder()
+        TodoListBulkUpdateRequestDto request = TodoListBulkUpdateRequestDto.builder()
                 .category(targetCategory)
                 .updatedOrCreateToDoLists(Arrays.asList(newToDoListDto, updateAnotherDto))
                 .deletedToDoListIds(Collections.singletonList(deletedToDoListId))
@@ -522,7 +522,7 @@ class ToDoListServiceTest {
     @DisplayName("Bulk Update: 카테고리가 누락되면 실패")
     void bulkUpdateToDoLists_fail_categoryRequired() {
         // Given
-        BulkToDoListUpdateRequestDto request = BulkToDoListUpdateRequestDto.builder()
+        TodoListBulkUpdateRequestDto request = TodoListBulkUpdateRequestDto.builder()
                 .category(null)
                 .updatedOrCreateToDoLists(Collections.emptyList())
                 .deletedToDoListIds(Collections.emptyList())
@@ -547,7 +547,7 @@ class ToDoListServiceTest {
         // Given
         Long deletedIdWrongOwner = 200L;
 
-        BulkToDoListUpdateRequestDto requestDeleteWrongOwner = BulkToDoListUpdateRequestDto.builder()
+        TodoListBulkUpdateRequestDto requestDeleteWrongOwner = TodoListBulkUpdateRequestDto.builder()
                 .category(targetCategory)
                 .updatedOrCreateToDoLists(Collections.emptyList())
                 .deletedToDoListIds(Collections.singletonList(deletedIdWrongOwner))
@@ -638,7 +638,7 @@ class ToDoListServiceTest {
         mockJd.addToDoList(todo1);
         mockJd.addToDoList(todo2);
 
-        UpdateTodoListsIsDoneRequestDto dto = UpdateTodoListsIsDoneRequestDto.builder()
+        TodoListIsDoneBulkUpdateRequestDto dto = TodoListIsDoneBulkUpdateRequestDto.builder()
                 .toDoListIds(List.of(101L, 102L))
                 .isDone(true)
                 .build();

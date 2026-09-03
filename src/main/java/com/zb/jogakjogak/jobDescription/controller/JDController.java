@@ -38,7 +38,7 @@ public class JDController {
     })
     @PostMapping("/jds")
     public ResponseEntity<HttpApiResponse<JDResponseDto>> llmAnalyze(
-            @Valid @RequestBody JDRequestDto jdRequestDto,
+            @Valid @RequestBody JDCreateRequestDto jdRequestDto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 new HttpApiResponse<>(
@@ -77,7 +77,7 @@ public class JDController {
     @PatchMapping("/jds/{jd_id}/alarm")
     public ResponseEntity<HttpApiResponse<JDAlarmResponseDto>> alarm(
             @PathVariable("jd_id") Long jdId,
-            @RequestBody JDAlarmRequestDto dto,
+            @RequestBody JDAlarmUpdateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
@@ -149,7 +149,7 @@ public class JDController {
     @PatchMapping("/jds/{jd_id}/bookmark")
     public ResponseEntity<HttpApiResponse<BookmarkResponseDto>> toggleBookmark
             (@PathVariable("jd_id") Long jdId,
-             @RequestBody BookmarkRequestDto dto,
+             @RequestBody JDBookmarkUpdateRequestDto dto,
              @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
@@ -190,7 +190,7 @@ public class JDController {
     @PatchMapping("/jds/{jd_id}/memo")
     public ResponseEntity<HttpApiResponse<MemoResponseDto>> updateMemo(
             @PathVariable("jd_id") Long jdId,
-            @Valid @RequestBody MemoRequestDto dto,
+            @Valid @RequestBody JDMemoUpdateRequestDto dto,
             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         return ResponseEntity.ok().body(
                 new HttpApiResponse<>(
@@ -201,7 +201,7 @@ public class JDController {
         );
     }
 
-    @Operation(summary = "특정 채용공고 수정", description = "jd_id와 요청받은 Jd를 통해 Jd를 수정합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "특정 채용공고 수정", description = "jd_id를 통해 Jd를 수정합니다. 요청 바디에 보낸 필드만 부분 수정되며, 보내지 않은 필드는 기존 값이 유지됩니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "JD 수정 완료"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 JD", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),

@@ -67,13 +67,23 @@ public class ResumeRepositoryImpl implements ResumeRepositoryCustom {
 
     @Transactional
     @Override
-    public void deleteResumeDetailsById(Long resumeId) {
+    public void deleteCareersByResumeId(Long resumeId) {
         queryFactory.delete(career)
                 .where(career.resume.id.eq(resumeId))
                 .execute();
+    }
+
+    @Transactional
+    @Override
+    public void deleteEducationsByResumeId(Long resumeId) {
         queryFactory.delete(education)
                 .where(education.resume.id.eq(resumeId))
                 .execute();
+    }
+
+    @Transactional
+    @Override
+    public void deleteSkillsByResumeId(Long resumeId) {
         queryFactory.delete(skill)
                 .where(skill.resume.id.eq(resumeId))
                 .execute();

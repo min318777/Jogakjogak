@@ -7,18 +7,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
-
-@Schema(description = "todolist 완료여부 수정 DTO")
+@Schema(description = "투두리스트 완료 상태 요청 DTO")
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateTodoListsIsDoneRequestDto {
-    @Schema(description = "수정할 todolist id")
-    private List<Long> toDoListIds;
-    @Schema(description = "일괄처리할 완료여부", example = "true")
-    @JsonProperty("done")
+public class TodoListIsDoneUpdateRequestDto {
+    @Schema(description = "todolist 완료 여부", example = "true", requiredMode = Schema.RequiredMode.REQUIRED)
+    @JsonProperty("is_done")
     private boolean isDone;
 }

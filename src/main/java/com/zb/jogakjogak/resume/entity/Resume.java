@@ -1,8 +1,9 @@
 package com.zb.jogakjogak.resume.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeAddRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDtoV2;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDto;
+import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDtoV2;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -45,14 +46,31 @@ public class Resume extends BaseEntity {
      *
      * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용.
      */
-    public void modify(ResumeRequestDto requestDto) {
-        this.title = requestDto.getTitle();
-        this.content = requestDto.getContent();
+    public void modify(ResumeUpdateRequestDto requestDto) {
+        if (requestDto.getTitle() != null) {
+            this.title = requestDto.getTitle();
+        }
+        if (requestDto.getContent() != null) {
+            this.content = requestDto.getContent();
+        }
     }
 
-    public void update(ResumeAddRequestDto requestDto) {
-        this.content = requestDto.getContent();
-        this.isNewcomer = requestDto.getIsNewcomer();
+    public void update(ResumeCreateRequestDtoV2 requestDto) {
+        if (requestDto.getContent() != null) {
+            this.content = requestDto.getContent();
+        }
+        if (requestDto.getIsNewcomer() != null) {
+            this.isNewcomer = requestDto.getIsNewcomer();
+        }
+    }
+
+    public void update(ResumeUpdateRequestDtoV2 requestDto) {
+        if (requestDto.getContent() != null) {
+            this.content = requestDto.getContent();
+        }
+        if (requestDto.getIsNewcomer() != null) {
+            this.isNewcomer = requestDto.getIsNewcomer();
+        }
     }
 
     public void setMember(Member member) {

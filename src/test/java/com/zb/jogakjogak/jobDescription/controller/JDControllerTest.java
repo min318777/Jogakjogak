@@ -5,10 +5,10 @@ import com.github.javafaker.Faker;
 import com.zb.jogakjogak.event.entity.Event;
 import com.zb.jogakjogak.event.repository.EventRepository;
 import com.zb.jogakjogak.event.type.EventType;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.BookmarkRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.MemoRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDBookmarkUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDAlarmUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDCreateRequestDto;
+import com.zb.jogakjogak.jobDescription.domain.requestDto.JDMemoUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
@@ -210,7 +210,7 @@ class JDControllerTest {
             contentBuilder.append(" ");
         }
         String validContent = contentBuilder.toString();
-        JDRequestDto requestDto = new JDRequestDto(
+        JDCreateRequestDto requestDto = new JDCreateRequestDto(
                 "Gemini 테스트 JD",
                 "http://gemini.com/jd/1",
                 "테스트용 회사 이름",
@@ -302,7 +302,7 @@ class JDControllerTest {
                 null
         );
         Long jdId = jd.getId();
-        JDAlarmRequestDto turnOnRequest = JDAlarmRequestDto.builder()
+        JDAlarmUpdateRequestDto turnOnRequest = JDAlarmUpdateRequestDto.builder()
                 .isAlarmOn(true)
                 .build();
         String content = objectMapper.writeValueAsString(turnOnRequest);
@@ -320,7 +320,7 @@ class JDControllerTest {
                 .andDo(print());
 
         // When: 알림 끄기
-        JDAlarmRequestDto turnOffRequest = new JDAlarmRequestDto(false);
+        JDAlarmUpdateRequestDto turnOffRequest = new JDAlarmUpdateRequestDto(false);
         ResultActions resultOff = mockMvc.perform(patch("/jds/{jd_id}/alarm", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(turnOffRequest)));
@@ -474,7 +474,7 @@ class JDControllerTest {
         Long jdId = jd.getId();
 
         // When: 즐겨찾기 설정 (true)
-        BookmarkRequestDto setBookmark = new BookmarkRequestDto(true);
+        JDBookmarkUpdateRequestDto setBookmark = new JDBookmarkUpdateRequestDto(true);
         ResultActions resultOn = mockMvc.perform(patch("/jds/{jd_id}/bookmark", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(setBookmark)));
@@ -488,7 +488,7 @@ class JDControllerTest {
 
 
         // When: 즐겨찾기 해제 (false)
-        BookmarkRequestDto unsetBookmark = new BookmarkRequestDto(false);
+        JDBookmarkUpdateRequestDto unsetBookmark = new JDBookmarkUpdateRequestDto(false);
         ResultActions resultOff = mockMvc.perform(patch("/jds/{jd_id}/bookmark", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(unsetBookmark)));
@@ -562,7 +562,7 @@ class JDControllerTest {
         Long jdId = jd.getId();
 
         // When
-        MemoRequestDto updateMemoRequest = new MemoRequestDto("수정된 새로운 메모 내용입니다.");
+        JDMemoUpdateRequestDto updateMemoRequest = new JDMemoUpdateRequestDto("수정된 새로운 메모 내용입니다.");
         ResultActions result = mockMvc.perform(patch("/jds/{jd_id}/memo", jdId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateMemoRequest)));

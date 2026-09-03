@@ -1,6 +1,5 @@
 package com.zb.jogakjogak.jobDescription.domain.requestDto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -11,12 +10,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Schema(description = "todolist 수정 요청 DTO")
+@Schema(description = "Todolist 생성 요청 DTO")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UpdateToDoListRequestDto {
+public class TodoListCreateRequestDto {
     @Schema(description = "todolist 카테고리", example = "STRUCTURAL_COMPLEMENT_PLAN", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "카테고리는 필수 입력 항목입니다.")
     private ToDoListType category;
@@ -27,7 +26,4 @@ public class UpdateToDoListRequestDto {
     @Schema(description = "todolist 내용", example = "유튜브에 있는 NoSQL에 관련된 강의 듣기", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "상세 설명은 필수 입력 항목입니다.")
     private String content;
-    @Schema(description = "todolist 완료 여부", example = "true", requiredMode = Schema.RequiredMode.REQUIRED)
-    @JsonProperty("is_done")
-    private boolean isDone;
 }
