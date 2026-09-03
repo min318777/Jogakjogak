@@ -30,7 +30,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final RefreshTokenRedisService refreshTokenRedisService;
     private final GaMeasurementProtocolService gaService;
     private final MemberRepository memberRepository;
-    private static final long REFRESH_TOKEN_EXPIRATION = 7 * 24 * 60 * 60 * 1000L;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication
@@ -42,9 +41,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         Long userId = member.getId();
-        String refreshToken = jwtUtil.createRefreshToken(userId, REFRESH_TOKEN_EXPIRATION, Token.REFRESH_TOKEN);
+        String refreshToken = jwtUtil.createRefreshToken(userId, Token.REFRESH_TOKEN);
 
-        refreshTokenRedisService.save(userId, refreshToken);
+        refreshTokenRedisService.save(userId, jwtUtil.getJti(refreshToken));
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
 
         String clientId = extractGaClientId(request);
@@ -77,7 +76,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if (isLocal) {
             // 로컬 환경
             cookieHeader = String.format(
-                "%s=%s; Max-Age=%d; Path=/; HttpOnly",
+                "%s=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=Lax",
                 cookieName,
                 cookieValue,
                 60 * 60 * 24 * 7
@@ -85,7 +84,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         } else {
             // 프로덕션 환경
             cookieHeader = String.format(
-                "%s=%s; Max-Age=%d; Path=/; Domain=.jogakjogak.com; HttpOnly; SameSite=None; Secure",
+                "%s=%s; Max-Age=%d; Path=/; Domain=.jogakjogak.com; HttpOnly; SameSite=Lax; Secure",
                 cookieName,
                 cookieValue,
                 60 * 60 * 24 * 7

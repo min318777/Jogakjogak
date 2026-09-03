@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -16,15 +16,26 @@ public class RefreshTokenRedisService {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    public void save(Long userId, String token) {
-        redisTemplate.opsForValue().set(REFRESH_PREFIX + userId, token, REFRESH_TOKEN_EXPIRATION_MS, TimeUnit.MILLISECONDS);
+    public void save(Long userId, String jti) {
+        redisTemplate.opsForValue().set(key(userId, jti), "1", REFRESH_TOKEN_EXPIRATION_MS, TimeUnit.MILLISECONDS);
     }
 
-    public Optional<String> get(Long userId) {
-        return Optional.ofNullable(redisTemplate.opsForValue().get(REFRESH_PREFIX + userId));
+    public boolean exists(Long userId, String jti) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key(userId, jti)));
     }
 
-    public void delete(Long userId) {
-        redisTemplate.delete(REFRESH_PREFIX + userId);
+    public void revoke(Long userId, String jti) {
+        redisTemplate.delete(key(userId, jti));
+    }
+
+    public void revokeAll(Long userId) {
+        Set<String> keys = redisTemplate.keys(REFRESH_PREFIX + userId + ":*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
+    }
+
+    private String key(Long userId, String jti) {
+        return REFRESH_PREFIX + userId + ":" + jti;
     }
 }

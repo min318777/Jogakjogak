@@ -8,6 +8,7 @@ import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.service.BlacklistService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,22 +38,23 @@ public class JWTFilter extends OncePerRequestFilter {
             return;
         }
 
+        Claims claims;
         try {
-            jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
+            claims = jwtUtil.validateToken(accessToken, Token.ACCESS_TOKEN);
         } catch (AuthException e) {
             writeErrorResponse(response, e.getMemberErrorCode().name(), e.getMessage());
             return;
         }
 
-        if (blacklistService.isBlacklisted(jwtUtil.getJti(accessToken))) {
+        if (blacklistService.isBlacklisted(jwtUtil.getJti(claims))) {
             writeErrorResponse(response, "BLACKLISTED_TOKEN", "로그아웃된 토큰입니다.");
             return;
         }
 
         Member member = Member.builder()
-                .id(Long.parseLong(jwtUtil.getUserId(accessToken)))
-                .username(jwtUtil.getUsername(accessToken))
-                .role(Role.valueOf(jwtUtil.getRole(accessToken)))
+                .id(Long.parseLong(jwtUtil.getUserId(claims)))
+                .username(jwtUtil.getUsername(claims))
+                .role(Role.valueOf(jwtUtil.getRole(claims)))
                 .build();
 
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(member);

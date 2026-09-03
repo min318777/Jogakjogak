@@ -4,6 +4,7 @@ import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.service.BlacklistService;
 import com.zb.jogakjogak.security.service.RefreshTokenRedisService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,16 +43,17 @@ public class CustomLogoutFilter extends OncePerRequestFilter {
             return;
         }
 
+        Claims claims;
         try {
-            jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
+            claims = jwtUtil.validateToken(refreshToken, Token.REFRESH_TOKEN);
         } catch (AuthException | JwtException | IllegalArgumentException e) {
             log.warn("[LogoutFilter] Refresh token 검증 실패 또는 username 추출 실패, 로그아웃 처리: {}", e.getMessage());
             clearRefreshTokenInCookie(response);
             response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
-        Long userId = Long.parseLong(jwtUtil.getUserId(refreshToken));
-        refreshTokenRedisService.delete(userId);
+        Long userId = Long.parseLong(jwtUtil.getUserId(claims));
+        refreshTokenRedisService.revoke(userId, jwtUtil.getJti(claims));
         log.info("[LogoutFilter] {} 사용자 로그아웃 처리 (refresh token 삭제)", userId);
 
         // AccessToken 블랙리스트 등록

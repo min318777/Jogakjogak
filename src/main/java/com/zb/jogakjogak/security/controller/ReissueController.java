@@ -39,7 +39,7 @@ public class ReissueController {
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
         ReissueResultDto reissueResultDto = reissueService.reissue(refreshToken);
         response.setHeader("Authorization", "Bearer " + reissueResultDto.getNewAccessToken());
-        response.addCookie(createCookie("refresh", reissueResultDto.getNewRefreshToken(), request));
+        response.addHeader("Set-Cookie", createCookieHeader("refresh", reissueResultDto.getNewRefreshToken(), request));
         return ResponseEntity.ok()
                 .body(
                         new HttpApiResponse<>(reissueResultDto.getNewAccessToken(),
@@ -57,12 +57,17 @@ public class ReissueController {
             return null;
     }
 
-    private Cookie createCookie(String key, String value, HttpServletRequest request) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60 * 7);
-        cookie.setSecure(!request.getServerName().contains("localhost"));
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        return cookie;
+    private String createCookieHeader(String key, String value, HttpServletRequest request) {
+        boolean isLocal = request.getServerName().contains("localhost");
+        if (isLocal) {
+            return String.format(
+                    "%s=%s; Max-Age=%d; Path=/; HttpOnly; SameSite=Lax",
+                    key, value, 24 * 60 * 60 * 7
+            );
+        }
+        return String.format(
+                "%s=%s; Max-Age=%d; Path=/; Domain=.jogakjogak.com; HttpOnly; SameSite=Lax; Secure",
+                key, value, 24 * 60 * 60 * 7
+        );
     }
 }

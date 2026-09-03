@@ -112,6 +112,10 @@ kakao:
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
+  issuer: jogakjogak
+  audience: jogakjogak-client
+  access-ttl-ms: 1800000
+  refresh-ttl-ms: 604800000
 
 openai:
   api:

@@ -58,7 +58,7 @@ class WithdrawalServiceTest {
         // then
         then(kakaoWithdrawalService).should().unlinkKakaoMember("kakao_12345");
         then(googleWithdrawalService).should(never()).unlinkGoogleMember(any());
-        then(refreshTokenRedisService).should().delete(1L);
+        then(refreshTokenRedisService).should().revokeAll(1L);
         then(memberRepository).should().delete(member);
     }
 
@@ -86,7 +86,7 @@ class WithdrawalServiceTest {
         // then
         then(googleWithdrawalService).should().unlinkGoogleMember("google-access-token");
         then(kakaoWithdrawalService).should(never()).unlinkKakaoMember(any());
-        then(refreshTokenRedisService).should().delete(2L);
+        then(refreshTokenRedisService).should().revokeAll(2L);
         then(memberRepository).should().delete(member);
     }
 
