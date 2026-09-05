@@ -6,7 +6,7 @@ import com.zb.jogakjogak.global.exception.ErrorResponse;
 import com.zb.jogakjogak.security.jwt.CustomLogoutFilter;
 import com.zb.jogakjogak.security.jwt.JWTFilter;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
-import com.zb.jogakjogak.security.oauth2.CustomSuccessHandler;
+import com.zb.jogakjogak.security.auth.CustomSuccessHandler;
 import com.zb.jogakjogak.member.repository.MemberRepository;
 import com.zb.jogakjogak.security.service.BlacklistService;
 import com.zb.jogakjogak.security.service.RefreshTokenRedisService;

@@ -2,7 +2,7 @@ package com.zb.jogakjogak.security.service;
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.dto.ReissueResultDto;
+import com.zb.jogakjogak.security.dto.response.ReissueResultDto;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.member.entity.Member;
 import com.zb.jogakjogak.member.entity.Role;
@@ -55,8 +55,8 @@ class ReissueServiceTest {
         given(refreshTokenRedisService.exists(USER_ID, REFRESH_TOKEN_JTI)).willReturn(true);
         Member member = Member.builder().id(USER_ID).role(Role.USER).build();
         given(memberRepository.findById(USER_ID)).willReturn(Optional.of(member));
-        given(jwtUtil.createAccessToken(eq(USER_ID), any(), eq(Token.ACCESS_TOKEN))).willReturn(NEW_ACCESS);
-        given(jwtUtil.createRefreshToken(eq(USER_ID), eq(Token.REFRESH_TOKEN))).willReturn(NEW_REFRESH);
+        given(jwtUtil.createAccessToken(eq(USER_ID), any())).willReturn(NEW_ACCESS);
+        given(jwtUtil.createRefreshToken(eq(USER_ID))).willReturn(NEW_REFRESH);
         given(jwtUtil.getJti(NEW_REFRESH)).willReturn(NEW_REFRESH_JTI);
 
         // when

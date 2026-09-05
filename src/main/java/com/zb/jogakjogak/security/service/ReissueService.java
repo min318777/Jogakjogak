@@ -4,7 +4,7 @@ package com.zb.jogakjogak.security.service;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.dto.ReissueResultDto;
+import com.zb.jogakjogak.security.dto.response.ReissueResultDto;
 import com.zb.jogakjogak.member.entity.Member;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.member.repository.MemberRepository;
@@ -35,8 +35,8 @@ public class ReissueService {
         Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        String newAccess = jwtUtil.createAccessToken(userId, member.getRole().toString(), Token.ACCESS_TOKEN);
-        String newRefresh = jwtUtil.createRefreshToken(userId, Token.REFRESH_TOKEN);
+        String newAccess = jwtUtil.createAccessToken(userId, member.getRole().toString());
+        String newRefresh = jwtUtil.createRefreshToken(userId);
 
         refreshTokenRedisService.revoke(userId, jti);
         refreshTokenRedisService.save(userId, jwtUtil.getJti(newRefresh));

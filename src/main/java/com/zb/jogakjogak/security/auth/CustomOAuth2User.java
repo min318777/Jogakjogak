@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.security.oauth2;
+package com.zb.jogakjogak.security.auth;
 
 import com.zb.jogakjogak.member.entity.Member;
 import lombok.AllArgsConstructor;

@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.global.exception;
 
 import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
-import com.zb.jogakjogak.security.oauth2.CustomOAuth2User;
+import com.zb.jogakjogak.security.auth.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

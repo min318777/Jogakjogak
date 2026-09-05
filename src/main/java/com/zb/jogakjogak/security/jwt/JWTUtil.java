@@ -65,32 +65,33 @@ public class JWTUtil {
         return claims.getId();
     }
 
-    public String createAccessToken(Long userId, String role, Token token){
-        return issue(token, userId, role);
-    }
-
-    public String createRefreshToken(Long userId, Token token){
-        return issue(token, userId, null);
-    }
-
-    private String issue(Token token, Long userId, String role){
+    public String createAccessToken(Long userId, String role){
         var claims = Jwts.claims()
                 .subject(String.valueOf(userId))
                 .issuer(jwtConfig.issuer())
                 .audience().add(jwtConfig.audience()).and()
-                .add("typ", token.name());
+                .add("typ", Token.ACCESS_TOKEN.name())
+                .add("role", role)
+                .build();
 
-        long expireMs;
-        if (token == Token.ACCESS_TOKEN) {
-            claims.add("role", role);
-            expireMs = jwtConfig.accessTtlMs();
-        } else {
-            claims.id(UUID.randomUUID().toString());
-            expireMs = jwtConfig.refreshTtlMs();
-        }
+        return issue(claims, jwtConfig.accessTtlMs());
+    }
 
+    public String createRefreshToken(Long userId){
+        var claims = Jwts.claims()
+                .subject(String.valueOf(userId))
+                .issuer(jwtConfig.issuer())
+                .audience().add(jwtConfig.audience()).and()
+                .add("typ", Token.REFRESH_TOKEN.name())
+                .id(UUID.randomUUID().toString())
+                .build();
+
+        return issue(claims, jwtConfig.refreshTtlMs());
+    }
+
+    private String issue(Claims claims, long expireMs){
         return Jwts.builder()
-                .claims(claims.build())
+                .claims(claims)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expireMs))
                 .signWith(secretKey)

@@ -5,7 +5,7 @@ import com.zb.jogakjogak.jobdescription.entity.JD;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.member.config.EmailEncryptor;
-import com.zb.jogakjogak.security.oauth2.OAuth2ResponseDto;
+import com.zb.jogakjogak.security.dto.response.OAuth2ResponseDto;
 import com.zb.jogakjogak.member.dto.request.UpdateMemberRequestDto;
 import jakarta.persistence.*;
 import lombok.*;

@@ -3,10 +3,10 @@ package com.zb.jogakjogak.security.service;
 
 import com.zb.jogakjogak.member.entity.Role;
 import com.zb.jogakjogak.member.config.NicknameCreator;
-import com.zb.jogakjogak.security.oauth2.CustomOAuth2User;
-import com.zb.jogakjogak.security.oauth2.GoogleResponseDto;
-import com.zb.jogakjogak.security.oauth2.KakaoResponseDto;
-import com.zb.jogakjogak.security.oauth2.OAuth2ResponseDto;
+import com.zb.jogakjogak.security.auth.CustomOAuth2User;
+import com.zb.jogakjogak.security.dto.response.GoogleResponseDto;
+import com.zb.jogakjogak.security.dto.response.KakaoResponseDto;
+import com.zb.jogakjogak.security.dto.response.OAuth2ResponseDto;
 import com.zb.jogakjogak.member.entity.Member;
 import com.zb.jogakjogak.member.entity.OAuth2Info;
 import com.zb.jogakjogak.member.repository.MemberRepository;

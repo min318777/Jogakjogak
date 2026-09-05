@@ -1,10 +1,8 @@
-package com.zb.jogakjogak.security.oauth2;
+package com.zb.jogakjogak.security.auth;
 
 import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
-import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.oauth2.CustomOAuth2User;
 import com.zb.jogakjogak.member.entity.Member;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.member.repository.MemberRepository;
@@ -41,7 +39,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         Long userId = member.getId();
-        String refreshToken = jwtUtil.createRefreshToken(userId, Token.REFRESH_TOKEN);
+        String refreshToken = jwtUtil.createRefreshToken(userId);
 
         refreshTokenRedisService.save(userId, jwtUtil.getJti(refreshToken));
         addSameSiteCookieAttribute(request, response, "refresh", refreshToken);
@@ -94,14 +92,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addHeader("Set-Cookie", cookieHeader);
     }
 
-    /**
-     * HttpServletRequest에서 GA의 _ga 쿠키 값을 추출하여 클라이언트 ID를 반환합니다.
-     * _ga 쿠키는 "GA1.2.123456789.987654321" 형식이며,
-     * 여기서 "123456789.987654321" 부분이 GA 클라이언트 ID입니다.
-     *
-     * @param request HttpServletRequest 객체
-     * @return 추출된 GA 클라이언트 ID 또는 null (쿠키가 없거나 형식이 맞지 않을 경우)
-     */
+
     private String extractGaClientId(HttpServletRequest request) {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {

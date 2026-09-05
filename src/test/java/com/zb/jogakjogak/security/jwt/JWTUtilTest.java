@@ -20,7 +20,7 @@ class JWTUtilTest {
 
     @Test
     void createAccessToken_토큰_발급_후_검증에_성공한다() {
-        String access = jwtUtil.createAccessToken(1L, "USER", Token.ACCESS_TOKEN);
+        String access = jwtUtil.createAccessToken(1L, "USER");
 
         Claims claims = jwtUtil.validateToken(access, Token.ACCESS_TOKEN);
 
@@ -31,7 +31,7 @@ class JWTUtilTest {
 
     @Test
     void createRefreshToken_토큰_발급_후_검증에_성공한다() {
-        String refresh = jwtUtil.createRefreshToken(1L, Token.REFRESH_TOKEN);
+        String refresh = jwtUtil.createRefreshToken(1L);
 
         Claims claims = jwtUtil.validateToken(refresh, Token.REFRESH_TOKEN);
 
@@ -42,7 +42,7 @@ class JWTUtilTest {
 
     @Test
     void refresh_토큰을_access_자리에서_검증하면_예외() {
-        String refresh = jwtUtil.createRefreshToken(1L, Token.REFRESH_TOKEN);
+        String refresh = jwtUtil.createRefreshToken(1L);
 
         assertThatThrownBy(() -> jwtUtil.validateToken(refresh, Token.ACCESS_TOKEN))
                 .isInstanceOf(AuthException.class);
@@ -57,7 +57,7 @@ class JWTUtilTest {
                 1800000L,
                 604800000L
         ));
-        String token = otherIssuerUtil.createAccessToken(1L, "USER", Token.ACCESS_TOKEN);
+        String token = otherIssuerUtil.createAccessToken(1L, "USER");
 
         assertThatThrownBy(() -> jwtUtil.validateToken(token, Token.ACCESS_TOKEN))
                 .isInstanceOf(AuthException.class);

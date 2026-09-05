@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.ga.interceptor;
 
 import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
-import com.zb.jogakjogak.security.oauth2.CustomOAuth2User;
+import com.zb.jogakjogak.security.auth.CustomOAuth2User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
