@@ -18,8 +18,7 @@ import java.util.HashMap;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = {"com.zb.jogakjogak.security.repository",
-                        "com.zb.jogakjogak.member.repository",
+        basePackages = {"com.zb.jogakjogak.member.repository",
                         "com.zb.jogakjogak.jobDescription.repository",
                         "com.zb.jogakjogak.resume.repository",
                         "com.zb.jogakjogak.notification.repository",
@@ -42,8 +41,7 @@ public class MainDBConfig {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 
         em.setDataSource(mainDBSource());
-        em.setPackagesToScan(new String[]{"com.zb.jogakjogak.security.entity",
-                                            "com.zb.jogakjogak.member.entity",
+        em.setPackagesToScan(new String[]{"com.zb.jogakjogak.member.entity",
                                             "com.zb.jogakjogak.jobDescription.entity",
                                             "com.zb.jogakjogak.resume.entity",
                                             "com.zb.jogakjogak.notification.entity",
