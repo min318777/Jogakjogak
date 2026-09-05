@@ -1,6 +1,6 @@
 package com.zb.jogakjogak.notification.controller;
 
-import com.zb.jogakjogak.notification.dto.ResponseDto;
+import com.zb.jogakjogak.notification.dto.DataInitResponseDto;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
@@ -46,12 +46,12 @@ public class DataInitController {
     }
 
     @PostMapping("/members")
-    public ResponseDto initMembers() {
+    public DataInitResponseDto initMembers() {
         long existing = memberRepository.findAll().stream()
                 .filter(m -> m.getUsername() != null && m.getUsername().startsWith(TEST_USERNAME_PREFIX))
                 .count();
         if (existing > 0) {
-            return new ResponseDto("이미 테스트 Member가 존재합니다. /biz/init/clean 후 재시도하세요.");
+            return new DataInitResponseDto("이미 테스트 Member가 존재합니다. /biz/init/clean 후 재시도하세요.");
         }
 
         List<Member> members = new ArrayList<>(TOTAL_MEMBERS);
@@ -67,18 +67,18 @@ public class DataInitController {
         }
         memberRepository.saveAll(members);
         log.info("테스트 Member {}명 생성 완료", TOTAL_MEMBERS);
-        return new ResponseDto("Member " + TOTAL_MEMBERS + "명 생성 완료");
+        return new DataInitResponseDto("Member " + TOTAL_MEMBERS + "명 생성 완료");
     }
 
     @PostMapping("/jds")
-    public ResponseDto initJds() {
+    public DataInitResponseDto initJds() {
         List<Long> memberIds = memberRepository.findAll().stream()
                 .filter(m -> m.getUsername() != null && m.getUsername().startsWith(TEST_USERNAME_PREFIX))
                 .map(Member::getId)
                 .toList();
 
         if (memberIds.isEmpty()) {
-            return new ResponseDto("테스트 Member가 없습니다. /biz/init/members 먼저 실행하세요.");
+            return new DataInitResponseDto("테스트 Member가 없습니다. /biz/init/members 먼저 실행하세요.");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -91,18 +91,18 @@ public class DataInitController {
         bulkInsertJds(memberIds, ELIGIBLE_JD_PER_MEMBER, true, fourDaysAgo, oneYearLater, now);
 
         log.info("JD 총 {}건 삽입 완료", total);
-        return new ResponseDto("JD " + total + "건 삽입 완료");
+        return new DataInitResponseDto("JD " + total + "건 삽입 완료");
     }
 
 @PostMapping("/large")
-    public ResponseDto initLarge() {
+    public DataInitResponseDto initLarge() {
         List<Long> memberIds = memberRepository.findAll().stream()
                 .filter(m -> m.getUsername() != null && m.getUsername().startsWith(TEST_USERNAME_PREFIX))
                 .map(Member::getId)
                 .toList();
 
         if (memberIds.isEmpty()) {
-            return new ResponseDto("테스트 Member가 없습니다. /biz/init/members 먼저 실행하세요.");
+            return new DataInitResponseDto("테스트 Member가 없습니다. /biz/init/members 먼저 실행하세요.");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -111,11 +111,11 @@ public class DataInitController {
         bulkInsertJds(memberIds, LARGE_ELIGIBLE_JD_PER_MEMBER, true, now.minusDays(4), now.plusYears(1), now);
 
         log.info("JD 총 {}건 삽입 완료", total);
-        return new ResponseDto("JD " + total + "건 삽입 완료");
+        return new DataInitResponseDto("JD " + total + "건 삽입 완료");
     }
 
     @DeleteMapping("/clean")
-    public ResponseDto clean() {
+    public DataInitResponseDto clean() {
         List<Long> memberIds = memberRepository.findAll().stream()
                 .filter(m -> m.getUsername() != null &&
                         m.getUsername().startsWith(TEST_USERNAME_PREFIX))
@@ -130,7 +130,7 @@ public class DataInitController {
         }
 
         log.info("테스트 데이터 삭제 완료. member: {}명", memberIds.size());
-        return new ResponseDto("테스트 데이터 삭제 완료");
+        return new DataInitResponseDto("테스트 데이터 삭제 완료");
     }
 
     private void bulkInsertJds(List<Long> memberIds, int countPerMember,
