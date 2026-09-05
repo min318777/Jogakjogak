@@ -1,5 +1,6 @@
 package com.zb.jogakjogak.notification.schedule;
 
+import com.zb.jogakjogak.notification.service.NotificationSendService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
@@ -18,13 +19,20 @@ public class NotificationScheduler {
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
+    private final NotificationSendService notificationSendService;
 
-    @Scheduled(cron = "0 0 10 * * *", zone = "Asia/Seoul")
+    // 신규 심플 구현(오전 8시)로 대체, 중복 발송 방지를 위해 비활성화
+    // @Scheduled(cron = "0 0 10 * * *", zone = "Asia/Seoul")
     public void runEmailNotificationJob() throws Exception {
         JobParameters params = new JobParametersBuilder()
                 .addLocalDateTime("batchStartTime", LocalDateTime.now())
                 .addLong("run.id", System.currentTimeMillis())
                 .toJobParameters();
         jobLauncher.run(jobRegistry.getJob("emailNotificationJob"), params);
+    }
+
+    @Scheduled(cron = "0 0 8 * * *", zone = "Asia/Seoul")
+    public void runDailyEmailNotification() {
+        notificationSendService.sendDailyNotifications();
     }
 }
