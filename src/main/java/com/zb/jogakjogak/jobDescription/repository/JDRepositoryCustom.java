@@ -34,4 +34,9 @@ public interface JDRepositoryCustom {
     Page<JD> findTodayNotifiedJds(LocalDateTime todayStart, Pageable pageable);
 
     Long findAllJdCountByMemberId(Long memberId);
+
+    /**
+     * showOnly 필터가 적용된 회원의 전체 JD 집합에 대한 통계(지원완료 수, 완료/전체 조각 수, 퍼펙트 JD 수)를 집계합니다.
+     */
+    JdStatsDto getJdStats(Long memberId, String showOnly);
 }

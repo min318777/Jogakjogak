@@ -26,14 +26,42 @@ public class LLMService {
     final String INVALID_INPUT_MESSAGE = "유효하지 않거나 분석하기 어려운 입력 내용입니다. 정확한 이력서와 채용 공고 내용을 다시 제공해주세요.";
 
     private final MeaningfulTextValidator meaningfulTextValidator;
+    private final ObjectMapper objectMapper;
 
-    public LLMService(MeaningfulTextValidator meaningfulTextValidator) {
+    public LLMService(MeaningfulTextValidator meaningfulTextValidator, ObjectMapper objectMapper) {
         this.meaningfulTextValidator = meaningfulTextValidator;
+        this.objectMapper = objectMapper;
     }
 
 
     public String generateTodoListJson(String resumeContent, String jobDescriptionContent, String jobName) {
 
+        validateInputs(resumeContent, jobDescriptionContent, jobName);
+
+        try (Client client = Client.builder()
+                .apiKey(API_KEY)
+                .build()) {
+
+            String userPromptContent = buildUserPrompt(resumeContent, jobDescriptionContent, jobName);
+            List<Content> contents = List.of(Content.fromParts(Part.fromText(userPromptContent)));
+            GenerateContentConfig config = buildGenerateContentConfig();
+
+            GenerateContentResponse response = client.models.generateContent(MODEL_NAME, contents, config);
+
+            String responseText = response.text();
+            validateResponse(responseText);
+
+            return responseText;
+
+        } catch (JDException e) {
+            // JDException은 그대로 전파
+            throw e;
+        } catch (Exception e) {
+            throw toAIServiceException(e);
+        }
+    }
+
+    private void validateInputs(String resumeContent, String jobDescriptionContent, String jobName) {
         if (API_KEY == null || API_KEY.isEmpty()) {
             throw new IllegalStateException("Gemini API 키가 이상합니다 확인해주세요.");
         }
@@ -46,12 +74,114 @@ public class LLMService {
         if (jobName == null || jobName.trim().isEmpty() || jobName.length() < 2) {
             throw new JDException(JDErrorCode.INVALID_JOB_NAME);
         }
+    }
 
-        try (Client client = Client.builder()
-                .apiKey(API_KEY)
-                .build()) {
+    private String buildUserPrompt(String resumeContent, String jobDescriptionContent, String jobName) {
+        if (resumeContent == null || resumeContent.trim().isEmpty()) {
+            return String.format(
+                    "이력서: 없음\n채용 공고: %s\n직무 이름: %s\n\n위 채용 공고와 직무 이름을 기반으로, 'CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL' 카테고리는 절대 생성하지 않고 나머지 두 카테고리만 포함하는 To-Do 리스트를 JSON 형식으로 생성해 주세요.",
+                    jobDescriptionContent,
+                    jobName
+            );
+        }
+        return String.format(
+                "이력서: %s\n채용 공고: %s\n직무 이름: %s\n\n위 이력서, 채용 공고, 그리고 직무 이름을 기반으로, To-Do 리스트를 JSON 형식으로 생성해 주세요.",
+                resumeContent,
+                jobDescriptionContent,
+                jobName
+        );
+    }
 
-            String SYSTEM_INSTRUCTION_TEXT = """
+    private GenerateContentConfig buildGenerateContentConfig() {
+        Schema taskSchema = Schema.builder()
+                .type("object")
+                .properties(
+                        ImmutableMap.of(
+                                "category", Schema.builder().type(Type.Known.STRING).description("To-Do 항목의 Enum 타입입니다.").build(),
+                                "title", Schema.builder().type(Type.Known.STRING).description("To-Do 항목의 간결하고 명확한 제목입니다.").build(),
+                                "content", Schema.builder().type(Type.Known.STRING).description("To-Do 항목에 대한 상세한 한글 설명입니다.").build(),
+                                "memo", Schema.builder().type(Type.Known.STRING).description("추가 사용자 메모입니다. 항상 빈 문자열로 설정해주세요.").build(),
+                                "isDone", Schema.builder().type(Type.Known.BOOLEAN).description("To-Do 항목의 완료 여부입니다. 항상 false로 설정해주세요.").build()
+                        )
+                )
+                .required(List.of("category", "title", "content", "memo", "isDone"))
+                .build();
+
+        Schema responseArraySchema = Schema.builder()
+                .type("array")
+                .items(taskSchema)
+                .build();
+
+        List<SafetySetting> safetySettings = new ArrayList<>();
+        safetySettings.add(SafetySetting.builder()
+                .category(HarmCategory.Known.HARM_CATEGORY_HATE_SPEECH)
+                .threshold(HarmBlockThreshold.Known.OFF)
+                .build());
+        safetySettings.add(SafetySetting.builder()
+                .category(HarmCategory.Known.HARM_CATEGORY_DANGEROUS_CONTENT)
+                .threshold(HarmBlockThreshold.Known.OFF)
+                .build());
+        safetySettings.add(SafetySetting.builder()
+                .category(HarmCategory.Known.HARM_CATEGORY_SEXUALLY_EXPLICIT)
+                .threshold(HarmBlockThreshold.Known.OFF)
+                .build());
+        safetySettings.add(SafetySetting.builder()
+                .category(HarmCategory.Known.HARM_CATEGORY_HARASSMENT)
+                .threshold(HarmBlockThreshold.Known.OFF)
+                .build());
+
+        return GenerateContentConfig.builder()
+                .temperature(0.8f)
+                .topP(1.0f)
+                .seed(0)
+                .maxOutputTokens(65535)
+                .responseMimeType("application/json")
+                .responseSchema(responseArraySchema)
+                .systemInstruction(Content.fromParts(Part.fromText(SYSTEM_INSTRUCTION_TEXT)))
+                .safetySettings(safetySettings)
+                .build();
+    }
+
+    private void validateResponse(String responseText) throws com.fasterxml.jackson.core.JsonProcessingException {
+        if (responseText == null || responseText.trim().equals(INVALID_INPUT_MESSAGE)) {
+            throw new JDException(JDErrorCode.AI_ANALYSIS_UNAVAILABLE);
+        }
+
+        JsonNode rootNode = objectMapper.readTree(responseText);
+        if (rootNode.isArray()) {
+            for (JsonNode node : rootNode) {
+                if (node.has("title")) {
+                    String title = node.get("title").asText();
+                    if (title.length() > 50) {
+                        throw new JDException(JDErrorCode.FAILED_ANALYSIS_REQUEST_TEXT_LENGTH_EXCEED);
+                    }
+                }
+            }
+        }
+    }
+
+    private AIServiceException toAIServiceException(Exception e) {
+        String errorMessage = "LLM 서비스 오류: ";
+
+        if (e.getMessage() != null && e.getMessage().contains("API key")) {
+            errorMessage = "Gemini API 키가 유효하지 않습니다";
+        } else if (e.getMessage() != null && e.getMessage().contains("quota")) {
+            errorMessage = "Gemini API 사용량을 초과했습니다";
+        } else if (e.getMessage() != null && e.getMessage().contains("rate limit")) {
+            errorMessage = "Gemini API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요";
+        } else if (e instanceof java.net.ConnectException || e instanceof java.net.UnknownHostException) {
+            errorMessage = "Gemini API 서버에 연결할 수 없습니다";
+        } else if (e instanceof com.fasterxml.jackson.core.JsonProcessingException) {
+            errorMessage = "AI 응답 파싱 중 오류가 발생했습니다";
+        } else {
+            errorMessage += e.getMessage() != null ? e.getMessage() : "알 수 없는 오류가 발생했습니다";
+        }
+
+        log.error("LLM Service Error: {}", e.getMessage(), e);
+        return new AIServiceException(errorMessage, e);
+    }
+
+    private static final String SYSTEM_INSTRUCTION_TEXT = """
                     당신은 사용자가 제공하는 이력서와 채용 공고(JD)를 분석하여, 합격률을 높이는 데 필요한 개인화된 To-Do List를 작성하는 전문 AI 어시스턴트입니다.
                     당신은 마치 지원자의 '과외 선생님'처럼, 직접적이고 명확하며 행동을 유도하는 조언을 **"해요체로 존댓말을 사용하여 제공해야 합니다."
                     ** 비전문가도 쉽게 이해할 수 있는 언어를 사용하세요.
@@ -115,130 +245,4 @@ public class LLMService {
                       }
                     ]
                     """;
-
-            // 사용자 프롬프트 구성
-            String userPromptContent;
-            if (resumeContent == null || resumeContent.trim().isEmpty()) {
-                userPromptContent = String.format(
-                        "이력서: 없음\n채용 공고: %s\n직무 이름: %s\n\n위 채용 공고와 직무 이름을 기반으로, 'CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL' 카테고리는 절대 생성하지 않고 나머지 두 카테고리만 포함하는 To-Do 리스트를 JSON 형식으로 생성해 주세요.",
-                        jobDescriptionContent,
-                        jobName
-                );
-            } else {
-                userPromptContent = String.format(
-                        "이력서: %s\n채용 공고: %s\n직무 이름: %s\n\n위 이력서, 채용 공고, 그리고 직무 이름을 기반으로, To-Do 리스트를 JSON 형식으로 생성해 주세요.",
-                        resumeContent,
-                        jobDescriptionContent,
-                        jobName
-                );
-            }
-
-            // 메시지(Content) 구성
-            List<Content> contents = List.of(
-                    Content.fromParts(Part.fromText(userPromptContent))
-            );
-
-            // JSON 스키마 정의 (To-Do 리스트 JSON 형식을 따름)
-            Schema taskSchema = Schema.builder()
-                    .type("object")
-                    .properties(
-                            ImmutableMap.of(
-                                    "category", Schema.builder().type(Type.Known.STRING).description("To-Do 항목의 Enum 타입입니다.").build(),
-                                    "title", Schema.builder().type(Type.Known.STRING).description("To-Do 항목의 간결하고 명확한 제목입니다.").build(),
-                                    "content", Schema.builder().type(Type.Known.STRING).description("To-Do 항목에 대한 상세한 한글 설명입니다.").build(),
-                                    "memo", Schema.builder().type(Type.Known.STRING).description("추가 사용자 메모입니다. 항상 빈 문자열로 설정해주세요.").build(),
-                                    "isDone", Schema.builder().type(Type.Known.BOOLEAN).description("To-Do 항목의 완료 여부입니다. 항상 false로 설정해주세요.").build()
-                            )
-                    )
-                    .required(List.of("category", "title", "content", "memo", "isDone"))
-                    .build();
-
-            Schema responseArraySchema = Schema.builder()
-                    .type("array")
-                    .items(taskSchema)
-                    .build();
-
-            // SafetySettings 구성
-            List<SafetySetting> safetySettings = new ArrayList<>();
-            safetySettings.add(SafetySetting.builder()
-                    .category(HarmCategory.Known.HARM_CATEGORY_HATE_SPEECH)
-                    .threshold(HarmBlockThreshold.Known.OFF)
-                    .build());
-            safetySettings.add(SafetySetting.builder()
-                    .category(HarmCategory.Known.HARM_CATEGORY_DANGEROUS_CONTENT)
-                    .threshold(HarmBlockThreshold.Known.OFF)
-                    .build());
-            safetySettings.add(SafetySetting.builder()
-                    .category(HarmCategory.Known.HARM_CATEGORY_SEXUALLY_EXPLICIT)
-                    .threshold(HarmBlockThreshold.Known.OFF)
-                    .build());
-            safetySettings.add(SafetySetting.builder()
-                    .category(HarmCategory.Known.HARM_CATEGORY_HARASSMENT)
-                    .threshold(HarmBlockThreshold.Known.OFF)
-                    .build());
-
-
-            // GenerateContentConfig 설정
-            GenerateContentConfig config = GenerateContentConfig.builder()
-                    .temperature(0.8f)
-                    .topP(1.0f)
-                    .seed(0)
-                    .maxOutputTokens(65535)
-                    .responseMimeType("application/json")
-                    .responseSchema(responseArraySchema)
-                    .systemInstruction(Content.fromParts(Part.fromText(SYSTEM_INSTRUCTION_TEXT)))
-                    .safetySettings(safetySettings)
-                    .build();
-
-            GenerateContentResponse response = client.models.generateContent(MODEL_NAME, contents, config);
-
-            String responseText = response.text();
-
-            if (responseText == null || responseText.trim().equals(INVALID_INPUT_MESSAGE)) {
-                throw new JDException(JDErrorCode.AI_ANALYSIS_UNAVAILABLE);
-            }
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode rootNode = objectMapper.readTree(responseText);
-
-            if (rootNode.isArray()) {
-                for (JsonNode node : rootNode) {
-                    if (node.has("title")) {
-                        String title = node.get("title").asText();
-                        if (title.length() > 50) {
-                            throw new JDException(JDErrorCode.FAILED_ANALYSIS_REQUEST_TEXT_LENGTH_EXCEED);
-                        }
-                    }
-                }
-            }
-            // 응답에서 텍스트 추출
-            return responseText;
-
-        } catch (JDException e) {
-            // JDException은 그대로 전파
-            throw e;
-        } catch (Exception e) {
-            // 에러 메시지를 더 구체적으로 개선
-            String errorMessage = "LLM 서비스 오류: ";
-            
-            if (e.getMessage() != null && e.getMessage().contains("API key")) {
-                errorMessage = "Gemini API 키가 유효하지 않습니다";
-            } else if (e.getMessage() != null && e.getMessage().contains("quota")) {
-                errorMessage = "Gemini API 사용량을 초과했습니다";
-            } else if (e.getMessage() != null && e.getMessage().contains("rate limit")) {
-                errorMessage = "Gemini API 요청 한도를 초과했습니다. 잠시 후 다시 시도해주세요";
-            } else if (e instanceof java.net.ConnectException || e instanceof java.net.UnknownHostException) {
-                errorMessage = "Gemini API 서버에 연결할 수 없습니다";
-            } else if (e instanceof com.fasterxml.jackson.core.JsonProcessingException) {
-                errorMessage = "AI 응답 파싱 중 오류가 발생했습니다";
-            } else {
-                errorMessage += e.getMessage() != null ? e.getMessage() : "알 수 없는 오류가 발생했습니다";
-            }
-            
-            // 로그에 상세 에러 출력
-            log.error("LLM Service Error: {}", e.getMessage(), e);
-            
-            throw new AIServiceException(errorMessage, e);
-        }
-    }
 }

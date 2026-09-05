@@ -3,19 +3,17 @@ package com.zb.jogakjogak.jobDescription.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zb.jogakjogak.event.entity.Event;
-import com.zb.jogakjogak.event.repository.EventRepository;
-import com.zb.jogakjogak.event.type.EventType;
+import com.zb.jogakjogak.event.service.EventService;
 import com.zb.jogakjogak.global.exception.*;
 import com.zb.jogakjogak.jobDescription.dto.request.*;
 import com.zb.jogakjogak.jobDescription.dto.response.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
+import com.zb.jogakjogak.jobDescription.repository.JdStatsDto;
 import com.zb.jogakjogak.member.entity.Member;
 import com.zb.jogakjogak.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +30,7 @@ public class JDService {
     private final ObjectMapper objectMapper;
     private final JDRepository jdRepository;
     private final MemberRepository memberRepository;
-    private final EventRepository eventRepository;
+    private final EventService eventService;
     private final LLMService llmService;
 
     /**
@@ -54,6 +51,7 @@ public class JDService {
             }
         } else {
             jdRepository.deleteAllByMemberAndIsCreatedWithResumeFalse(member);
+            jdCount = jdRepository.findAllJdCountByMemberId(member.getId());
             if (jdCount >= 20) {
                 throw new JDException(JDErrorCode.JD_LIMIT_EXCEEDED);
             }
@@ -75,24 +73,8 @@ public class JDService {
         }
         JD savedJd = jdRepository.save(jd);
 
-        // 이벤트 코드 추가
-        Optional<Event> findEvent = eventRepository.findByMemberIdAndType(member.getId(), EventType.NEW_MEMBER);
-        if (jdCount == 0 && findEvent.isEmpty()) {
-            String code;
-            while (true) {
-                code = RandomStringUtils.random(6, true, true).toUpperCase();
-                boolean isExists = eventRepository.existsByCode(code);
-                if (!isExists) {
-                    break;
-                }
-            }
-            Event event = Event.builder()
-                    .code(code)
-                    .member(member)
-                    .type(EventType.NEW_MEMBER)
-                    .isFirst(true)
-                    .build();
-            eventRepository.save(event);
+        if (jdCount == 0) {
+            eventService.issueNewMemberCodeIfAbsent(member);
         }
 
         return JDResponseDto.from(savedJd, member);
@@ -160,34 +142,16 @@ public class JDService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         Page<JD> jdEntitiesPage = jdRepository.findAllJdsByMemberIdWithToDoLists(member.getId(), pageable, showOnly);
-        int applyJdCount = 0, completedPiecesCount = 0, totalPiecesCount = 0, perfectJdCount = 0;
-
-        for (JD jd : jdEntitiesPage.getContent()) {
-            if (jd.getApplyAt() != null) {
-                applyJdCount++;
-            }
-
-            int totalCount = jd.getToDoLists().size();
-            totalPiecesCount += totalCount;
-            int completedCount = (int) jd.getToDoLists().stream()
-                    .filter(ToDoList::isDone)
-                    .count();
-            completedPiecesCount += completedCount;
-
-            if (completedCount == totalCount) {
-                perfectJdCount++;
-            }
-        }
+        JdStatsDto stats = jdRepository.getJdStats(member.getId(), showOnly);
 
         List<AllGetJDResponseDto> dtos = jdEntitiesPage.getContent().stream()
                 .map(AllGetJDResponseDto::from)
                 .collect(Collectors.toList());
-        int allJdCount = dtos.size();
 
         Page<AllGetJDResponseDto> page = new PageImpl<>(dtos, pageable, jdEntitiesPage.getTotalElements());
 
-        return new PagedJdResponseDto(page, member, allJdCount, applyJdCount,
-                completedPiecesCount, totalPiecesCount, perfectJdCount);
+        return new PagedJdResponseDto(page, member, stats.postedJdCount(), stats.applyJdCount(),
+                stats.allCompletedPieces(), stats.allTotalPieces(), stats.perfectJdCount());
     }
 
     @Transactional

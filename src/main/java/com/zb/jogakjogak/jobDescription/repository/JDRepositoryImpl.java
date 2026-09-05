@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.QJD;
 import com.zb.jogakjogak.jobDescription.entity.QToDoList;
+import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.resume.entity.QResume;
 import com.zb.jogakjogak.member.entity.QMember;
 import jakarta.persistence.EntityManager;
@@ -53,23 +54,7 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
         QJD jd = QJD.jD;
         QToDoList toDoList = QToDoList.toDoList;
 
-        BooleanBuilder whereBuilder = new BooleanBuilder();
-        whereBuilder.and(jd.member.id.eq(memberId));
-
-        switch (showOnly) {
-            case "bookmark": //즐겨 찾기 된 jd
-                whereBuilder.and(jd.isBookmark.isTrue());
-                break;
-            case "completed": // 완료된 jd
-                whereBuilder.and(jd.applyAt.isNotNull());
-                break;
-            case "alarm": // 알람 on 설정된 jd
-                whereBuilder.and(jd.isAlarmOn.isTrue());
-                break;
-            // "normal"이거나 알 수 없는 값인 경우 추가 필터링 없음
-            default:
-                break;
-        }
+        BooleanBuilder whereBuilder = getFilterCondition(memberId, showOnly, jd);
 
         // 1단계: 페이징을 적용하여 대상 JD의 ID 목록만 조회
         List<Long> ids = queryFactory
@@ -174,6 +159,62 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
                 .fetchOne();
     }
 
+    @Override
+    public JdStatsDto getJdStats(Long memberId, String showOnly) {
+        QJD jd = QJD.jD;
+        QToDoList toDoList = QToDoList.toDoList;
+
+        BooleanBuilder whereBuilder = getFilterCondition(memberId, showOnly, jd);
+
+        List<JD> jds = queryFactory
+                .selectFrom(jd)
+                .leftJoin(jd.toDoLists, toDoList).fetchJoin()
+                .where(whereBuilder)
+                .fetch();
+
+        int postedJdCount = jds.size();
+        int applyJdCount = 0, allCompletedPieces = 0, allTotalPieces = 0, perfectJdCount = 0;
+
+        for (JD foundJd : jds) {
+            if (foundJd.getApplyAt() != null) {
+                applyJdCount++;
+            }
+
+            int totalCount = foundJd.getToDoLists().size();
+            allTotalPieces += totalCount;
+            int completedCount = (int) foundJd.getToDoLists().stream()
+                    .filter(ToDoList::isDone)
+                    .count();
+            allCompletedPieces += completedCount;
+
+            if (completedCount == totalCount) {
+                perfectJdCount++;
+            }
+        }
+
+        return new JdStatsDto(postedJdCount, applyJdCount, allCompletedPieces, allTotalPieces, perfectJdCount);
+    }
+
+    private BooleanBuilder getFilterCondition(Long memberId, String showOnly, QJD jd) {
+        BooleanBuilder whereBuilder = new BooleanBuilder();
+        whereBuilder.and(jd.member.id.eq(memberId));
+
+        switch (showOnly) {
+            case "bookmark": //즐겨 찾기 된 jd
+                whereBuilder.and(jd.isBookmark.isTrue());
+                break;
+            case "completed": // 완료된 jd
+                whereBuilder.and(jd.applyAt.isNotNull());
+                break;
+            case "alarm": // 알람 on 설정된 jd
+                whereBuilder.and(jd.isAlarmOn.isTrue());
+                break;
+            // "normal"이거나 알 수 없는 값인 경우 추가 필터링 없음
+            default:
+                break;
+        }
+        return whereBuilder;
+    }
 
     /**
      * Pageable의 Sort 정보를 QueryDSL의 OrderSpecifier 리스트로 변환합니다.

@@ -51,8 +51,6 @@ public class ToDoList extends BaseEntity {
 
         Logger logger = LoggerFactory.getLogger(ToDoList.class);
 
-        String escapedContent = dto.getContent().replace("'", "''");
-
         ToDoListType category = dto.getCategory();
         if (category == null) {
             logger.warn("LLM 응답에서 ToDoList category가 누락되었습니다. 기본값으로 설정합니다.");
@@ -65,14 +63,15 @@ public class ToDoList extends BaseEntity {
             title = "제목 없음";
         }
 
-        if (escapedContent.isEmpty()) {
+        String content = dto.getContent();
+        if (content == null || content.isEmpty()) {
             logger.warn("LLM 응답에서 ToDoList content가 누락되었습니다. 기본값으로 설정합니다.");
-            escapedContent = "내용 없음";
+            content = "내용 없음";
         }
         return ToDoList.builder()
                 .category(category)
                 .title(title)
-                .content(escapedContent)
+                .content(content)
                 .memo(dto.getMemo())
                 .isDone(dto.isDone())
                 .jd(jd)

@@ -166,11 +166,16 @@ public class ToDoListService {
      */
     @Transactional
     public UpdateIsDoneTodoListsResponseDto updateIsDoneTodoLists(Long jdId, TodoListIsDoneBulkUpdateRequestDto dto, Long memberId) {
-        getAuthorizedJd(jdId, memberId);
+        JD jd = getAuthorizedJd(jdId, memberId);
 
         List<ToDoList> updatedLists = new ArrayList<>();
         List<ToDoList> toDoLists = toDoListRepository.findAllById(dto.getToDoListIds());
 
+        boolean hasUnauthorizedToDoList = toDoLists.stream()
+                .anyMatch(toDoList -> !toDoList.getJd().getId().equals(jd.getId()));
+        if (hasUnauthorizedToDoList) {
+            throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
+        }
 
         for (ToDoList toDoList : toDoLists) {
             toDoList.updateToDoListIsDone(dto.isDone());

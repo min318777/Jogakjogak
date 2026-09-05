@@ -4,9 +4,12 @@ import com.zb.jogakjogak.event.domain.responseDto.EventResponseDto;
 import com.zb.jogakjogak.event.entity.Event;
 import com.zb.jogakjogak.event.repository.EventRepository;
 import com.zb.jogakjogak.event.type.EventType;
+import com.zb.jogakjogak.global.exception.EventErrorCode;
 import com.zb.jogakjogak.global.exception.EventException;
+import com.zb.jogakjogak.member.entity.Member;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
 import static com.zb.jogakjogak.global.exception.EventErrorCode.NOT_FOUND_EVENT_CODE;
@@ -15,15 +18,43 @@ import static com.zb.jogakjogak.global.exception.EventErrorCode.NOT_FOUND_EVENT_
 @RequiredArgsConstructor
 public class EventService {
 
+    private static final int MAX_CODE_GENERATION_ATTEMPTS = 10;
+
     private final EventRepository eventRepository;
 
     /**
+     * 신규 회원 이벤트 코드가 아직 발급되지 않았다면 발급합니다.
+     */
+    @Transactional
+    public void issueNewMemberCodeIfAbsent(Member member) {
+        if (eventRepository.findByMemberIdAndType(member.getId(), EventType.NEW_MEMBER).isPresent()) {
+            return;
+        }
+
+        String code = null;
+        for (int attempt = 0; attempt < MAX_CODE_GENERATION_ATTEMPTS; attempt++) {
+            String candidate = RandomStringUtils.random(6, true, true).toUpperCase();
+            if (!eventRepository.existsByCode(candidate)) {
+                code = candidate;
+                break;
+            }
+        }
+        if (code == null) {
+            throw new EventException(EventErrorCode.FAILED_TO_GENERATE_EVENT_CODE);
+        }
+
+        Event event = Event.builder()
+                .code(code)
+                .member(member)
+                .type(EventType.NEW_MEMBER)
+                .isFirst(true)
+                .build();
+        eventRepository.save(event);
+    }
+
+    /**
      * 회원이 처음 등록할 때 생성된 이벤트를 조회하는 서비스 메서드
-     * 두번째 조회하는 경우 isFirst를 false로 반환 (팝업을 띄울 대상인지 아닌지 확인하기 위해)
-     *
-     * @param memberId 회원 id
-     * @return 이벤트 Dto
-     * @throws EventException 이벤트를 찾을 수 없는 경우 발생하는 예외
+     * 두번째 조회하는 경우 isFirst를 false로 반환
      */
     @Transactional
     public EventResponseDto getNewMemberEvent(Long memberId) {
