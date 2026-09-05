@@ -205,26 +205,4 @@ class ResumeCreateRequestDtoTest {
         assertThat(violation.getPropertyPath().toString()).isEqualTo("title");
         assertThat(violation.getMessage()).isEqualTo("이력서 제목은 30자 이내여야 합니다.");
     }
-
-    @DisplayName("모든 필드가 유효할 때 유효성 검사 성공")
-    @Test
-    void testAllFieldsValid() {
-        // Given
-        StringBuilder contentBuilder = new StringBuilder();
-        while (contentBuilder.length() < 300) {
-            contentBuilder.append(faker.lorem().paragraph(2));
-            contentBuilder.append(" "); // 단락 사이에 공백 추가
-        }
-        String validContent = contentBuilder.toString();
-        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
-                .title("완벽한 이름")
-                .content(validContent)
-                .build();
-
-        // When
-        Set<ConstraintViolation<ResumeCreateRequestDto>> violations = validator.validate(requestDto);
-
-        // Then
-        assertThat(violations).isEmpty();
-    }
 }

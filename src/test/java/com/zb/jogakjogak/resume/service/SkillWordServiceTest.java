@@ -4,6 +4,9 @@ import com.zb.jogakjogak.resume.repository.SkillWordRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,6 +15,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -27,13 +31,11 @@ class SkillWordServiceTest {
     @InjectMocks
     private  SkillWordService skillWordService;
 
-    @Test
-    @DisplayName("스킬 검색 기능 성공 - 영어단어")
-    void autoComplete_success_withEnglishWord() {
+    @ParameterizedTest(name = "{0} 쿼리는 정렬/중복제거/최대8개로 가공되어 반환된다")
+    @DisplayName("스킬 검색 기능 성공")
+    @MethodSource("autoCompleteSuccessCases")
+    void autoComplete_success(String query, List<String> mockSuggestions) {
         // Given
-        String query = "java";
-
-        List<String> mockSuggestions = Arrays.asList("JPA", "java script", "Java", "JavaScript");
         given(skillWordRepository.findContentsByContentLike(query)).willReturn(mockSuggestions);
 
         // When
@@ -48,25 +50,11 @@ class SkillWordServiceTest {
         assertThat(result, equalTo(expectedResult));
     }
 
-    @Test
-    @DisplayName("스킬 검색 기능 성공 - 한국단어")
-    void autoComplete_success_withKoreaWord() {
-        // Given
-        String query = "스프링";
-
-        List<String> mockSuggestions = Arrays.asList("스프링", "스프링 부트", "스프링부트");
-        given(skillWordRepository.findContentsByContentLike(query)).willReturn(mockSuggestions);
-
-        // When
-        List<String> result = skillWordService.getAutocompleteSuggestions(query);
-
-        // Then
-        List<String> expectedResult = mockSuggestions.stream()
-                .sorted(Comparator.naturalOrder())
-                .distinct()
-                .limit(8)
-                .collect(Collectors.toList());
-        assertThat(result, equalTo(expectedResult));
+    static Stream<Arguments> autoCompleteSuccessCases() {
+        return Stream.of(
+                Arguments.of("java", Arrays.asList("JPA", "java script", "Java", "JavaScript")),
+                Arguments.of("스프링", Arrays.asList("스프링", "스프링 부트", "스프링부트"))
+        );
     }
 
     @Test

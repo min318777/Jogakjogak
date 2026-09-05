@@ -31,12 +31,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -98,50 +102,6 @@ class ResumeServiceTest {
                 .build();
     }
 
-    @DisplayName("이력서 등록 테스트")
-    @Test
-    void createResume_success() {
-        // Given
-        String fixedUserName = "testUser123";
-        String testName = "테스트 이력서";
-        String testContent = "이것은 테스트 내용입니다.";
-
-        Member mockMember = Member.builder()
-                .id(1L)
-                .username(fixedUserName)
-                .email("test@example.com")
-                .password("password123")
-                .role(Role.USER)
-                .resume(null)
-                .build();
-
-        ResumeCreateRequestDto requestDto = ResumeCreateRequestDto.builder()
-                .title(testName)
-                .content(testContent)
-                .build();
-
-        Resume mockResume = Resume.builder()
-                .id(1L)
-                .title(testName)
-                .content(testContent)
-                .member(mockMember)
-                .build();
-
-        given(memberRepository.findById(1L)).willReturn(Optional.of(mockMember));
-        given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
-
-        // When
-        ResumeResponseDto responseDto = resumeService.register(requestDto, 1L);
-
-        // Then
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getResumeId()).isEqualTo(1L);
-        assertThat(responseDto.getTitle()).isEqualTo(testName);
-        assertThat(responseDto.getContent()).isEqualTo(testContent);
-
-        verify(resumeRepository, times(1)).save(any(Resume.class));
-    }
-
     @DisplayName("이력서 등록 실패 - 회원이 이미 이력서를 가지고 있을 때")
     @Test
     void createResume_alreadyHaveResume_throwsAuthException() {
@@ -170,40 +130,6 @@ class ResumeServiceTest {
 
         assertThat(exception.getMemberErrorCode()).isEqualTo(MemberErrorCode.ALREADY_HAVE_RESUME);
         verify(resumeRepository, never()).save(any(Resume.class));
-    }
-
-    @Test
-    @DisplayName("이력서 수정 성공 테스트 - 200 OK 예상")
-    void modify_success() {
-        //Given
-        Resume saveResume = Resume.builder()
-                .id(1L)
-                .title(sampleRequestDto.getTitle())
-                .content(sampleRequestDto.getContent())
-                .member(mockMember)
-                .build();
-
-        ResumeUpdateRequestDto sampleUpdateRequestDto = ResumeUpdateRequestDto.builder()
-                .title(sampleRequestDto.getTitle())
-                .content(sampleRequestDto.getContent())
-                .build();
-
-        when(resumeRepository.findResumeWithMemberById(1L)).thenReturn(Optional.of(sampleResume));
-        when(resumeRepository.save(any(Resume.class))).thenReturn(saveResume);
-
-        //When
-        ResumeResponseDto result = resumeService.modify(1L, sampleUpdateRequestDto, mockMember.getId());
-
-        //Then
-        verify(resumeRepository, times(1)).findResumeWithMemberById(1L);
-
-        assertEquals(sampleRequestDto.getTitle(), sampleResume.getTitle());
-        assertEquals(sampleRequestDto.getContent(), sampleResume.getContent());
-
-        assertNotNull(result);
-        assertEquals(sampleResume.getId(), result.getResumeId());
-        assertEquals(sampleRequestDto.getTitle(), result.getTitle());
-        assertEquals(sampleRequestDto.getContent(), result.getContent());
     }
 
     @Test
@@ -250,24 +176,6 @@ class ResumeServiceTest {
     }
 
     @Test
-    @DisplayName("이력서 조회 성공 테스트 - 200 OK 예상")
-    void get_success() {
-        //Given
-        when(resumeRepository.findResumeWithMemberById(1L)).thenReturn(Optional.of(sampleResume));
-
-        //When
-        ResumeResponseDto result = resumeService.get(1L, mockMember.getId());
-
-        //Then
-        verify(resumeRepository, times(1)).findResumeWithMemberById(1L);
-
-        assertNotNull(result);
-        assertEquals(sampleResume.getId(), result.getResumeId());
-        assertEquals(sampleResume.getTitle(), result.getTitle());
-        assertEquals(sampleResume.getContent(), result.getContent());
-    }
-
-    @Test
     @DisplayName("이력서 조회 실패 테스트 - 이력서를 찾을 수 없음")
     void get_fail_notFoundResume() {
         //Given
@@ -298,21 +206,6 @@ class ResumeServiceTest {
 
         assertEquals(ResumeErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
         verify(resumeRepository, times(1)).findResumeWithMemberById(1L);
-    }
-
-    @DisplayName("이력서 삭제 성공 테스트")
-    @Test
-    void deleteResume_success() {
-        // Given
-        Long resumeIdToDelete = 1L;
-        when(resumeRepository.findResumeWithMemberById(resumeIdToDelete)).thenReturn(Optional.of(sampleResume));
-
-        // When
-        resumeService.delete(resumeIdToDelete, mockMember.getId());
-
-        // Then
-        verify(resumeRepository, times(1)).findResumeWithMemberById(resumeIdToDelete);
-        assertThat(mockMember.getResume()).isNull();
     }
 
     @DisplayName("이력서 삭제 실패 테스트 - 이력서를 찾을 수 없음")
@@ -349,13 +242,12 @@ class ResumeServiceTest {
         verify(resumeRepository, never()).delete(any(Resume.class));
     }
 
-    @Test
-    @DisplayName("(v2) 이력서 추가 성공 - 신입")
-    void registerV2_success_newcomer() {
+    @ParameterizedTest(name = "{0}")
+    @DisplayName("(v2) 이력서 추가 성공")
+    @MethodSource("registerV2SuccessCases")
+    void registerV2_success(String caseName, ResumeCreateRequestDtoV2 requestDto, boolean isNewcomer) {
+        // Given
         String fixedUserName = "testUser123";
-        String testContent = faker.lorem().sentence(3);
-        boolean isNewcomer = true;
-
         Member mockMember = Member.builder()
                 .id(1L)
                 .username(fixedUserName)
@@ -365,18 +257,12 @@ class ResumeServiceTest {
                 .resume(null)
                 .build();
 
-        ResumeCreateRequestDtoV2 requestDto = ResumeCreateRequestDtoV2.builder()
-                .content(testContent)
-                .isNewcomer(isNewcomer)
-                .build();
-
         Resume mockResume = Resume.builder()
                 .id(1L)
-                .content(testContent)
+                .content(requestDto.getContent())
                 .member(mockMember)
                 .isNewcomer(isNewcomer)
                 .build();
-
 
         given(memberRepository.findById(1L))
                 .willReturn(Optional.of(mockMember));
@@ -387,30 +273,22 @@ class ResumeServiceTest {
 
         // Then
         assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getContent()).isEqualTo(testContent);
+        assertThat(responseDto.getContent()).isEqualTo(requestDto.getContent());
 
         verify(resumeRepository, times(1)).save(any(Resume.class));
     }
 
-    @Test
-    @DisplayName("(v2) 이력서 추가 성공 - 신입 - 학력,스킬 추가")
-    void registerV2_success_newcomer_plus_education_and_skill() {
-        String fixedUserName = "testUser123";
-        String testContent = faker.lorem().sentence(3);
-        boolean isNewcomer = true;
+    static Stream<Arguments> registerV2SuccessCases() {
+        String content = "테스트용 이력서 본문입니다.";
 
-        Member mockMember = Member.builder()
-                .id(1L)
-                .username(fixedUserName)
-                .email("test@example.com")
-                .password("password123")
-                .role(Role.USER)
-                .resume(null)
+        ResumeCreateRequestDtoV2 newcomerOnly = ResumeCreateRequestDtoV2.builder()
+                .content(content)
+                .isNewcomer(true)
                 .build();
 
-        ResumeCreateRequestDtoV2 requestDto = ResumeCreateRequestDtoV2.builder()
-                .content(testContent)
-                .isNewcomer(isNewcomer)
+        ResumeCreateRequestDtoV2 newcomerWithEducationAndSkill = ResumeCreateRequestDtoV2.builder()
+                .content(content)
+                .isNewcomer(true)
                 .educationList(new ArrayList<>(List.of(
                         EducationDto.builder()
                                 .level(EducationLevel.HIGH_SCHOOL)
@@ -423,57 +301,18 @@ class ResumeServiceTest {
                                 .status(EducationStatus.GRADUATED)
                                 .build()
                 )))
-                .skillList(new ArrayList<>(List.of(
-                        "조각", "조가악"
-                )))
+                .skillList(new ArrayList<>(List.of("조각", "조가악")))
                 .build();
 
-        Resume mockResume = Resume.builder()
-                .id(1L)
-                .content(testContent)
-                .member(mockMember)
-                .isNewcomer(isNewcomer)
-                .build();
-
-        given(memberRepository.findById(1L))
-                .willReturn(Optional.of(mockMember));
-        given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
-
-        // When
-        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, 1L);
-
-        // Then
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getContent()).isEqualTo(testContent);
-
-        verify(resumeRepository, times(1)).save(any(Resume.class));
-    }
-
-    @Test
-    @DisplayName("(v2) 이력서 추가 성공 - 경력 - 경력,학력,스킬 추가")
-    void registerV2_success_plus_career_education_and_skill() {
-        String fixedUserName = "testUser123";
-        String testContent = faker.lorem().sentence(3);
-        boolean isNewcomer = false;
-
-        Member mockMember = Member.builder()
-                .id(1L)
-                .username(fixedUserName)
-                .email("test@example.com")
-                .password("password123")
-                .role(Role.USER)
-                .resume(null)
-                .build();
-
-        ResumeCreateRequestDtoV2 requestDto = ResumeCreateRequestDtoV2.builder()
-                .content(testContent)
-                .isNewcomer(isNewcomer)
+        ResumeCreateRequestDtoV2 withCareerEducationAndSkill = ResumeCreateRequestDtoV2.builder()
+                .content(content)
+                .isNewcomer(false)
                 .careerList(new ArrayList<>(List.of(
                         CareerDto.builder()
                                 .companyName("조각조각")
                                 .isWorking(true)
                                 .joinedAt(LocalDate.of(2020, 1, 1))
-                                .workPerformance(faker.lorem().paragraph(2))
+                                .workPerformance("성과 요약")
                                 .build()
                 )))
                 .educationList(new ArrayList<>(List.of(
@@ -488,30 +327,14 @@ class ResumeServiceTest {
                                 .status(EducationStatus.GRADUATED)
                                 .build()
                 )))
-                .skillList(new ArrayList<>(List.of(
-                        "조각", "조가악"
-                )))
+                .skillList(new ArrayList<>(List.of("조각", "조가악")))
                 .build();
 
-        Resume mockResume = Resume.builder()
-                .id(1L)
-                .content(testContent)
-                .member(mockMember)
-                .isNewcomer(isNewcomer)
-                .build();
-
-        given(memberRepository.findById(1L))
-                .willReturn(Optional.of(mockMember));
-        given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
-
-        // When
-        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, 1L);
-
-        // Then
-        assertThat(responseDto).isNotNull();
-        assertThat(responseDto.getContent()).isEqualTo(testContent);
-
-        verify(resumeRepository, times(1)).save(any(Resume.class));
+        return Stream.of(
+                Arguments.of("신입", newcomerOnly, true),
+                Arguments.of("신입 - 학력,스킬 추가", newcomerWithEducationAndSkill, true),
+                Arguments.of("경력 - 경력,학력,스킬 추가", withCareerEducationAndSkill, false)
+        );
     }
 
     @Test

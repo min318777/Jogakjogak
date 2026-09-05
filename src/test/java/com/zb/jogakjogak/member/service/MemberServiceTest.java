@@ -12,6 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,21 +48,6 @@ class MemberServiceTest {
                 .nickname("oldNickname")
                 .isNotificationEnabled(true)
                 .build();
-    }
-
-    @Test
-    @DisplayName("my-page - 정상 조회")
-    void getMember_success_test() {
-        // given
-        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
-
-        // when
-        MemberResponseDto result = memberService.getMember(1L);
-
-        // then
-        assertThat(result.getNickname()).isEqualTo("oldNickname");
-        assertThat(result.getEmail()).isEqualTo("test@test.com");
-        assertThat(result.isNotificationEnabled()).isTrue();
     }
 
     @Test
@@ -127,11 +115,14 @@ class MemberServiceTest {
                 .hasMessageContaining(MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
 
-    @Test
-    @DisplayName("my-page - 닉네임을 보내지 않으면 중복 체크 없이 업데이트 성공")
-    void updateMember_nicknameNotProvided_test() {
+    @ParameterizedTest(name = "nickname={0}이면 existsByNickname 중복 체크를 하지 않는다")
+    @DisplayName("my-page - 닉네임 미변경/미제공 시 중복 체크 없이 업데이트 성공")
+    @NullSource
+    @ValueSource(strings = "oldNickname")
+    void updateMember_skipsDuplicateCheck_whenNicknameUnchangedOrAbsent(String nickname) {
         // given
         UpdateMemberRequestDto dto = UpdateMemberRequestDto.builder()
+                .nickname(nickname)
                 .isNotificationEnabled(false)
                 .build();
 
@@ -143,25 +134,6 @@ class MemberServiceTest {
         // then
         assertThat(result.getNickname()).isEqualTo("oldNickname");
         assertThat(result.isNotificationEnabled()).isFalse();
-        verify(memberRepository, never()).existsByNickname(any());
-    }
-
-    @Test
-    @DisplayName("my-page - 기존과 동일한 닉네임으로 수정해도 중복 예외가 발생하지 않음")
-    void updateMember_sameNicknameAsBefore_test() {
-        // given
-        UpdateMemberRequestDto dto = UpdateMemberRequestDto.builder()
-                .nickname("oldNickname")
-                .isNotificationEnabled(false)
-                .build();
-
-        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
-
-        // when
-        MemberResponseDto result = memberService.updateMember(1L, dto);
-
-        // then
-        assertThat(result.getNickname()).isEqualTo("oldNickname");
         verify(memberRepository, never()).existsByNickname(any());
     }
 

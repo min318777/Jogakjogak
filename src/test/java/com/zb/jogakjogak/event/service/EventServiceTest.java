@@ -10,6 +10,8 @@ import com.zb.jogakjogak.member.entity.Member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -46,23 +48,10 @@ class EventServiceTest {
             .isFirst(true)
             .build();
 
-    @Test
-    @DisplayName("새 사용자 이벤트 조회 성공 - isFirst가 true인 경우")
-    void getNewMemberEvent_success1() {
-        //given
-        given(eventRepository.findByMemberIdAndType(anyLong(), any()))
-                .willReturn(Optional.of(mockEvent));
-        //when
-        EventResponseDto result = eventService.getNewMemberEvent(mockMember.getId());
-        //then
-        assertEquals(result.getCode(), mockEvent.getCode());
-        assertEquals(result.getType(), mockEvent.getType());
-        assertEquals(true, result.getIsFirst());
-    }
-
-    @Test
-    @DisplayName("새 사용자 이벤트 조회 성공 - isFirst가 false인 경우")
-    void getNewMemberEvent_success2() {
+    @ParameterizedTest(name = "isFirst={0}인 이벤트를 조회하면 그에 맞는 결과를 반환한다")
+    @DisplayName("새 사용자 이벤트 조회 성공")
+    @ValueSource(booleans = {true, false})
+    void getNewMemberEvent_success(boolean isFirst) {
         //given
         given(eventRepository.findByMemberIdAndType(anyLong(), any()))
                 .willReturn(Optional.of(Event.builder()
@@ -70,14 +59,14 @@ class EventServiceTest {
                         .code("TEST01")
                         .member(mockMember)
                         .type(EventType.NEW_MEMBER)
-                        .isFirst(false)
+                        .isFirst(isFirst)
                         .build()));
         //when
         EventResponseDto result = eventService.getNewMemberEvent(mockMember.getId());
         //then
         assertEquals(result.getCode(), mockEvent.getCode());
         assertEquals(result.getType(), mockEvent.getType());
-        assertEquals(false, result.getIsFirst());
+        assertEquals(isFirst, result.getIsFirst());
     }
 
     @Test

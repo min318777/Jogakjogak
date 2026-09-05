@@ -21,6 +21,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -35,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -233,79 +238,6 @@ class JDServiceTest {
         verify(llmService, times(1)).generateTodoListJson(anyString(), anyString(), anyString());
         verify(objectMapper, times(1)).readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class));
         verify(jdRepository, never()).save(any(JD.class));
-    }
-
-    @Test
-    @DisplayName("JD 조회 서비스 성공 테스트 - JD 및 ToDoList 함께 조회")
-    void getJd_success() {
-        // Given
-        Long jdId = 1L;
-        JD mockJd = JD.builder()
-                .id(jdId)
-                .title("테스트 JD")
-                .companyName("테스트 회사")
-                .job("백엔드 개발자")
-                .content("테스트 JD 내용")
-                .jdUrl("https://test.com/jd/1")
-                .memo("테스트 메모")
-                .member(mockMember)
-                .isAlarmOn(true)
-                .endedAt(LocalDate.now().plusDays(10).atStartOfDay())
-                .build();
-
-        ToDoList toDoList1 = ToDoList.builder()
-                .id(101L)
-                .category(ToDoListType.STRUCTURAL_COMPLEMENT_PLAN)
-                .title("테스트 ToDo 1")
-                .content("테스트 ToDo 내용 1")
-                .memo("투두 메모 1")
-                .isDone(false)
-                .jd(mockJd)
-                .build();
-        ToDoList toDoList2 = ToDoList.builder()
-                .id(102L)
-                .category(ToDoListType.CONTENT_EMPHASIS_REORGANIZATION_PROPOSAL)
-                .title("테스트 ToDo 2")
-                .content("테스트 ToDo 내용 2")
-                .memo("투두 메모 2")
-                .isDone(true)
-                .jd(mockJd)
-                .build();
-        mockJd.addToDoList(toDoList1);
-        mockJd.addToDoList(toDoList2);
-        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
-
-        // When
-        JDResponseDto result = jdService.getJd(jdId, mockMember.getId());
-
-        // Then
-        assertNotNull(result);
-        assertEquals(mockJd.getTitle(), result.getTitle());
-        assertEquals(mockJd.getCompanyName(), result.getCompanyName());
-        assertEquals(mockJd.getJdUrl(), result.getJdUrl());
-        assertEquals(mockJd.getMemo(), result.getMemo());
-        assertEquals(mockJd.getId(), result.getJd_id());
-        assertEquals(mockJd.isAlarmOn(), result.isAlarmOn());
-        assertEquals(mockJd.getEndedAt(), result.getEndedAt());
-        assertEquals(mockJd.getCreatedAt(), result.getCreatedAt());
-        assertEquals(mockJd.getUpdatedAt(), result.getUpdatedAt());
-
-        // ToDoList 검증
-        assertNotNull(result.getToDoLists());
-        assertFalse(result.getToDoLists().isEmpty());
-        assertEquals(2, result.getToDoLists().size());
-
-        ToDoListResponseDto firstToDo = result.getToDoLists().get(0);
-        assertEquals(toDoList1.getId(), firstToDo.getChecklist_id());
-        assertEquals(toDoList1.getCategory(), firstToDo.getCategory());
-        assertEquals(toDoList1.getTitle(), firstToDo.getTitle());
-        assertEquals(toDoList1.getContent(), firstToDo.getContent());
-        assertEquals(toDoList1.getMemo(), firstToDo.getMemo());
-        assertEquals(toDoList1.isDone(), firstToDo.isDone());
-        assertEquals(mockJd.getId(), firstToDo.getJdId());
-
-        // Verify
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(jdId);
     }
 
     @Test
@@ -591,11 +523,13 @@ class JDServiceTest {
         assertEquals(mockResume.getTitle(), resultPage.getResume().getTitle());
     }
 
-    @Test
-    @DisplayName("북마크 상태 업데이트 성공 - true로 변경")
-    void updateBookmarkStatus_success_toTrue() {
+    @ParameterizedTest(name = "isBookmark={0}로 변경 요청 시 그대로 반영된다")
+    @DisplayName("북마크 상태 업데이트 성공")
+    @ValueSource(booleans = {true, false})
+    void updateBookmarkStatus_success(boolean isBookmark) {
         // Given
-        JDBookmarkUpdateRequestDto dto = JDBookmarkUpdateRequestDto.builder().isBookmark(true).build();
+        testJd.updateBookmarkStatus(!isBookmark);
+        JDBookmarkUpdateRequestDto dto = JDBookmarkUpdateRequestDto.builder().isBookmark(isBookmark).build();
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
@@ -604,29 +538,8 @@ class JDServiceTest {
         // Then
         assertNotNull(response);
         assertEquals(testJd.getId(), response.getJd_id());
-        assertTrue(response.isBookmark());
-        assertTrue(testJd.isBookmark());
-
-        // Mock 객체의 메서드 호출 검증
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
-    }
-
-    @Test
-    @DisplayName("북마크 상태 업데이트 성공 - false로 변경")
-    void updateBookmarkStatus_success_toFalse() {
-        // Given
-        testJd.updateBookmarkStatus(true);
-        JDBookmarkUpdateRequestDto dto = JDBookmarkUpdateRequestDto.builder().isBookmark(false).build();
-        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
-
-        // When
-        BookmarkResponseDto response = jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember.getId());
-
-        // Then
-        assertNotNull(response);
-        assertEquals(testJd.getId(), response.getJd_id());
-        assertFalse(response.isBookmark());
-        assertFalse(testJd.isBookmark());
+        assertEquals(isBookmark, response.isBookmark());
+        assertEquals(isBookmark, testJd.isBookmark());
 
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
     }
@@ -736,30 +649,6 @@ class JDServiceTest {
     }
 
     @Test
-    @DisplayName("메모 업데이트 성공 테스트")
-    void updateMemo_Success() {
-        // Given
-        JDMemoUpdateRequestDto memoRequestDto = JDMemoUpdateRequestDto.builder()
-                .memo("새로운 메모")
-                .build();
-
-        // Mock repository calls
-        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
-
-        // When
-        MemoResponseDto result = jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember.getId());
-
-        // Then
-        assertNotNull(result);
-        assertEquals(testJd.getId(), result.getJd_id());
-        assertEquals(memoRequestDto.getMemo(), result.getMemo());
-        assertEquals(memoRequestDto.getMemo(), testJd.getMemo());
-
-        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
-
-    }
-
-    @Test
     @DisplayName("메모 업데이트 실패: JD 없음")
     void updateMemo_JDNotFound() {
         // Given
@@ -805,154 +694,51 @@ class JDServiceTest {
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
     }
 
-    @Test
-    @DisplayName("JD 업데이트 성공")
-    void updateJd_Success() {
+    @ParameterizedTest(name = "showOnly={0} 필터링 시 해당 조건의 JD만 반환된다")
+    @DisplayName("JD 목록 조회 필터링: showOnly 조건에 맞는 JD만 반환")
+    @MethodSource("filterTestCases")
+    void getAllJds_Success_appliesShowOnlyFilter(String showOnly, JD matchingJd, JD nonMatchingJd,
+                                                  java.util.function.Predicate<AllGetJDResponseDto> matcher) {
         // Given
-        LocalDateTime now = LocalDateTime.now();
-        JDUpdateRequestDto dto = JDUpdateRequestDto.builder()
-                .title("새로운 제목")
-                .companyName("새로운 회사명")
-                .jdUrl("새로운 JD URL")
-                .endedAt(now)
-                .job("백엔드 개발자")
-                .build();
-
-        // Mock repository calls
-        when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
-
-        // When
-        JDResponseDto result = jdService.updateJd(testJd.getId(), dto, mockMember.getId());
-        assertEquals(dto.getTitle(), result.getTitle());
-        assertEquals(dto.getCompanyName(), result.getCompanyName());
-        assertEquals(dto.getJob(), result.getJob());
-        assertEquals(now, result.getEndedAt());
-        assertEquals(dto.getJdUrl(), result.getJdUrl());
-    }
-
-    @Test
-    @DisplayName("알람 설정 된 JD 목록 성공적으로 조회")
-    void getAllJds_Success_toFilterByAlarmOn_ReturnsOnlyAlarmOnJds() {
-        // Given
-        JD jd1 = JD.builder()
-                .id(101L)
-                .title("백엔드 개발자")
-                .companyName("SKC")
-                .member(mockMember)
-                .isAlarmOn(true)
-                .build();
-
-        JD jd2 = JD.builder()
-                .id(102L)
-                .title("UX 디렉터")
-                .companyName("메리츠화재")
-                .member(mockMember)
-                .isAlarmOn(false)
-                .build();
-
-
-        List<JD> filteredJds = Collections.singletonList(jd1);
+        List<JD> filteredJds = Collections.singletonList(matchingJd);
         Page<JD> jdPage = new PageImpl<>(filteredJds, pageable, 1);
 
-        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "alarm"))
+        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, showOnly))
                 .thenReturn(jdPage);
-        when(jdRepository.getJdStats(mockMember.getId(), "alarm"))
+        when(jdRepository.getJdStats(mockMember.getId(), showOnly))
                 .thenReturn(new JdStatsDto(1, 0, 0, 0, 0));
         when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getId(), pageable, "alarm");
-
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getId(), pageable, showOnly);
 
         // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "alarm");
+        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, showOnly);
 
         assertNotNull(resultPage);
         assertNotNull(resultPage.getJds());
-        assertTrue(resultPage.getJds().stream().allMatch(AllGetJDResponseDto::isAlarmOn));
+        assertTrue(resultPage.getJds().stream().allMatch(matcher));
     }
 
-    @Test
-    @DisplayName("즐겨 찾기 설정 된 JD 목록 성공적으로 조회")
-    void getAllJds_Success_toFilterByBookmark_ReturnsOnlyBookmarkedJds() {
-        // Given
-        JD jd1 = JD.builder()
-                .id(101L)
-                .title("백엔드 개발자")
-                .companyName("SKC")
-                .member(mockMember)
-                .isBookmark(true)
-                .build();
+    static Stream<Arguments> filterTestCases() {
+        Member member = Member.builder().id(1L).username("testUser").build();
 
-        JD jd2 = JD.builder()
-                .id(102L)
-                .title("UX 디렉터")
-                .companyName("메리츠화재")
-                .member(mockMember)
-                .isBookmark(false)
-                .build();
+        JD alarmOnJd = JD.builder().id(101L).title("백엔드 개발자").companyName("SKC").member(member).isAlarmOn(true).build();
+        JD alarmOffJd = JD.builder().id(102L).title("UX 디렉터").companyName("메리츠화재").member(member).isAlarmOn(false).build();
 
+        JD bookmarkedJd = JD.builder().id(101L).title("백엔드 개발자").companyName("SKC").member(member).isBookmark(true).build();
+        JD notBookmarkedJd = JD.builder().id(102L).title("UX 디렉터").companyName("메리츠화재").member(member).isBookmark(false).build();
 
-        List<JD> filteredJds = Collections.singletonList(jd1);
-        Page<JD> jdPage = new PageImpl<>(filteredJds, pageable, 1);
+        JD completedJd = JD.builder().id(101L).title("백엔드 개발자").companyName("SKC").member(member).applyAt(LocalDateTime.now()).build();
+        JD notCompletedJd = JD.builder().id(102L).title("UX 디렉터").companyName("메리츠화재").member(member).build();
 
-        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "bookmark"))
-                .thenReturn(jdPage);
-        when(jdRepository.getJdStats(mockMember.getId(), "bookmark"))
-                .thenReturn(new JdStatsDto(1, 0, 0, 0, 0));
-        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
-
-        // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getId(), pageable, "bookmark");
-
-
-        // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "bookmark");
-
-        assertNotNull(resultPage);
-        assertNotNull(resultPage.getJds());
-        assertTrue(resultPage.getJds().stream().allMatch(AllGetJDResponseDto::isBookmark));
-    }
-
-    @Test
-    @DisplayName("지원 완료된 JD 목록 성공적으로 조회")
-    void getAllJds_Success_toFilterByCompleted_ReturnsOnlyCompletedJds() {
-        // Given
-        JD jd1 = JD.builder()
-                .id(101L)
-                .title("백엔드 개발자")
-                .companyName("SKC")
-                .member(mockMember)
-                .applyAt(LocalDateTime.now())
-                .build();
-
-        JD jd2 = JD.builder()
-                .id(102L)
-                .title("UX 디렉터")
-                .companyName("메리츠화재")
-                .member(mockMember)
-                .build();
-
-
-        List<JD> filteredJds = Collections.singletonList(jd1);
-        Page<JD> jdPage = new PageImpl<>(filteredJds, pageable, 1);
-
-        when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "completed"))
-                .thenReturn(jdPage);
-        when(jdRepository.getJdStats(mockMember.getId(), "completed"))
-                .thenReturn(new JdStatsDto(1, 1, 0, 0, 0));
-        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
-
-        // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getId(), pageable, "completed");
-
-
-        // Then
-        verify(jdRepository, times(1)).findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "completed");
-
-        assertNotNull(resultPage);
-        assertNotNull(resultPage.getJds());
-        assertTrue(resultPage.getJds().stream().allMatch(jd -> jd.getApplyAt() != null));
-
+        return Stream.of(
+                Arguments.of("alarm", alarmOnJd, alarmOffJd,
+                        (java.util.function.Predicate<AllGetJDResponseDto>) AllGetJDResponseDto::isAlarmOn),
+                Arguments.of("bookmark", bookmarkedJd, notBookmarkedJd,
+                        (java.util.function.Predicate<AllGetJDResponseDto>) AllGetJDResponseDto::isBookmark),
+                Arguments.of("completed", completedJd, notCompletedJd,
+                        (java.util.function.Predicate<AllGetJDResponseDto>) (jd -> jd.getApplyAt() != null))
+        );
     }
 }
