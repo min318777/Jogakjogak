@@ -3,9 +3,7 @@ package com.zb.jogakjogak.jobDescription.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.event.entity.Event;
-import com.zb.jogakjogak.event.repository.EventRepository;
-import com.zb.jogakjogak.event.type.EventType;
+import com.zb.jogakjogak.event.service.EventService;
 import com.zb.jogakjogak.global.exception.JDErrorCode;
 import com.zb.jogakjogak.global.exception.JDException;
 import com.zb.jogakjogak.jobDescription.dto.request.*;
@@ -13,6 +11,7 @@ import com.zb.jogakjogak.jobDescription.dto.response.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
+import com.zb.jogakjogak.jobDescription.repository.JdStatsDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.member.entity.Role;
@@ -60,7 +59,7 @@ class JDServiceTest {
     private MemberRepository memberRepository;
 
     @Mock
-    private EventRepository eventRepository;
+    private EventService eventService;
 
     private JDCreateRequestDto jdRequestDto;
     private String mockLLMAnalysisJsonString;
@@ -159,14 +158,6 @@ class JDServiceTest {
                     .toDoLists(originalJd.getToDoLists())
                     .build();
         });
-        when(eventRepository.findByMemberIdAndType(anyLong(), any()))
-                .thenReturn(Optional.of(Event.builder()
-                        .id(1L)
-                        .member(mockMember)
-                        .code("TEST10")
-                        .isFirst(true)
-                        .type(EventType.NEW_MEMBER)
-                        .build()));
         when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // when
@@ -218,7 +209,7 @@ class JDServiceTest {
         assertEquals(JDErrorCode.JD_LIMIT_EXCEEDED, thrown.getErrorCode());
 
         // verify
-        verify(jdRepository, times(1)).findAllJdCountByMemberId(mockMember.getId());
+        verify(jdRepository, times(2)).findAllJdCountByMemberId(mockMember.getId());
         verify(llmService, never()).generateTodoListJson(anyString(), anyString(), anyString());
         verify(jdRepository, never()).save(any(JD.class));
     }
@@ -333,6 +324,28 @@ class JDServiceTest {
     }
 
     @Test
+    @DisplayName("JD 조회 서비스 실패 테스트 - 권한 없음")
+    void getJd_unauthorizedAccess() {
+        // Given
+        Long jdId = 1L;
+        JD mockJd = JD.builder()
+                .id(jdId)
+                .title("테스트 JD")
+                .member(mockMember)
+                .build();
+        Member otherMember = Member.builder().id(999L).username("otherUser").build();
+
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
+
+        // When & Then
+        JDException thrown = assertThrows(JDException.class,
+                () -> jdService.getJd(jdId, otherMember.getId()));
+        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, thrown.getErrorCode());
+
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(jdId);
+    }
+
+    @Test
     @DisplayName("JD 삭제 서비스 성공 테스트 - JD 및 연관된 ToDoList 함께 삭제")
     void deleteJd_success() {
         // Given
@@ -368,6 +381,29 @@ class JDServiceTest {
 
         // Verify
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(nonExistentJdId);
+        verify(jdRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    @DisplayName("JD 삭제 서비스 실패 테스트 - 권한 없음")
+    void deleteJd_unauthorizedAccess() {
+        // Given
+        Long jdId = 1L;
+        JD mockJd = JD.builder()
+                .id(jdId)
+                .title(faker.book().title())
+                .member(mockMember)
+                .build();
+        Member otherMember = Member.builder().id(999L).username("otherUser").build();
+
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
+
+        // When & Then
+        JDException thrown = assertThrows(JDException.class,
+                () -> jdService.deleteJd(jdId, otherMember.getId()));
+        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, thrown.getErrorCode());
+
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(jdId);
         verify(jdRepository, never()).deleteById(anyLong());
     }
 
@@ -431,6 +467,33 @@ class JDServiceTest {
     }
 
     @Test
+    @DisplayName("JD 알람 상태 변경 서비스 실패 테스트 - 권한 없음")
+    void alarm_unauthorizedAccess() {
+        // Given
+        Long jdId = 1L;
+        JDAlarmUpdateRequestDto requestDto = JDAlarmUpdateRequestDto.builder()
+                .isAlarmOn(true)
+                .build();
+        JD mockJd = JD.builder()
+                .id(jdId)
+                .title("알람 테스트 JD")
+                .member(mockMember)
+                .isAlarmOn(false)
+                .build();
+        Member otherMember = Member.builder().id(999L).username("otherUser").build();
+
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
+
+        // When & Then
+        JDException thrown = assertThrows(JDException.class,
+                () -> jdService.alarm(jdId, requestDto, otherMember.getId()));
+        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, thrown.getErrorCode());
+
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(jdId);
+        verify(memberRepository, never()).findById(anyLong());
+    }
+
+    @Test
     @DisplayName("JD 목록 성공적으로 조회 및 ToDoList 개수 계산")
     void getAllJds_Success() {
         // Given
@@ -461,6 +524,8 @@ class JDServiceTest {
         Page<JD> jdPage = new PageImpl<>(jds, pageable, jds.size());
 
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "normal")).thenReturn(jdPage);
+        when(jdRepository.getJdStats(mockMember.getId(), "normal"))
+                .thenReturn(new JdStatsDto(2, 0, 2, 3, 1));
         when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
@@ -506,6 +571,8 @@ class JDServiceTest {
         // Given
         Page<JD> emptyJdPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "normal")).thenReturn(emptyJdPage);
+        when(jdRepository.getJdStats(mockMember.getId(), "normal"))
+                .thenReturn(new JdStatsDto(0, 0, 0, 0, 0));
         when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
@@ -738,6 +805,7 @@ class JDServiceTest {
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
     }
 
+    @Test
     @DisplayName("JD 업데이트 성공")
     void updateJd_Success() {
         // Given
@@ -788,6 +856,8 @@ class JDServiceTest {
 
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "alarm"))
                 .thenReturn(jdPage);
+        when(jdRepository.getJdStats(mockMember.getId(), "alarm"))
+                .thenReturn(new JdStatsDto(1, 0, 0, 0, 0));
         when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
@@ -828,6 +898,8 @@ class JDServiceTest {
 
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "bookmark"))
                 .thenReturn(jdPage);
+        when(jdRepository.getJdStats(mockMember.getId(), "bookmark"))
+                .thenReturn(new JdStatsDto(1, 0, 0, 0, 0));
         when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
@@ -867,6 +939,8 @@ class JDServiceTest {
 
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "completed"))
                 .thenReturn(jdPage);
+        when(jdRepository.getJdStats(mockMember.getId(), "completed"))
+                .thenReturn(new JdStatsDto(1, 1, 0, 0, 0));
         when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When

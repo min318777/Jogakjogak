@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -319,6 +320,26 @@ class ToDoListServiceTest {
     }
 
     @Test
+    @DisplayName("ToDoList 조회 실패 - JD 소유자가 아닌 회원이 접근 (IDOR 방지)")
+    void getToDoList_fail_unauthorizedAccess() {
+        // Given
+        JD testJd = createTestJd(jdId, mockMember, new ArrayList<>());
+        ToDoList mockToDoList = createTestToDoList(toDoListId, testJd, targetCategory, "Test Title");
+        testJd.addToDoList(mockToDoList);
+        Member otherMember = Member.builder().id(999L).username("otherUser").build();
+
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(testJd));
+
+        // When & Then
+        JDException exception = assertThrows(JDException.class, () ->
+                toDoListService.getToDoList(jdId, toDoListId, otherMember.getId())
+        );
+
+        assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
+        verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(jdId);
+    }
+
+    @Test
     @DisplayName("ToDoList 성공적으로 삭제")
     void deleteToDoList_success() {
         // Given
@@ -564,6 +585,78 @@ class ToDoListServiceTest {
         verify(toDoListRepository, never()).deleteAllInBatch(anyList());
     }
 
+    @Test
+    @DisplayName("Bulk Update 실패: 생성/삭제 반영 후 카테고리별 개수가 10개를 초과하면 예외 발생")
+    void bulkUpdateToDoLists_fail_exceedsCategoryLimit() {
+        // Given
+        List<ToDoList> existingToDoLists = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            existingToDoLists.add(createTestToDoList((long) i, null, targetCategory, "기존 ToDo " + i));
+        }
+        JD mockJd = createTestJd(jdId, mockMember, existingToDoLists);
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
+
+        TodoListBulkItemDto newToDoListDto = TodoListBulkItemDto.builder()
+                .id(null)
+                .title("초과분 ToDo")
+                .content("초과분 내용")
+                .isDone(false)
+                .build();
+
+        TodoListBulkUpdateRequestDto request = TodoListBulkUpdateRequestDto.builder()
+                .category(targetCategory)
+                .updatedOrCreateToDoLists(Collections.singletonList(newToDoListDto))
+                .deletedToDoListIds(Collections.emptyList())
+                .build();
+
+        // When & Then
+        ToDoListException exception = assertThrows(ToDoListException.class, () ->
+                toDoListService.bulkUpdateToDoLists(jdId, request, mockMember.getId())
+        );
+
+        assertEquals(ToDoListErrorCode.TODO_LIST_LIMIT_EXCEEDED_FOR_CATEGORY, exception.getErrorCode());
+        verify(toDoListRepository, never()).saveAll(anyList());
+        verify(toDoListRepository, never()).deleteAllInBatch(anyList());
+    }
+
+    @Test
+    @DisplayName("Bulk Update 성공: 카테고리별 개수가 10개여도 삭제로 순감소하면 생성 허용")
+    void bulkUpdateToDoLists_success_atLimitWithDeletionMakesRoom() {
+        // Given
+        JD mockJd = createTestJd(jdId, mockMember, new ArrayList<>());
+        List<ToDoList> existingToDoLists = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            ToDoList toDoList = createTestToDoList((long) i, mockJd, targetCategory, "기존 ToDo " + i);
+            existingToDoLists.add(toDoList);
+            mockJd.addToDoList(toDoList);
+        }
+        ToDoList toDeleteToDoList = existingToDoLists.get(0);
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.findAllByIdsWithJd(Collections.singletonList(toDeleteToDoList.getId())))
+                .thenReturn(Collections.singletonList(toDeleteToDoList));
+
+        TodoListBulkItemDto newToDoListDto = TodoListBulkItemDto.builder()
+                .id(null)
+                .title("새로 생성될 ToDo")
+                .content("새로 생성될 내용")
+                .isDone(false)
+                .build();
+
+        TodoListBulkUpdateRequestDto request = TodoListBulkUpdateRequestDto.builder()
+                .category(targetCategory)
+                .updatedOrCreateToDoLists(Collections.singletonList(newToDoListDto))
+                .deletedToDoListIds(Collections.singletonList(toDeleteToDoList.getId()))
+                .build();
+
+        // When & Then
+        assertDoesNotThrow(() ->
+                toDoListService.bulkUpdateToDoLists(jdId, request, mockMember.getId())
+        );
+
+        verify(toDoListRepository, times(2)).saveAll(anyList());
+        verify(toDoListRepository, times(1)).deleteAllById(anyList());
+    }
+
 
     @Test
     @DisplayName("Get ToDoLists By Category: 성공적으로 조회")
@@ -659,6 +752,40 @@ class ToDoListServiceTest {
         assertEquals(2, result.getToDoLists().size());
         assertTrue(result.isDone());
         assertTrue(result.getToDoLists().stream().allMatch(ToDoListResponseDto::isDone));
+    }
+
+    @Test
+    @DisplayName("여러 ToDoList 완료여부 일괄 수정 실패 - 요청한 ToDoList 중 하나가 다른 JD 소속이면 예외 (IDOR 방지)")
+    void updateIsDoneTodoLists_fail_toDoListNotBelongToJd() {
+        // Given
+        JD mockJd = createTestJd(jdId, mockMember, new ArrayList<>());
+        JD otherJd = createTestJd(999L, mockMember, new ArrayList<>());
+
+        ToDoList todo1 = createTestToDoList(101L, mockJd, targetCategory, "할 일 1");
+        ToDoList otherTodo = createTestToDoList(102L, otherJd, targetCategory, "다른 JD의 할 일");
+        mockJd.addToDoList(todo1);
+        otherJd.addToDoList(otherTodo);
+
+        TodoListIsDoneBulkUpdateRequestDto dto = TodoListIsDoneBulkUpdateRequestDto.builder()
+                .toDoListIds(List.of(101L, 102L))
+                .isDone(true)
+                .build();
+
+        when(jdRepository.findJdWithMemberAndToDoListsById(jdId))
+                .thenReturn(Optional.of(mockJd));
+        when(toDoListRepository.findAllById(dto.getToDoListIds()))
+                .thenReturn(List.of(todo1, otherTodo));
+
+        // When & Then
+        ToDoListException exception = assertThrows(ToDoListException.class, () ->
+                toDoListService.updateIsDoneTodoLists(jdId, dto, mockMember.getId())
+        );
+
+        assertEquals(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD, exception.getErrorCode());
+
+        verify(toDoListRepository, never()).saveAll(anyList());
+        assertFalse(todo1.isDone());
+        assertFalse(otherTodo.isDone());
     }
 
 

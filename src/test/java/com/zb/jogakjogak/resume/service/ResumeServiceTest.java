@@ -230,6 +230,26 @@ class ResumeServiceTest {
     }
 
     @Test
+    @DisplayName("이력서 수정 실패 테스트 - 소유자가 아닌 회원이 접근 (IDOR 방지)")
+    void modify_fail_unauthorizedAccess() {
+        //Given
+        Long otherMemberId = 999L;
+        ResumeUpdateRequestDto sampleUpdateRequestDto = ResumeUpdateRequestDto.builder()
+                .title(sampleRequestDto.getTitle())
+                .content(sampleRequestDto.getContent())
+                .build();
+        when(resumeRepository.findResumeWithMemberById(1L)).thenReturn(Optional.of(sampleResume));
+
+        // When & Then
+        ResumeException exception = assertThrows(ResumeException.class, () ->
+                resumeService.modify(1L, sampleUpdateRequestDto, otherMemberId));
+
+        assertEquals(ResumeErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
+        verify(resumeRepository, times(1)).findResumeWithMemberById(1L);
+        verify(resumeRepository, never()).save(any(Resume.class));
+    }
+
+    @Test
     @DisplayName("이력서 조회 성공 테스트 - 200 OK 예상")
     void get_success() {
         //Given
@@ -265,6 +285,21 @@ class ResumeServiceTest {
         verify(resumeRepository, times(1)).findResumeWithMemberById(nonExistentResumeId);
     }
 
+    @Test
+    @DisplayName("이력서 조회 실패 테스트 - 소유자가 아닌 회원이 접근 (IDOR 방지)")
+    void get_fail_unauthorizedAccess() {
+        //Given
+        Long otherMemberId = 999L;
+        when(resumeRepository.findResumeWithMemberById(1L)).thenReturn(Optional.of(sampleResume));
+
+        // When & Then
+        ResumeException exception = assertThrows(ResumeException.class, () ->
+                resumeService.get(1L, otherMemberId));
+
+        assertEquals(ResumeErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
+        verify(resumeRepository, times(1)).findResumeWithMemberById(1L);
+    }
+
     @DisplayName("이력서 삭제 성공 테스트")
     @Test
     void deleteResume_success() {
@@ -296,6 +331,22 @@ class ResumeServiceTest {
 
         verify(resumeRepository, times(1)).findResumeWithMemberById(nonExistentResumeId);
         verify(resumeRepository, times(0)).delete(any(Resume.class));
+    }
+
+    @DisplayName("이력서 삭제 실패 테스트 - 소유자가 아닌 회원이 접근 (IDOR 방지)")
+    @Test
+    void deleteResume_fail_unauthorizedAccess() {
+        // Given
+        Long otherMemberId = 999L;
+        when(resumeRepository.findResumeWithMemberById(1L)).thenReturn(Optional.of(sampleResume));
+
+        // When & Then
+        ResumeException exception = assertThrows(ResumeException.class, () ->
+                resumeService.delete(1L, otherMemberId));
+
+        assertEquals(ResumeErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
+        verify(resumeRepository, times(1)).findResumeWithMemberById(1L);
+        verify(resumeRepository, never()).delete(any(Resume.class));
     }
 
     @Test

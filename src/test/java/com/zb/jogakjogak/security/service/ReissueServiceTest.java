@@ -4,6 +4,8 @@ import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
+import com.zb.jogakjogak.member.entity.Member;
+import com.zb.jogakjogak.member.entity.Role;
 import com.zb.jogakjogak.member.repository.MemberRepository;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,7 +53,8 @@ class ReissueServiceTest {
         given(jwtUtil.getUserId(claims)).willReturn(USER_ID.toString());
         given(jwtUtil.getJti(claims)).willReturn(REFRESH_TOKEN_JTI);
         given(refreshTokenRedisService.exists(USER_ID, REFRESH_TOKEN_JTI)).willReturn(true);
-        given(memberRepository.existsById(USER_ID)).willReturn(true);
+        Member member = Member.builder().id(USER_ID).role(Role.USER).build();
+        given(memberRepository.findById(USER_ID)).willReturn(Optional.of(member));
         given(jwtUtil.createAccessToken(eq(USER_ID), any(), eq(Token.ACCESS_TOKEN))).willReturn(NEW_ACCESS);
         given(jwtUtil.createRefreshToken(eq(USER_ID), eq(Token.REFRESH_TOKEN))).willReturn(NEW_REFRESH);
         given(jwtUtil.getJti(NEW_REFRESH)).willReturn(NEW_REFRESH_JTI);
@@ -90,7 +95,7 @@ class ReissueServiceTest {
         given(jwtUtil.getUserId(claims)).willReturn(USER_ID.toString());
         given(jwtUtil.getJti(claims)).willReturn(REFRESH_TOKEN_JTI);
         given(refreshTokenRedisService.exists(USER_ID, REFRESH_TOKEN_JTI)).willReturn(true);
-        given(memberRepository.existsById(USER_ID)).willReturn(false);
+        given(memberRepository.findById(USER_ID)).willReturn(Optional.empty());
 
         // when & then
         assertThatThrownBy(() -> reissueService.reissue(REFRESH_TOKEN))
