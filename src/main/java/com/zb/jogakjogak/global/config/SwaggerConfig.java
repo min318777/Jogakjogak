@@ -42,7 +42,6 @@ public class SwaggerConfig {
                 if (openApi.getComponents() != null && openApi.getComponents().getSchemas() != null) {
                     openApi.getComponents().getSchemas().remove("Pageable");
                     openApi.getComponents().getSchemas().remove("PageableObject");
-                    openApi.getComponents().getSchemas().remove("OpenAIRequestDto");
                     openApi.getComponents().getSchemas().remove("AllGetJDResponseDto");
                     Map<String, Schema> schemas = openApi.getComponents().getSchemas();
                     Iterator<Map.Entry<String, Schema>> iterator = schemas.entrySet().iterator();

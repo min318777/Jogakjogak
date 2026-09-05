@@ -10,13 +10,6 @@ import java.util.Optional;
 public interface JDRepositoryCustom {
 
     /**
-     * JD ID와 Member ID를 기반으로 JD, Member, ToDoList를 즉시 로딩하여 조회합니다.
-     * 이 메서드는 JD의 소유권 검증을 쿼리 내에서 수행하며, N+1 문제를 방지합니다.
-     *
-     */
-    Optional<JD> findJdWithMemberAndToDoListsByIdAndMemberId(Long jdId, Long memberId);
-
-    /**
      * JD ID만으로 JD, Member, ToDoList를 즉시 로딩하여 조회합니다.
      * 존재 여부(404)와 소유권(403)을 구분해서 검증할 때 사용합니다.
      */

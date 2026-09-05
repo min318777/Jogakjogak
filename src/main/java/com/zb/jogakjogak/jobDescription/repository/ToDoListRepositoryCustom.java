@@ -28,31 +28,6 @@ public interface ToDoListRepositoryCustom {
     List<ToDoList> findToDoListsByJdIdAndCategoryWithJd(Long jdId, ToDoListType category);
 
     /**
-     * 특정 JD에 속한 특정 카테고리의 ToDoList 개수를 조회합니다.
-     *
-     * @param jdId     JD의 ID
-     * @param category ToDoList의 카테고리
-     * @return 해당 조건에 맞는 ToDoList의 개수
-     */
-    long countToDoListsByJdIdAndCategory(Long jdId, ToDoListType category);
-
-    /**
-     * 특정 JD에 속한 ToDoList 중 완료된 항목의 개수를 조회합니다.
-     *
-     * @param jdId JD의 ID
-     * @return 완료된 ToDoList의 개수
-     */
-    long countDoneToDoListsByJdId(Long jdId);
-
-    /**
-     * 특정 JD에 속한 ToDoList 중 완료되지 않은 항목의 개수를 조회합니다.
-     *
-     * @param jdId JD의 ID
-     * @return 완료되지 않은 ToDoList의 개수
-     */
-    long countUndoneToDoListsByJdId(Long jdId);
-
-    /**
      * 주어진 ID 목록에 해당하는 ToDoList들을 조회하면서, 연관된 JD를 즉시 로딩합니다.
      *
      * @param ids 조회할 ToDoList ID 목록

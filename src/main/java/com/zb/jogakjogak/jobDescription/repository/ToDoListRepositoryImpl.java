@@ -46,47 +46,6 @@ public class ToDoListRepositoryImpl implements ToDoListRepositoryCustom{
     }
 
     @Override
-    public long countToDoListsByJdIdAndCategory(Long jdId, ToDoListType category) {
-       QToDoList toDoList = QToDoList.toDoList;
-
-       Long count = queryFactory
-               .select(toDoList.count())
-               .from(toDoList)
-               .where(toDoList.jd.id.eq(jdId)
-                       .and(toDoList.category.eq(category)))
-               .fetchOne();
-        return count != null ? count : 0;
-    }
-
-    @Override
-    public long countDoneToDoListsByJdId(Long jdId) {
-        QToDoList toDoList = QToDoList.toDoList;
-
-        Long count = queryFactory
-                .select(toDoList.count())
-                .from(toDoList)
-                .where(toDoList.jd.id.eq(jdId)
-                        .and(toDoList.isDone.isTrue()))
-                .fetchOne();
-
-        return count != null ? count : 0;
-    }
-
-    @Override
-    public long countUndoneToDoListsByJdId(Long jdId) {
-        QToDoList toDoList = QToDoList.toDoList;
-
-        Long count = queryFactory
-                .select(toDoList.count())
-                .from(toDoList)
-                .where(toDoList.jd.id.eq(jdId)
-                        .and(toDoList.isDone.isFalse()))
-                .fetchOne();
-
-        return count != null ? count : 0;
-    }
-
-    @Override
     public List<ToDoList> findAllByIdsWithJd(List<Long> ids) {
         QToDoList toDoList = QToDoList.toDoList;
         QJD jd = QJD.jD;

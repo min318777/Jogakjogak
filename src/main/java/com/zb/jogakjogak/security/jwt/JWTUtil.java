@@ -45,16 +45,8 @@ public class JWTUtil {
         return claims;
     }
 
-    public String getUserId(String token){
-        return getUserId(parseClaims(token));
-    }
-
     public String getUserId(Claims claims){
         return claims.getSubject();
-    }
-
-    public String getRole(String token) {
-        return getRole(parseClaims(token));
     }
 
     public String getRole(Claims claims) {
@@ -63,10 +55,6 @@ public class JWTUtil {
 
     public Date getExpiration(String token) {
         return parseClaims(token).getExpiration();
-    }
-
-    public Date getExpiration(Claims claims) {
-        return claims.getExpiration();
     }
 
     public String getJti(String token) {

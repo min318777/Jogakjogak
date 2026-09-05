@@ -40,7 +40,6 @@ public class Member {
 
     private boolean isNotificationEnabled;
 
-    //@Convert(converter = PhoneNumberEncryptor.class)
     private String phoneNumber;
 
     private boolean isOnboarded;

@@ -79,18 +79,6 @@ public class ToDoList extends BaseEntity {
                 .build();
     }
 
-    public static ToDoList fromDto(TodoListBulkItemDto dto, JD jd, ToDoListType category) {
-
-        return ToDoList.builder()
-                .category(category)
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .isDone(dto.isDone())
-                .memo("")
-                .jd(jd)
-                .build();
-    }
-
     public static ToDoList createToDoList(TodoListCreateRequestDto toDoListDto, JD jd) {
         return ToDoList.builder()
                 .category(toDoListDto.getCategory())

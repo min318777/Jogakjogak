@@ -3,7 +3,6 @@ package com.zb.jogakjogak.jobDescription.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zb.jogakjogak.event.entity.Event;
 import com.zb.jogakjogak.event.repository.EventRepository;
 import com.zb.jogakjogak.event.type.EventType;
@@ -31,54 +30,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JDService {
 
-    private final OpenAIResponseService openAIResponseService;
     private final ObjectMapper objectMapper;
     private final JDRepository jdRepository;
     private final MemberRepository memberRepository;
     private final EventRepository eventRepository;
     private final LLMService llmService;
-
-    /**
-     * open ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
-     */
-    public JDResponseDto analyze(JDCreateRequestDto jdRequestDto, Long memberId) {
-
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-
-        if (member.getResume().getContent() == null) {
-            throw new ResumeException(ResumeErrorCode.NOT_FOUND_RESUME);
-        }
-
-        String analysisJsonString = openAIResponseService.sendRequest(member.getResume().getContent(), jdRequestDto.getContent(), 4000);
-        List<ToDoListDto> parsedAnalysisResult;
-        try {
-            CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(List.class, ToDoListDto.class);
-            parsedAnalysisResult = objectMapper.readValue(analysisJsonString, listType);
-        } catch (JsonProcessingException e) {
-            throw new JDException(JDErrorCode.FAILED_JSON_PROCESS);
-        }
-
-        JD jd = JD.builder()
-                .title(jdRequestDto.getTitle())
-                .jdUrl(jdRequestDto.getJdUrl())
-                .endedAt(jdRequestDto.getEndedAt())
-                .memo("")
-                .companyName(jdRequestDto.getCompanyName())
-                .job(jdRequestDto.getJob())
-                .content(jdRequestDto.getContent())
-                .isAlarmOn(false)
-                .build();
-
-        for (ToDoListDto dto : parsedAnalysisResult) {
-            ToDoList toDoList = ToDoList.fromDto(dto, jd);
-            jd.addToDoList(toDoList);
-        }
-
-        JD savedJd = jdRepository.save(jd);
-
-        return JDResponseDto.from(savedJd, member);
-    }
 
     /**
      * gemini ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드

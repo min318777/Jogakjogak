@@ -29,25 +29,6 @@ public class JDRepositoryImpl implements JDRepositoryCustom{
     }
 
     @Override
-    public Optional<JD> findJdWithMemberAndToDoListsByIdAndMemberId(Long jdId, Long memberId) {
-        QJD jd = QJD.jD;
-        QMember member = QMember.member;
-        QToDoList toDoList = QToDoList.toDoList;
-        QResume resume = QResume.resume;
-
-        JD foundJd = queryFactory
-                .selectFrom(jd)
-                .join(jd.member, member).fetchJoin()
-                .leftJoin(jd.toDoLists, toDoList).fetchJoin()
-                .leftJoin(member.resume, resume).fetchJoin()
-                .where(jd.id.eq(jdId)
-                        .and(member.id.eq(memberId)))
-                .fetchOne();
-
-        return Optional.ofNullable(foundJd);
-    }
-
-    @Override
     public Optional<JD> findJdWithMemberAndToDoListsById(Long jdId) {
         QJD jd = QJD.jD;
         QMember member = QMember.member;
