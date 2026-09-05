@@ -5,7 +5,6 @@ import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.notification.entity.NotificationStatus;
 import com.zb.jogakjogak.notification.repository.NotificationRepository;
-import com.zb.jogakjogak.notification.service.NotificationBatchService;
 import com.zb.jogakjogak.notification.service.NotificationEmailSender;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityManagerFactory;
@@ -46,21 +45,18 @@ public class NotificationEmailBatchConfig {
     private final EntityManagerFactory entityManagerFactory;
     private final NotificationRepository notificationRepository;
     private final NotificationEmailSender emailSender;
-    private final NotificationBatchService batchService;
 
     public NotificationEmailBatchConfig(
             JobRepository jobRepository,
             @Qualifier("dataTransactionManager") PlatformTransactionManager transactionManager,
             @Qualifier("dataEntityManager") EntityManagerFactory entityManagerFactory,
             NotificationRepository notificationRepository,
-            NotificationEmailSender emailSender,
-            NotificationBatchService batchService) {
+            NotificationEmailSender emailSender) {
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.entityManagerFactory = entityManagerFactory;
         this.notificationRepository = notificationRepository;
         this.emailSender = emailSender;
-        this.batchService = batchService;
     }
 
     // Job

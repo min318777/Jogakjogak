@@ -5,7 +5,6 @@ import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.notification.entity.NotificationStatus;
 import com.zb.jogakjogak.notification.repository.NotificationRepository;
-import com.zb.jogakjogak.notification.service.NotificationBatchService;
 import com.zb.jogakjogak.notification.service.NotificationEmailSender;
 import com.zb.jogakjogak.member.entity.Member;
 import jakarta.mail.MessagingException;
@@ -47,7 +46,6 @@ public class NotificationEmailFullJdbcBatchConfig {
     private final PlatformTransactionManager transactionManager;
     private final DataSource mainDBSource;
     private final NotificationEmailSender emailSender;
-    private final NotificationBatchService batchService;
     private final NotificationRepository notificationRepository;
 
     public NotificationEmailFullJdbcBatchConfig(
@@ -55,13 +53,11 @@ public class NotificationEmailFullJdbcBatchConfig {
             @Qualifier("dataTransactionManager") PlatformTransactionManager transactionManager,
             @Qualifier("mainDBSource") DataSource mainDBSource,
             NotificationEmailSender emailSender,
-            NotificationBatchService batchService,
             NotificationRepository notificationRepository) {
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.mainDBSource = mainDBSource;
         this.emailSender = emailSender;
-        this.batchService = batchService;
         this.notificationRepository = notificationRepository;
     }
 

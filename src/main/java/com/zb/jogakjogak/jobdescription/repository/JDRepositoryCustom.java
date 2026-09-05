@@ -31,8 +31,6 @@ public interface JDRepositoryCustom {
      */
     Page<JD> findNotUpdatedJdByQueryDsl(LocalDateTime oldDate, LocalDateTime todayStart, Pageable pageable);
 
-    Page<JD> findTodayNotifiedJds(LocalDateTime todayStart, Pageable pageable);
-
     Long findAllJdCountByMemberId(Long memberId);
 
     /**

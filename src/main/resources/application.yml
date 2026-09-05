@@ -104,7 +104,6 @@ spring:
 security:
   encrypt:
     email-key: ${EMAIL_AES_KEY}
-    phone-key: ${PHONE_AES_KEY}
 
 kakao:
   admin-key: ${KAKAO_ADMIN_KEY}

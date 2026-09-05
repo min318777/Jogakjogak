@@ -168,7 +168,7 @@ class CustomOauth2UserServiceTest {
             // 신규 회원 생성 로직
             member = Member.builder()
                     .username(userName)
-                    .nickname(kakaoResponseDto.getNickname())
+                    .nickname("테스트닉네임")
                     .email(kakaoResponseDto.getEmail())
                     .role(Role.USER)
                     .lastLoginAt(LocalDateTime.now())

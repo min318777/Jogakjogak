@@ -22,22 +22,6 @@ public class ResumeRepositoryImpl implements ResumeRepositoryCustom {
     }
 
     @Override
-    public Optional<Resume> findResumeWithMemberByIdAndMemberId(Long resumeId, Long memberId) {
-        QResume resume = QResume.resume;
-        QMember member = QMember.member;
-
-        Resume foundResume = queryFactory
-                .selectFrom(resume)
-                .join(resume.member, member)
-                .fetchJoin()
-                .where(resume.id.eq(resumeId)
-                        .and(member.id.eq(memberId)))
-                .fetchOne();
-
-        return Optional.ofNullable(foundResume);
-    }
-
-    @Override
     public Optional<Resume> findResumeWithMemberById(Long resumeId) {
         QResume resume = QResume.resume;
         QMember member = QMember.member;

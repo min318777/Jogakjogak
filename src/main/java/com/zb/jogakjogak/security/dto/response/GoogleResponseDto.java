@@ -29,14 +29,4 @@ public class GoogleResponseDto implements OAuth2ResponseDto{
     public String getName() {
         return attribute.get("name").toString();
     }
-
-    @Override
-    public String getPhoneNumber() {
-        return "";
-    }
-
-    @Override
-    public String getNickname(){
-        return "";
-    }
 }

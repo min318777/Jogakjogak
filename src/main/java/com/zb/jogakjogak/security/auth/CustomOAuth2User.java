@@ -37,16 +37,8 @@ public class CustomOAuth2User implements OAuth2User {
         return member.getUsername();
     }
 
-    public String getRealName(){
-        return member.getName();
-    }
-
     public String getEmail() {
         return member.getEmail();
-    }
-
-    public String getPhoneNumber(){
-        return member.getPhoneNumber();
     }
 
     public String getRole(){

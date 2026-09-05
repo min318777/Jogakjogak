@@ -40,8 +40,6 @@ public class Member {
     @Column(nullable = false)
     private boolean isNotificationEnabled;
 
-    private String phoneNumber;
-
     @Column(nullable = false)
     private boolean isOnboarded;
 
