@@ -50,10 +50,10 @@ class WithdrawalServiceTest {
                 .oauth2Info(List.of(kakaoInfo))
                 .build();
 
-        given(memberRepository.findByUsername("kakao_user")).willReturn(Optional.of(member));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
 
         // when
-        withdrawalService.withdrawMember("kakao_user");
+        withdrawalService.withdrawMember(1L);
 
         // then
         then(kakaoWithdrawalService).should().unlinkKakaoMember("kakao_12345");
@@ -78,10 +78,10 @@ class WithdrawalServiceTest {
                 .oauth2Info(List.of(googleInfo))
                 .build();
 
-        given(memberRepository.findByUsername("google_user")).willReturn(Optional.of(member));
+        given(memberRepository.findById(2L)).willReturn(Optional.of(member));
 
         // when
-        withdrawalService.withdrawMember("google_user");
+        withdrawalService.withdrawMember(2L);
 
         // then
         then(googleWithdrawalService).should().unlinkGoogleMember("google-access-token");
@@ -94,10 +94,10 @@ class WithdrawalServiceTest {
     @DisplayName("회원이 존재하지 않으면 예외 발생")
     void withdrawMember_member_not_found() {
         // given
-        given(memberRepository.findByUsername("unknown")).willReturn(Optional.empty());
+        given(memberRepository.findById(999L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> withdrawalService.withdrawMember("unknown"))
+        assertThatThrownBy(() -> withdrawalService.withdrawMember(999L))
                 .isInstanceOf(AuthException.class);
 
         then(memberRepository).should(never()).delete(any());
@@ -113,10 +113,10 @@ class WithdrawalServiceTest {
                 .oauth2Info(List.of())
                 .build();
 
-        given(memberRepository.findByUsername("no_oauth_user")).willReturn(Optional.of(member));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
 
         // when & then
-        assertThatThrownBy(() -> withdrawalService.withdrawMember("no_oauth_user"))
+        assertThatThrownBy(() -> withdrawalService.withdrawMember(1L))
                 .isInstanceOf(AuthException.class);
 
         then(memberRepository).should(never()).delete(any());

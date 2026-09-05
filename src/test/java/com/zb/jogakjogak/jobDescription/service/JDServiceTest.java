@@ -167,9 +167,10 @@ class JDServiceTest {
                         .isFirst(true)
                         .type(EventType.NEW_MEMBER)
                         .build()));
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // when
-        JDResponseDto result = jdService.llmAnalyze(jdRequestDto, mockMember);
+        JDResponseDto result = jdService.llmAnalyze(jdRequestDto, mockMember.getId());
 
         // then
         assertNotNull(result);
@@ -207,11 +208,12 @@ class JDServiceTest {
                 .build();
         mockMember.setResume(mockResume);
 
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
         when(jdRepository.findAllJdCountByMemberId(mockMember.getId())).thenReturn(20L);
 
         // when & then
         JDException thrown = assertThrows(JDException.class, () ->
-                jdService.llmAnalyze(jdRequestDto, mockMember));
+                jdService.llmAnalyze(jdRequestDto, mockMember.getId()));
 
         assertEquals(JDErrorCode.JD_LIMIT_EXCEEDED, thrown.getErrorCode());
 
@@ -230,9 +232,10 @@ class JDServiceTest {
 
         when(objectMapper.readValue(anyString(), any(com.fasterxml.jackson.core.type.TypeReference.class)))
                 .thenThrow(mock(JsonProcessingException.class));
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // when & then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.llmAnalyze(jdRequestDto, mockMember));
+        JDException thrown = assertThrows(JDException.class, () -> jdService.llmAnalyze(jdRequestDto, mockMember.getId()));
         assertEquals(JDErrorCode.FAILED_JSON_PROCESS, thrown.getErrorCode());
 
         // verify
@@ -282,7 +285,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
 
         // When
-        JDResponseDto result = jdService.getJd(jdId, mockMember);
+        JDResponseDto result = jdService.getJd(jdId, mockMember.getId());
 
         // Then
         assertNotNull(result);
@@ -322,7 +325,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(nonExistentJdId)).thenReturn(Optional.empty());
 
         // When & Then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId, mockMember));
+        JDException thrown = assertThrows(JDException.class, () -> jdService.getJd(nonExistentJdId, mockMember.getId()));
         assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
@@ -345,7 +348,7 @@ class JDServiceTest {
         doNothing().when(jdRepository).deleteById(jdId);
 
         // When
-        jdService.deleteJd(jdId, mockMember);
+        jdService.deleteJd(jdId, mockMember.getId());
 
         // Then
         verify(jdRepository, times(1)).deleteById(mockJd.getId());
@@ -360,7 +363,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(nonExistentJdId)).thenReturn(Optional.empty());
 
         // When & Then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.deleteJd(nonExistentJdId, mockMember));
+        JDException thrown = assertThrows(JDException.class, () -> jdService.deleteJd(nonExistentJdId, mockMember.getId()));
         assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
         // Verify
@@ -395,9 +398,10 @@ class JDServiceTest {
                 .build();
 
         when(jdRepository.findJdWithMemberAndToDoListsById(jdId)).thenReturn(Optional.of(mockJd));
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
-        JDAlarmResponseDto result = jdService.alarm(jdId, requestDto, mockMember);
+        JDAlarmResponseDto result = jdService.alarm(jdId, requestDto, mockMember.getId());
 
         // Then
         assertNotNull(result);
@@ -421,7 +425,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(nonExistentJdId)).thenReturn(Optional.empty());
 
         // When & Then
-        JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto, mockMember));
+        JDException thrown = assertThrows(JDException.class, () -> jdService.alarm(nonExistentJdId, requestDto, mockMember.getId()));
         assertEquals(JDErrorCode.NOT_FOUND_JD, thrown.getErrorCode());
 
     }
@@ -457,9 +461,10 @@ class JDServiceTest {
         Page<JD> jdPage = new PageImpl<>(jds, pageable, jds.size());
 
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "normal")).thenReturn(jdPage);
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "normal");
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getId(), pageable, "normal");
 
 
         // Then
@@ -501,9 +506,10 @@ class JDServiceTest {
         // Given
         Page<JD> emptyJdPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "normal")).thenReturn(emptyJdPage);
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "normal");
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getId(), pageable, "normal");
 
 
         // Then
@@ -526,7 +532,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
-        BookmarkResponseDto response = jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember);
+        BookmarkResponseDto response = jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember.getId());
 
         // Then
         assertNotNull(response);
@@ -547,7 +553,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
-        BookmarkResponseDto response = jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember);
+        BookmarkResponseDto response = jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember.getId());
 
         // Then
         assertNotNull(response);
@@ -567,7 +573,7 @@ class JDServiceTest {
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
-                () -> jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember));
+                () -> jdService.updateBookmarkStatus(testJd.getId(), dto, mockMember.getId()));
         assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
@@ -586,7 +592,7 @@ class JDServiceTest {
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
-                () -> jdService.updateBookmarkStatus(testJd.getId(), dto, requestMember));
+                () -> jdService.updateBookmarkStatus(testJd.getId(), dto, requestMember.getId()));
         assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
 
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
@@ -601,7 +607,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
-        ApplyStatusResponseDto response = jdService.toggleApplyStatus(testJd.getId(), mockMember);
+        ApplyStatusResponseDto response = jdService.toggleApplyStatus(testJd.getId(), mockMember.getId());
 
         // Then
         assertNotNull(response);
@@ -620,7 +626,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
-        ApplyStatusResponseDto response = jdService.toggleApplyStatus(testJd.getId(), mockMember);
+        ApplyStatusResponseDto response = jdService.toggleApplyStatus(testJd.getId(), mockMember.getId());
 
         // Then
         assertNotNull(response);
@@ -639,7 +645,7 @@ class JDServiceTest {
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
-                () -> jdService.toggleApplyStatus(testJd.getId(), mockMember));
+                () -> jdService.toggleApplyStatus(testJd.getId(), mockMember.getId()));
         assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(anyLong());
@@ -655,7 +661,7 @@ class JDServiceTest {
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
-                () -> jdService.toggleApplyStatus(testJd.getId(), otherMember));
+                () -> jdService.toggleApplyStatus(testJd.getId(), otherMember.getId()));
         assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
 
         verify(jdRepository, times(1)).findJdWithMemberAndToDoListsById(testJd.getId());
@@ -674,7 +680,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
-        MemoResponseDto result = jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember);
+        MemoResponseDto result = jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember.getId());
 
         // Then
         assertNotNull(result);
@@ -698,7 +704,7 @@ class JDServiceTest {
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
-                () -> jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember));
+                () -> jdService.updateMemo(testJd.getId(), memoRequestDto, mockMember.getId()));
 
         assertEquals(JDErrorCode.NOT_FOUND_JD, exception.getErrorCode());
 
@@ -724,7 +730,7 @@ class JDServiceTest {
 
         // When & Then
         JDException exception = assertThrows(JDException.class,
-                () -> jdService.updateMemo(testJd.getId(), memoRequestDto, unauthorizedMember));
+                () -> jdService.updateMemo(testJd.getId(), memoRequestDto, unauthorizedMember.getId()));
 
         assertEquals(JDErrorCode.UNAUTHORIZED_ACCESS, exception.getErrorCode());
 
@@ -748,7 +754,7 @@ class JDServiceTest {
         when(jdRepository.findJdWithMemberAndToDoListsById(testJd.getId())).thenReturn(Optional.of(testJd));
 
         // When
-        JDResponseDto result = jdService.updateJd(testJd.getId(), dto, mockMember);
+        JDResponseDto result = jdService.updateJd(testJd.getId(), dto, mockMember.getId());
         assertEquals(dto.getTitle(), result.getTitle());
         assertEquals(dto.getCompanyName(), result.getCompanyName());
         assertEquals(dto.getJob(), result.getJob());
@@ -782,9 +788,10 @@ class JDServiceTest {
 
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "alarm"))
                 .thenReturn(jdPage);
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "alarm");
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getId(), pageable, "alarm");
 
 
         // Then
@@ -821,9 +828,10 @@ class JDServiceTest {
 
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "bookmark"))
                 .thenReturn(jdPage);
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "bookmark");
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getId(), pageable, "bookmark");
 
 
         // Then
@@ -859,9 +867,10 @@ class JDServiceTest {
 
         when(jdRepository.findAllJdsByMemberIdWithToDoLists(mockMember.getId(), pageable, "completed"))
                 .thenReturn(jdPage);
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
 
         // When
-        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember, pageable, "completed");
+        PagedJdResponseDto resultPage = jdService.getAllJds(mockMember.getId(), pageable, "completed");
 
 
         // Then

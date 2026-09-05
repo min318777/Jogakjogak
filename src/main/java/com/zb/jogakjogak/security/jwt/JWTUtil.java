@@ -53,18 +53,6 @@ public class JWTUtil {
         return claims.getSubject();
     }
 
-    public String getProvider(String token){
-        return parseClaims(token).get("provider", String.class);
-    }
-
-    public String getUsername(String token) {
-        return getUsername(parseClaims(token));
-    }
-
-    public String getUsername(Claims claims) {
-        return claims.get("username", String.class);
-    }
-
     public String getRole(String token) {
         return getRole(parseClaims(token));
     }
@@ -89,15 +77,15 @@ public class JWTUtil {
         return claims.getId();
     }
 
-    public String createAccessToken(Long userId, String provider, String username, String role, Token token){
-        return issue(token, userId, provider, username, role);
+    public String createAccessToken(Long userId, String role, Token token){
+        return issue(token, userId, role);
     }
 
     public String createRefreshToken(Long userId, Token token){
-        return issue(token, userId, null, null, null);
+        return issue(token, userId, null);
     }
 
-    private String issue(Token token, Long userId, String provider, String username, String role){
+    private String issue(Token token, Long userId, String role){
         var claims = Jwts.claims()
                 .subject(String.valueOf(userId))
                 .issuer(jwtConfig.issuer())
@@ -106,9 +94,7 @@ public class JWTUtil {
 
         long expireMs;
         if (token == Token.ACCESS_TOKEN) {
-            claims.add("provider", provider)
-                    .add("username", username)
-                    .add("role", role);
+            claims.add("role", role);
             expireMs = jwtConfig.accessTtlMs();
         } else {
             claims.id(UUID.randomUUID().toString());

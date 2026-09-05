@@ -47,7 +47,10 @@ public class ResumeService {
      */
 
     @Transactional
-    public ResumeResponseDto register(ResumeCreateRequestDto requestDto, Member member) {
+    public ResumeResponseDto register(ResumeCreateRequestDto requestDto, Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         if (member.getResume() != null) {
             throw new AuthException(MemberErrorCode.ALREADY_HAVE_RESUME);
@@ -70,9 +73,9 @@ public class ResumeService {
     }
 
     @Transactional
-    public ResumeResponseDto modify(Long resumeId, @Valid ResumeUpdateRequestDto requestDto, Member member) {
+    public ResumeResponseDto modify(Long resumeId, @Valid ResumeUpdateRequestDto requestDto, Long memberId) {
 
-        Resume resume = getAuthorizedResume(resumeId, member);
+        Resume resume = getAuthorizedResume(resumeId, memberId);
 
         resume.modify(requestDto);
         Resume savedResume = resumeRepository.save(resume);
@@ -85,9 +88,9 @@ public class ResumeService {
                 .build();
     }
 
-    public ResumeResponseDto get(Long resumeId, Member member) {
+    public ResumeResponseDto get(Long resumeId, Long memberId) {
 
-        Resume resume = getAuthorizedResume(resumeId, member);
+        Resume resume = getAuthorizedResume(resumeId, memberId);
 
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
@@ -99,8 +102,8 @@ public class ResumeService {
     }
 
     @Transactional
-    public void delete(Long resumeId, Member member) {
-        Resume resumeToDelete = getAuthorizedResume(resumeId, member);
+    public void delete(Long resumeId, Long memberId) {
+        Resume resumeToDelete = getAuthorizedResume(resumeId, memberId);
         resumeRepository.delete(resumeToDelete);
     }
 
@@ -108,10 +111,10 @@ public class ResumeService {
      * 이력서를 조회하고 회원이 접근 권한이 있는지 확인하는 헬퍼 메서드.
      * 존재하지 않으면 404, 본인 소유가 아니면 403을 던진다.
      */
-    private Resume getAuthorizedResume(Long resumeId, Member member) {
+    private Resume getAuthorizedResume(Long resumeId, Long memberId) {
         Resume resume = resumeRepository.findResumeWithMemberById(resumeId)
                 .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
-        if (!resume.getMember().getId().equals(member.getId())) {
+        if (!resume.getMember().getId().equals(memberId)) {
             throw new ResumeException(UNAUTHORIZED_ACCESS);
         }
         return resume;
@@ -125,11 +128,12 @@ public class ResumeService {
      * @return 이력서 id, 이력서 내용, 신입 유무, 경력 리스트, 학력 리스트, 스킬 리스트, 생성 일시, 수정 일시
      */
     @Transactional
-    public ResumeGetResponseDto registerV2(ResumeCreateRequestDtoV2 requestDto, Member member) {
+    public ResumeGetResponseDto registerV2(ResumeCreateRequestDtoV2 requestDto, Long memberId) {
 
-        Resume memberResume = member.getResume();
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        if (memberResume != null) {
+        if (member.getResume() != null) {
             throw new AuthException(MemberErrorCode.ALREADY_HAVE_RESUME);
         }
 
@@ -143,28 +147,28 @@ public class ResumeService {
                 .isNewcomer(requestDto.getIsNewcomer())
                 .build();
 
-        Member updateMember = memberRepository.findByUsername(member.getUsername())
-                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-        updateMember.setOnboarded(true);
+        member.setOnboarded(true);
         Resume saveResume = resumeRepository.save(newResume);
 
         return saveResumeDetails(saveResume, requestDto);
     }
 
-    public ResumeGetResponseDto getResumeV2(Member member) {
-        Resume resume = resumeRepository.findResumeWithCareerAndEducationAndSkill(member.getId())
+    public ResumeGetResponseDto getResumeV2(Long memberId) {
+        Resume resume = resumeRepository.findResumeWithCareerAndEducationAndSkill(memberId)
                 .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
 
         return ResumeGetResponseDto.from(resume);
     }
 
     @Transactional
-    public ResumeGetResponseDto modifyV2(ResumeUpdateRequestDtoV2 requestDto, Member member) {
+    public ResumeGetResponseDto modifyV2(ResumeUpdateRequestDtoV2 requestDto, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         if (member.getResume() == null) {
             throw new ResumeException(NOT_FOUND_RESUME);
         }
 
-        Resume resume = resumeRepository.findResumeWithCareerAndEducationAndSkill(member.getId())
+        Resume resume = resumeRepository.findResumeWithCareerAndEducationAndSkill(memberId)
                 .orElseThrow(() -> new ResumeException(NOT_FOUND_RESUME));
 
         List<Career> existingCareerList = resume.getCareerList() != null ? new ArrayList<>(resume.getCareerList()) : new ArrayList<>();

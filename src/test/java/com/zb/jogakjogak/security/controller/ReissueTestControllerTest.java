@@ -63,7 +63,7 @@ class ReissueTestControllerTest {
 
         // then
         assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getHeader("Authorization")).isEqualTo("Bearer " + newAccess);
+        assertThat(response.getContentAsString()).contains(newAccess);
 
         Cookie[] cookies = response.getCookies();
         boolean hasRefreshCookie = false;

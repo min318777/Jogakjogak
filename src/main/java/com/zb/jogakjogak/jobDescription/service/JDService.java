@@ -41,7 +41,10 @@ public class JDService {
     /**
      * open ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
      */
-    public JDResponseDto analyze(JDCreateRequestDto jdRequestDto, Member member) {
+    public JDResponseDto analyze(JDCreateRequestDto jdRequestDto, Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         if (member.getResume().getContent() == null) {
             throw new ResumeException(ResumeErrorCode.NOT_FOUND_RESUME);
@@ -81,7 +84,10 @@ public class JDService {
      * gemini ai를 이용하여 JD와 이력서를 분석하여 To Do List를 만들어주는 서비스 메서드
      */
     @Transactional
-    public JDResponseDto llmAnalyze(JDCreateRequestDto jdRequestDto, Member member) {
+    public JDResponseDto llmAnalyze(JDCreateRequestDto jdRequestDto, Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         long jdCount = jdRepository.findAllJdCountByMemberId(member.getId());
 
@@ -152,27 +158,29 @@ public class JDService {
                 .build();
     }
 
-    public JDResponseDto getJd(Long jdId, Member member) {
+    public JDResponseDto getJd(Long jdId, Long memberId) {
 
-        JD jd = getAuthorizedJd(jdId, member);
-        return JDResponseDto.from(jd, member);
+        JD jd = getAuthorizedJd(jdId, memberId);
+        return JDResponseDto.from(jd, jd.getMember());
     }
 
     @Transactional
-    public void deleteJd(Long jdId, Member member) {
+    public void deleteJd(Long jdId, Long memberId) {
 
-        JD jd = getAuthorizedJd(jdId, member);
+        JD jd = getAuthorizedJd(jdId, memberId);
         jdRepository.deleteById(jd.getId());
     }
 
     @Transactional
-    public JDAlarmResponseDto alarm(Long jdId, JDAlarmUpdateRequestDto dto, Member member) {
+    public JDAlarmResponseDto alarm(Long jdId, JDAlarmUpdateRequestDto dto, Long memberId) {
 
-        JD jd = getAuthorizedJd(jdId, member);
+        JD jd = getAuthorizedJd(jdId, memberId);
         if (dto.isAlarmOn()) {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
             member.setNotificationEnabled(true);
+            memberRepository.save(member);
         }
-        memberRepository.save(member);
         jd.isAlarmOn(dto.isAlarmOn());
         return JDAlarmResponseDto.builder()
                 .isAlarmOn(jd.isAlarmOn())
@@ -190,9 +198,11 @@ public class JDService {
      */
 
     @Transactional(readOnly = true)
-    public PagedJdResponseDto getAllJds(Member member,
+    public PagedJdResponseDto getAllJds(Long memberId,
                                         Pageable pageable,
                                         String showOnly) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         Page<JD> jdEntitiesPage = jdRepository.findAllJdsByMemberIdWithToDoLists(member.getId(), pageable, showOnly);
         int applyJdCount = 0, completedPiecesCount = 0, totalPiecesCount = 0, perfectJdCount = 0;
 
@@ -225,9 +235,9 @@ public class JDService {
     }
 
     @Transactional
-    public BookmarkResponseDto updateBookmarkStatus(Long jdId, JDBookmarkUpdateRequestDto dto, Member member) {
+    public BookmarkResponseDto updateBookmarkStatus(Long jdId, JDBookmarkUpdateRequestDto dto, Long memberId) {
 
-        JD jd = getAuthorizedJd(jdId, member);
+        JD jd = getAuthorizedJd(jdId, memberId);
 
         jd.updateBookmarkStatus(dto.isBookmark());
         return BookmarkResponseDto.builder()
@@ -237,9 +247,9 @@ public class JDService {
     }
 
     @Transactional
-    public ApplyStatusResponseDto toggleApplyStatus(Long jdId, Member member) {
+    public ApplyStatusResponseDto toggleApplyStatus(Long jdId, Long memberId) {
 
-        JD updateJd = getAuthorizedJd(jdId, member);
+        JD updateJd = getAuthorizedJd(jdId, memberId);
         if (updateJd.getApplyAt() == null) {
             updateJd.markJdAsApplied();
         } else {
@@ -252,8 +262,8 @@ public class JDService {
     }
 
     @Transactional
-    public MemoResponseDto updateMemo(Long jdId, JDMemoUpdateRequestDto dto, Member member) {
-        JD jd = getAuthorizedJd(jdId, member);
+    public MemoResponseDto updateMemo(Long jdId, JDMemoUpdateRequestDto dto, Long memberId) {
+        JD jd = getAuthorizedJd(jdId, memberId);
         jd.updateMemo(dto);
         return MemoResponseDto.builder()
                 .jd_id(jd.getId())
@@ -262,20 +272,20 @@ public class JDService {
     }
 
     @Transactional
-    public JDResponseDto updateJd(Long jdId, JDUpdateRequestDto jdUpdateRequestDto, Member member) {
-        JD jd = getAuthorizedJd(jdId, member);
+    public JDResponseDto updateJd(Long jdId, JDUpdateRequestDto jdUpdateRequestDto, Long memberId) {
+        JD jd = getAuthorizedJd(jdId, memberId);
         jd.updateJd(jdUpdateRequestDto);
-        return JDResponseDto.from(jd, member);
+        return JDResponseDto.from(jd, jd.getMember());
     }
 
     /**
      * Helper method to retrieve a JD and ensure the member has access.
      * JD를 검색하고 회원이 접근 권한이 있는지 확인하는 헬퍼 메서드.
      */
-    private JD getAuthorizedJd(Long jdId, Member member) {
+    private JD getAuthorizedJd(Long jdId, Long memberId) {
         JD jd = jdRepository.findJdWithMemberAndToDoListsById(jdId)
                 .orElseThrow(() -> new JDException(JDErrorCode.NOT_FOUND_JD));
-        if (!jd.getMember().getId().equals(member.getId())) {
+        if (!jd.getMember().getId().equals(memberId)) {
             throw new JDException(JDErrorCode.UNAUTHORIZED_ACCESS);
         }
         return jd;

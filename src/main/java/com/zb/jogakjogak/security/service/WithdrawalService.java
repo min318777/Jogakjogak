@@ -17,8 +17,8 @@ public class WithdrawalService {
     private final KakaoWithdrawalService kakaoWithdrawalService;
     private final GoogleWithdrawalService googleWithdrawalService;
 
-    public void withdrawMember(String username) {
-        Member member = memberRepository.findByUsername(username)
+    public void withdrawMember(Long userId) {
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         OAuth2Info oAuth2Info = member.getOauth2Info().stream().findFirst()

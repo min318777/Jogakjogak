@@ -127,10 +127,11 @@ class ResumeServiceTest {
                 .member(mockMember)
                 .build();
 
+        given(memberRepository.findById(1L)).willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
-        ResumeResponseDto responseDto = resumeService.register(requestDto, mockMember);
+        ResumeResponseDto responseDto = resumeService.register(requestDto, 1L);
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -160,9 +161,11 @@ class ResumeServiceTest {
                 .resume(Resume.builder().id(300L).build())
                 .build();
 
+        given(memberRepository.findById(2L)).willReturn(Optional.of(memberWithResume));
+
         // When & Then
         AuthException exception = assertThrows(AuthException.class, () -> {
-            resumeService.register(requestDto, memberWithResume);
+            resumeService.register(requestDto, 2L);
         });
 
         assertThat(exception.getMemberErrorCode()).isEqualTo(MemberErrorCode.ALREADY_HAVE_RESUME);
@@ -189,7 +192,7 @@ class ResumeServiceTest {
         when(resumeRepository.save(any(Resume.class))).thenReturn(saveResume);
 
         //When
-        ResumeResponseDto result = resumeService.modify(1L, sampleUpdateRequestDto, mockMember);
+        ResumeResponseDto result = resumeService.modify(1L, sampleUpdateRequestDto, mockMember.getId());
 
         //Then
         verify(resumeRepository, times(1)).findResumeWithMemberById(1L);
@@ -216,7 +219,7 @@ class ResumeServiceTest {
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.modify(nonExistentResumeId, sampleUpdateRequestDto, mockMember);
+            resumeService.modify(nonExistentResumeId, sampleUpdateRequestDto, mockMember.getId());
         });
 
         // 예외 메시지 또는 에러 코드 검증
@@ -233,7 +236,7 @@ class ResumeServiceTest {
         when(resumeRepository.findResumeWithMemberById(1L)).thenReturn(Optional.of(sampleResume));
 
         //When
-        ResumeResponseDto result = resumeService.get(1L, mockMember);
+        ResumeResponseDto result = resumeService.get(1L, mockMember.getId());
 
         //Then
         verify(resumeRepository, times(1)).findResumeWithMemberById(1L);
@@ -253,7 +256,7 @@ class ResumeServiceTest {
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.get(nonExistentResumeId, mockMember);
+            resumeService.get(nonExistentResumeId, mockMember.getId());
         });
 
         // 예외 메시지 또는 에러 코드 검증
@@ -270,7 +273,7 @@ class ResumeServiceTest {
         when(resumeRepository.findResumeWithMemberById(resumeIdToDelete)).thenReturn(Optional.of(sampleResume));
 
         // When
-        resumeService.delete(resumeIdToDelete, mockMember);
+        resumeService.delete(resumeIdToDelete, mockMember.getId());
 
         // Then
         verify(resumeRepository, times(1)).findResumeWithMemberById(resumeIdToDelete);
@@ -286,7 +289,7 @@ class ResumeServiceTest {
 
         // When & Then
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.delete(nonExistentResumeId, mockMember);
+            resumeService.delete(nonExistentResumeId, mockMember.getId());
         });
 
         assertEquals(ResumeErrorCode.NOT_FOUND_RESUME, exception.getErrorCode());
@@ -324,12 +327,12 @@ class ResumeServiceTest {
                 .build();
 
 
-        given(memberRepository.findByUsername(fixedUserName))
+        given(memberRepository.findById(1L))
                 .willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
-        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
+        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, 1L);
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -381,12 +384,12 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
-        given(memberRepository.findByUsername(fixedUserName))
+        given(memberRepository.findById(1L))
                 .willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
-        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
+        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, 1L);
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -446,12 +449,12 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
-        given(memberRepository.findByUsername(fixedUserName))
+        given(memberRepository.findById(1L))
                 .willReturn(Optional.of(mockMember));
         given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
 
         // When
-        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, mockMember);
+        ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, 1L);
 
         // Then
         assertThat(responseDto).isNotNull();
@@ -481,8 +484,10 @@ class ResumeServiceTest {
                 .isNewcomer(isNewcomer)
                 .build();
 
+        given(memberRepository.findById(1L)).willReturn(Optional.of(mockMember));
+
         ResumeException exception = assertThrows(ResumeException.class, () -> {
-            resumeService.registerV2(requestDto, mockMember);
+            resumeService.registerV2(requestDto, 1L);
         });
 
         // Then
@@ -533,7 +538,7 @@ class ResumeServiceTest {
                 .thenReturn(Optional.of(resume));
 
         //When
-        ResumeGetResponseDto result = resumeService.getResumeV2(mockMember);
+        ResumeGetResponseDto result = resumeService.getResumeV2(mockMember.getId());
 
         //Then
         verify(resumeRepository, times(1)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
@@ -572,7 +577,7 @@ class ResumeServiceTest {
                 .thenReturn(Optional.of(resume));
 
         //When
-        ResumeGetResponseDto result = resumeService.getResumeV2(mockMember);
+        ResumeGetResponseDto result = resumeService.getResumeV2(mockMember.getId());
 
         //Then
         verify(resumeRepository, times(1)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
@@ -651,6 +656,7 @@ class ResumeServiceTest {
                 )))
                 .build();
         mockMember.setResume(resume);
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
         when(resumeRepository.findResumeWithCareerAndEducationAndSkill(mockMember.getId())).thenReturn(Optional.of(resume));
         when(careerRepository.saveAll(any())).thenReturn(List.of(
                 Career.builder()
@@ -684,7 +690,7 @@ class ResumeServiceTest {
                         .build()));
 
         //When
-        ResumeGetResponseDto result = resumeService.modifyV2(requestDto, mockMember);
+        ResumeGetResponseDto result = resumeService.modifyV2(requestDto, mockMember.getId());
 
         //Then
         verify(resumeRepository, times(1)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
@@ -729,9 +735,11 @@ class ResumeServiceTest {
                 )))
                 .build();
 
+        given(memberRepository.findById(mockMember.getId())).willReturn(Optional.of(mockMember));
+
         //When
         ResumeException exception = assertThrows(ResumeException.class, () ->
-                resumeService.modifyV2(requestDto, mockMember));
+                resumeService.modifyV2(requestDto, mockMember.getId()));
 
         //Then
         verify(resumeRepository, times(0)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());
@@ -777,6 +785,7 @@ class ResumeServiceTest {
                 )))
                 .build();
         mockMember.setResume(resume);
+        when(memberRepository.findById(mockMember.getId())).thenReturn(Optional.of(mockMember));
         when(resumeRepository.findResumeWithCareerAndEducationAndSkill(mockMember.getId())).thenReturn(Optional.of(resume));
 
         ResumeUpdateRequestDtoV2 requestDto = ResumeUpdateRequestDtoV2.builder()
@@ -802,7 +811,7 @@ class ResumeServiceTest {
 
         //When
         ResumeException exception = assertThrows(ResumeException.class, () ->
-                resumeService.modifyV2(requestDto, mockMember));
+                resumeService.modifyV2(requestDto, mockMember.getId()));
 
         //Then
         verify(resumeRepository, times(1)).findResumeWithCareerAndEducationAndSkill(mockMember.getId());

@@ -53,7 +53,7 @@ class EventServiceTest {
         given(eventRepository.findByMemberIdAndType(anyLong(), any()))
                 .willReturn(Optional.of(mockEvent));
         //when
-        EventResponseDto result = eventService.getNewMemberEvent(mockMember);
+        EventResponseDto result = eventService.getNewMemberEvent(mockMember.getId());
         //then
         assertEquals(result.getCode(), mockEvent.getCode());
         assertEquals(result.getType(), mockEvent.getType());
@@ -73,7 +73,7 @@ class EventServiceTest {
                         .isFirst(false)
                         .build()));
         //when
-        EventResponseDto result = eventService.getNewMemberEvent(mockMember);
+        EventResponseDto result = eventService.getNewMemberEvent(mockMember.getId());
         //then
         assertEquals(result.getCode(), mockEvent.getCode());
         assertEquals(result.getType(), mockEvent.getType());
@@ -87,7 +87,7 @@ class EventServiceTest {
         given(eventRepository.findByMemberIdAndType(anyLong(), any(EventType.class)))
                 .willReturn(Optional.empty());
         //when
-        EventException exception = assertThrows(EventException.class, () -> eventService.getNewMemberEvent(mockMember));
+        EventException exception = assertThrows(EventException.class, () -> eventService.getNewMemberEvent(mockMember.getId()));
 
         //then
         assertEquals(EventErrorCode.NOT_FOUND_EVENT_CODE, exception.getErrorCode());

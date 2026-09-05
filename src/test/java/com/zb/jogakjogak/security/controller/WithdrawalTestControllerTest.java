@@ -1,7 +1,6 @@
 package com.zb.jogakjogak.security.controller;
 
 import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.security.service.WithdrawalService;
 import jakarta.servlet.http.Cookie;
 import net.datafaker.Faker;
@@ -13,11 +12,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Map;
+import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
@@ -46,20 +46,9 @@ class WithdrawalTestControllerTest {
     @DisplayName("OAuth2 사용자 회원탈퇴 성공")
     void oauth2User_withdrawal_test() throws Exception {
         // given
-        String username = faker.internet().username();
-        String email = faker.internet().emailAddress();
+        Long userId = faker.number().randomNumber();
 
-        CustomOAuth2User customOAuth2User = mock(CustomOAuth2User.class);
-        when(customOAuth2User.getName()).thenReturn(username);
-        when(customOAuth2User.getAttributes()).thenReturn(Map.of(
-                "email", email,
-                "name", username
-        ));
-        OAuth2AuthenticationToken authentication = new OAuth2AuthenticationToken(
-                customOAuth2User,
-                customOAuth2User.getAuthorities(),
-                "kakao"
-        );
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of());
 
         // when
         MockHttpServletResponse response = mockMvc.perform(delete("/member/withdrawal")
@@ -82,17 +71,6 @@ class WithdrawalTestControllerTest {
             }
         }
         assertThat(isRefreshCookieCleared).isTrue();
-        verify(withdrawalService, times(1)).withdrawMember(username);
-    }
-
-    private OAuth2AuthenticationToken createMockAuthentication(String username) {
-        CustomOAuth2User user = mock(CustomOAuth2User.class);
-        when(user.getName()).thenReturn(username);
-
-        return new OAuth2AuthenticationToken(
-                user,
-                user.getAuthorities(),
-                "kakao"
-        );
+        verify(withdrawalService, times(1)).withdrawMember(userId);
     }
 }

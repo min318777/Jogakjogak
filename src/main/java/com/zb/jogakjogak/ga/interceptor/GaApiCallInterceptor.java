@@ -101,20 +101,18 @@ public class GaApiCallInterceptor implements HandlerInterceptor {
     private String getUserIdFromSecurityContext() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() && !(authentication.getPrincipal() instanceof String && "anonymousUser".equals(authentication.getPrincipal()))) {
+            if (authentication.getPrincipal() instanceof Long userId) {
+                return userId.toString();
+            }
             if (authentication.getPrincipal() instanceof CustomOAuth2User) {
                 CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-                // Member 객체가 null이 아니고, member.getId()의 반환값이 null이 아닐 때만 toString() 호출
-                // CustomOAuth2User에 getMember() 메서드가 있다면 그것을 사용하는 것이 좋습니다.
                 if (customOAuth2User.getMember() != null && customOAuth2User.getMember().getId() != null) {
-                    return customOAuth2User.getMember().getId().toString(); // Member 객체의 실제 ID 필드 접근
+                    return customOAuth2User.getMember().getId().toString();
                 } else {
-                    // member 또는 member.getId()가 null인 경우
                     System.err.println("Warning: Authenticated CustomOAuth2User has null Member or Member ID. Principal: " + customOAuth2User.getName());
-                    return null; // userId를 null로 반환
+                    return null;
                 }
             }
-            // 그 외 (일반 UserDetails, 또는 JWT 등에서 직접 사용자 ID를 Principal로 설정한 경우)
-            // return authentication.getName(); // 사용자 이름(username)을 ID로 사용할 경우
         }
         return null; // 인증되지 않았거나 익명 사용자인 경우 userId 없음
     }

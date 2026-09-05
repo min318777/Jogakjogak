@@ -159,7 +159,14 @@ public class GlobalExceptionHandler {
 
         String errorMessage = String.join(", ", errors);
 
-        ErrorResponse response = new ErrorResponse("VALIDATION_FAILED", errorMessage);
+        Map<String, Object> details = e.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        fieldError -> fieldError.getDefaultMessage(),
+                        (existing, replacement) -> existing
+                ));
+
+        ErrorResponse response = new ErrorResponse("VALIDATION_FAILED", errorMessage, details);
 
         log.error("Validation failed: {}", errorMessage, e);
 
@@ -237,6 +244,9 @@ public class GlobalExceptionHandler {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated() &&
                 !(authentication.getPrincipal() instanceof String && "anonymousUser".equals(authentication.getPrincipal()))) {
+            if (authentication.getPrincipal() instanceof Long userId) {
+                return userId.toString();
+            }
             if (authentication.getPrincipal() instanceof CustomOAuth2User) {
                 CustomOAuth2User customOAuth2User = (CustomOAuth2User) authentication.getPrincipal();
                 return customOAuth2User.getMember().getId().toString();

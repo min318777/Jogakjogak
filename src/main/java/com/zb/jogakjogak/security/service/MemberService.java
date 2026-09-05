@@ -22,8 +22,8 @@ public class MemberService {
     private final NicknameCreator nicknameCreator;
 
 
-    public MemberResponseDto getMember(String username){
-        Member member = memberRepository.findByUsername(username)
+    public MemberResponseDto getMember(Long userId){
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         return MemberResponseDto.builder()
@@ -34,8 +34,8 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponseDto updateMember(String username, UpdateMemberRequestDto updateMemberRequestDto){
-        Member member = memberRepository.findByUsername(username)
+    public MemberResponseDto updateMember(Long userId, UpdateMemberRequestDto updateMemberRequestDto){
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         String newNickname = updateMemberRequestDto.getNickname();
         if (newNickname != null && !newNickname.equals(member.getNickname())
@@ -51,8 +51,8 @@ public class MemberService {
     }
 
     @Transactional
-    public UpdateIsOnboardedResponseDto updateIsOnboarded(String username) {
-        Member member = memberRepository.findByUsername(username)
+    public UpdateIsOnboardedResponseDto updateIsOnboarded(Long userId) {
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         boolean toggleOnboarded = !member.isOnboarded();

@@ -20,14 +20,12 @@ class JWTUtilTest {
 
     @Test
     void createAccessToken_토큰_발급_후_검증에_성공한다() {
-        String access = jwtUtil.createAccessToken(1L, "kakao", "kakao 123", "USER", Token.ACCESS_TOKEN);
+        String access = jwtUtil.createAccessToken(1L, "USER", Token.ACCESS_TOKEN);
 
         Claims claims = jwtUtil.validateToken(access, Token.ACCESS_TOKEN);
 
         assertThat(claims.getSubject()).isEqualTo("1");
         assertThat(claims.getId()).isNull();
-        assertThat(jwtUtil.getProvider(access)).isEqualTo("kakao");
-        assertThat(jwtUtil.getUsername(claims)).isEqualTo("kakao 123");
         assertThat(jwtUtil.getRole(claims)).isEqualTo("USER");
     }
 
@@ -59,7 +57,7 @@ class JWTUtilTest {
                 1800000L,
                 604800000L
         ));
-        String token = otherIssuerUtil.createAccessToken(1L, "kakao", "kakao 123", "USER", Token.ACCESS_TOKEN);
+        String token = otherIssuerUtil.createAccessToken(1L, "USER", Token.ACCESS_TOKEN);
 
         assertThatThrownBy(() -> jwtUtil.validateToken(token, Token.ACCESS_TOKEN))
                 .isInstanceOf(AuthException.class);

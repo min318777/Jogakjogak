@@ -7,6 +7,7 @@ import com.zb.jogakjogak.security.jwt.CustomLogoutFilter;
 import com.zb.jogakjogak.security.jwt.JWTFilter;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.oauth2.CustomSuccessHandler;
+import com.zb.jogakjogak.security.repository.MemberRepository;
 import com.zb.jogakjogak.security.service.BlacklistService;
 import com.zb.jogakjogak.security.service.RefreshTokenRedisService;
 import com.zb.jogakjogak.security.service.CustomOauth2UserService;
@@ -25,7 +26,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -37,6 +37,7 @@ public class SecurityConfig {
     private final RefreshTokenRedisService refreshTokenRedisService;
     private final JWTUtil jwtUtil;
     private final BlacklistService blacklistService;
+    private final MemberRepository memberRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Bean
@@ -53,10 +54,14 @@ public class SecurityConfig {
                                 "https://www.jogakjogak.com",
                                 "https://api.jogakjogak.com"
                                 ));
-                        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                         corsConfiguration.setAllowCredentials(true);
-                        corsConfiguration.setAllowedHeaders(Collections.singletonList("*"));
-                        corsConfiguration.setMaxAge(3600L);
+                        corsConfiguration.setAllowedHeaders(Arrays.asList(
+                                "Authorization",
+                                "Content-Type",
+                                "X-Client-ID"
+                        ));
+                        corsConfiguration.setMaxAge(600L);
                         corsConfiguration.setExposedHeaders(Arrays.asList(
                                 "Set-Cookie",
                                 "Authorization",
@@ -71,7 +76,7 @@ public class SecurityConfig {
         http.
                 httpBasic((auth) -> auth.disable());
         http.
-                addFilterAfter(new JWTFilter(jwtUtil, blacklistService), OAuth2LoginAuthenticationFilter.class);
+                addFilterAfter(new JWTFilter(jwtUtil, blacklistService, memberRepository), OAuth2LoginAuthenticationFilter.class);
         http.
                 addFilterBefore(new CustomLogoutFilter(refreshTokenRedisService, jwtUtil, blacklistService), LogoutFilter.class);
         http.

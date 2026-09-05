@@ -21,9 +21,9 @@ public class NotificationOnOffService {
     private final JDRepository jdRepository;
 
     @Transactional
-    public boolean switchAllJdsNotification(String username) {
+    public boolean switchAllJdsNotification(Long userId) {
 
-        Member member = memberRepository.findByUsername(username)
+        Member member = memberRepository.findById(userId)
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
         List<JD> jds = jdRepository.findAllByMember(member);
 

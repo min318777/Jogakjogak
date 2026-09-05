@@ -3,8 +3,6 @@ package com.zb.jogakjogak.security.service;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Token;
 import com.zb.jogakjogak.security.dto.ReissueResultDto;
-import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.entity.OAuth2Info;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import io.jsonwebtoken.Claims;
@@ -14,9 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -43,26 +38,19 @@ class ReissueServiceTest {
     private static final String NEW_ACCESS = "new-access-token";
     private static final String NEW_REFRESH = "new-refresh-token";
     private static final String NEW_REFRESH_JTI = "new-refresh-token-jti";
-    private static final String PROVIDER = "kakao";
-    private static final String USERNAME = "testuser";
 
     @Test
     @DisplayName("정상 재발급 - 새 액세스/리프레시 토큰 반환")
     void reissue_success() {
         // given
-        OAuth2Info oauth2Info = mock(OAuth2Info.class);
-        Member member = mock(Member.class);
         Claims claims = mock(Claims.class);
 
         given(jwtUtil.validateToken(REFRESH_TOKEN, Token.REFRESH_TOKEN)).willReturn(claims);
         given(jwtUtil.getUserId(claims)).willReturn(USER_ID.toString());
         given(jwtUtil.getJti(claims)).willReturn(REFRESH_TOKEN_JTI);
         given(refreshTokenRedisService.exists(USER_ID, REFRESH_TOKEN_JTI)).willReturn(true);
-        given(memberRepository.findById(USER_ID)).willReturn(Optional.of(member));
-        given(member.getOauth2Info()).willReturn(List.of(oauth2Info));
-        given(oauth2Info.getProvider()).willReturn(PROVIDER);
-        given(member.getUsername()).willReturn(USERNAME);
-        given(jwtUtil.createAccessToken(eq(USER_ID), eq(PROVIDER), eq(USERNAME), any(), eq(Token.ACCESS_TOKEN))).willReturn(NEW_ACCESS);
+        given(memberRepository.existsById(USER_ID)).willReturn(true);
+        given(jwtUtil.createAccessToken(eq(USER_ID), any(), eq(Token.ACCESS_TOKEN))).willReturn(NEW_ACCESS);
         given(jwtUtil.createRefreshToken(eq(USER_ID), eq(Token.REFRESH_TOKEN))).willReturn(NEW_REFRESH);
         given(jwtUtil.getJti(NEW_REFRESH)).willReturn(NEW_REFRESH_JTI);
 
@@ -102,7 +90,7 @@ class ReissueServiceTest {
         given(jwtUtil.getUserId(claims)).willReturn(USER_ID.toString());
         given(jwtUtil.getJti(claims)).willReturn(REFRESH_TOKEN_JTI);
         given(refreshTokenRedisService.exists(USER_ID, REFRESH_TOKEN_JTI)).willReturn(true);
-        given(memberRepository.findById(USER_ID)).willReturn(Optional.empty());
+        given(memberRepository.existsById(USER_ID)).willReturn(false);
 
         // when & then
         assertThatThrownBy(() -> reissueService.reissue(REFRESH_TOKEN))

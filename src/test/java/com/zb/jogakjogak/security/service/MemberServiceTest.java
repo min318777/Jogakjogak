@@ -51,10 +51,10 @@ class MemberServiceTest {
     @DisplayName("my-page - 정상 조회")
     void getMember_success_test() {
         // given
-        given(memberRepository.findByUsername("testUser")).willReturn(Optional.of(testMember));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
 
         // when
-        MemberResponseDto result = memberService.getMember("testUser");
+        MemberResponseDto result = memberService.getMember(1L);
 
         // then
         assertThat(result.getNickname()).isEqualTo("oldNickname");
@@ -66,10 +66,10 @@ class MemberServiceTest {
     @DisplayName("my-page - 회원이 존재하지 않으면 예외 발생")
     void getMember_notFound_test() {
         // given
-        given(memberRepository.findByUsername("unknown")).willReturn(Optional.empty());
+        given(memberRepository.findById(999L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> memberService.getMember("unknown"))
+        assertThatThrownBy(() -> memberService.getMember(999L))
                 .isInstanceOf(AuthException.class)
                 .hasMessageContaining(MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
@@ -83,11 +83,11 @@ class MemberServiceTest {
                 .isNotificationEnabled(false)
                 .build();
 
-        given(memberRepository.findByUsername("testUser")).willReturn(Optional.of(testMember));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
         given(memberRepository.existsByNickname("newNickname")).willReturn(false);
 
         // when
-        MemberResponseDto result = memberService.updateMember("testUser", dto);
+        MemberResponseDto result = memberService.updateMember(1L, dto);
 
         // then
         assertThat(result.getNickname()).isEqualTo("newNickname");
@@ -103,11 +103,11 @@ class MemberServiceTest {
                 .isNotificationEnabled(true)
                 .build();
 
-        given(memberRepository.findByUsername("testUser")).willReturn(Optional.of(testMember));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
         given(memberRepository.existsByNickname("duplicateNickname")).willReturn(true);
 
         // when & then
-        assertThatThrownBy(() -> memberService.updateMember("testUser", dto))
+        assertThatThrownBy(() -> memberService.updateMember(1L, dto))
                 .isInstanceOf(AuthException.class)
                 .hasMessageContaining(MemberErrorCode.ALREADY_EXISTING_NICKNAME.getMessage());
     }
@@ -119,10 +119,10 @@ class MemberServiceTest {
         UpdateMemberRequestDto dto = UpdateMemberRequestDto.builder()
                 .nickname("newNickname")
                 .build();
-        given(memberRepository.findByUsername("unknown")).willReturn(Optional.empty());
+        given(memberRepository.findById(999L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> memberService.updateMember("unknown", dto))
+        assertThatThrownBy(() -> memberService.updateMember(999L, dto))
                 .isInstanceOf(AuthException.class)
                 .hasMessageContaining(MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
@@ -135,10 +135,10 @@ class MemberServiceTest {
                 .isNotificationEnabled(false)
                 .build();
 
-        given(memberRepository.findByUsername("testUser")).willReturn(Optional.of(testMember));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
 
         // when
-        MemberResponseDto result = memberService.updateMember("testUser", dto);
+        MemberResponseDto result = memberService.updateMember(1L, dto);
 
         // then
         assertThat(result.getNickname()).isEqualTo("oldNickname");
@@ -155,10 +155,10 @@ class MemberServiceTest {
                 .isNotificationEnabled(false)
                 .build();
 
-        given(memberRepository.findByUsername("testUser")).willReturn(Optional.of(testMember));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(testMember));
 
         // when
-        MemberResponseDto result = memberService.updateMember("testUser", dto);
+        MemberResponseDto result = memberService.updateMember(1L, dto);
 
         // then
         assertThat(result.getNickname()).isEqualTo("oldNickname");
@@ -174,10 +174,10 @@ class MemberServiceTest {
                 .username("testUser")
                 .isOnboarded(false)
                 .build();
-        given(memberRepository.findByUsername("testUser")).willReturn(Optional.of(member));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
 
         // when
-        UpdateIsOnboardedResponseDto result = memberService.updateIsOnboarded("testUser");
+        UpdateIsOnboardedResponseDto result = memberService.updateIsOnboarded(1L);
 
         // then
         assertThat(result.isOnboarded()).isTrue();
@@ -192,10 +192,10 @@ class MemberServiceTest {
                 .username("testUser")
                 .isOnboarded(true)
                 .build();
-        given(memberRepository.findByUsername("testUser")).willReturn(Optional.of(member));
+        given(memberRepository.findById(1L)).willReturn(Optional.of(member));
 
         // when
-        UpdateIsOnboardedResponseDto result = memberService.updateIsOnboarded("testUser");
+        UpdateIsOnboardedResponseDto result = memberService.updateIsOnboarded(1L);
 
         // then
         assertThat(result.isOnboarded()).isFalse();
@@ -205,10 +205,10 @@ class MemberServiceTest {
     @DisplayName("updateIsOnboarded - 회원이 존재하지 않으면 예외 발생")
     void updateIsOnboarded_memberNotFound_test() {
         // given
-        given(memberRepository.findByUsername("unknown")).willReturn(Optional.empty());
+        given(memberRepository.findById(999L)).willReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> memberService.updateIsOnboarded("unknown"))
+        assertThatThrownBy(() -> memberService.updateIsOnboarded(999L))
                 .isInstanceOf(AuthException.class)
                 .hasMessageContaining(MemberErrorCode.NOT_FOUND_MEMBER.getMessage());
     }
