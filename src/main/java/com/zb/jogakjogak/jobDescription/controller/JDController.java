@@ -1,8 +1,8 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.CommonResponse;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
+import com.zb.jogakjogak.jobDescription.dto.request.*;
+import com.zb.jogakjogak.jobDescription.dto.response.*;
 import com.zb.jogakjogak.jobDescription.service.JDService;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;

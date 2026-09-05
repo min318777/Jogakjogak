@@ -1,6 +1,6 @@
 package com.zb.jogakjogak.resume.entity;
 
-import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
+import com.zb.jogakjogak.resume.dto.request.EducationDto;
 import com.zb.jogakjogak.resume.type.EducationLevel;
 import com.zb.jogakjogak.resume.type.EducationStatus;
 import jakarta.persistence.*;

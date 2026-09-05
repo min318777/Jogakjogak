@@ -3,7 +3,7 @@ package com.zb.jogakjogak.jobDescription.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
+import com.zb.jogakjogak.jobDescription.dto.request.*;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.ToDoList;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;

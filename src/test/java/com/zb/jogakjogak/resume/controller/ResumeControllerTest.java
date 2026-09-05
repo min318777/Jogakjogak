@@ -2,10 +2,10 @@ package com.zb.jogakjogak.resume.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
-import com.zb.jogakjogak.resume.domain.requestDto.CareerDto;
-import com.zb.jogakjogak.resume.domain.requestDto.EducationDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDtoV2;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDto;
+import com.zb.jogakjogak.resume.dto.request.CareerDto;
+import com.zb.jogakjogak.resume.dto.request.EducationDto;
+import com.zb.jogakjogak.resume.dto.request.ResumeCreateRequestDtoV2;
+import com.zb.jogakjogak.resume.dto.request.ResumeCreateRequestDto;
 import com.zb.jogakjogak.resume.entity.Career;
 import com.zb.jogakjogak.resume.entity.Education;
 import com.zb.jogakjogak.resume.entity.Resume;

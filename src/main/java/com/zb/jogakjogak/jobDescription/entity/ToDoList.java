@@ -2,10 +2,10 @@ package com.zb.jogakjogak.jobDescription.entity;
 
 
 import com.zb.jogakjogak.global.BaseEntity;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.TodoListCreateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.ToDoListDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.TodoListBulkItemDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.TodoListUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.dto.request.TodoListCreateRequestDto;
+import com.zb.jogakjogak.jobDescription.dto.request.ToDoListDto;
+import com.zb.jogakjogak.jobDescription.dto.request.TodoListBulkItemDto;
+import com.zb.jogakjogak.jobDescription.dto.request.TodoListUpdateRequestDto;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import jakarta.persistence.*;
 import lombok.*;

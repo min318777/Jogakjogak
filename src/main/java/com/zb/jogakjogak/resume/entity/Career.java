@@ -1,6 +1,6 @@
 package com.zb.jogakjogak.resume.entity;
 
-import com.zb.jogakjogak.resume.domain.requestDto.CareerDto;
+import com.zb.jogakjogak.resume.dto.request.CareerDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

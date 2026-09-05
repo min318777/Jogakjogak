@@ -1,12 +1,12 @@
 package com.zb.jogakjogak.resume.controller;
 
 import com.zb.jogakjogak.global.CommonResponse;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDtoV2;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDtoV2;
-import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
-import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
+import com.zb.jogakjogak.resume.dto.request.ResumeCreateRequestDtoV2;
+import com.zb.jogakjogak.resume.dto.request.ResumeCreateRequestDto;
+import com.zb.jogakjogak.resume.dto.request.ResumeUpdateRequestDto;
+import com.zb.jogakjogak.resume.dto.request.ResumeUpdateRequestDtoV2;
+import com.zb.jogakjogak.resume.dto.response.ResumeGetResponseDto;
+import com.zb.jogakjogak.resume.dto.response.ResumeResponseDto;
 import com.zb.jogakjogak.resume.service.ResumeService;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,8 +1,8 @@
 package com.zb.jogakjogak.jobDescription.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDUpdateRequestDto;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.JDMemoUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.dto.request.JDUpdateRequestDto;
+import com.zb.jogakjogak.jobDescription.dto.request.JDMemoUpdateRequestDto;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;

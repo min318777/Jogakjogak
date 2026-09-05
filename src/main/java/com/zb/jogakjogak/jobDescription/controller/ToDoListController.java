@@ -1,10 +1,10 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
 import com.zb.jogakjogak.global.CommonResponse;
-import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
-import com.zb.jogakjogak.jobDescription.domain.responseDto.UpdateIsDoneTodoListsResponseDto;
+import com.zb.jogakjogak.jobDescription.dto.request.*;
+import com.zb.jogakjogak.jobDescription.dto.response.ToDoListGetByCategoryResponseDto;
+import com.zb.jogakjogak.jobDescription.dto.response.ToDoListResponseDto;
+import com.zb.jogakjogak.jobDescription.dto.response.UpdateIsDoneTodoListsResponseDto;
 import com.zb.jogakjogak.jobDescription.service.ToDoListService;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
 import com.zb.jogakjogak.global.exception.ErrorResponse;

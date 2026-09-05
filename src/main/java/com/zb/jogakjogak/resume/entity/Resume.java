@@ -1,9 +1,9 @@
 package com.zb.jogakjogak.resume.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDtoV2;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDto;
-import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDtoV2;
+import com.zb.jogakjogak.resume.dto.request.ResumeCreateRequestDtoV2;
+import com.zb.jogakjogak.resume.dto.request.ResumeUpdateRequestDto;
+import com.zb.jogakjogak.resume.dto.request.ResumeUpdateRequestDtoV2;
 import com.zb.jogakjogak.security.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
