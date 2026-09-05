@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.security.dto;
+package com.zb.jogakjogak.security.oauth2;
 
 import lombok.AllArgsConstructor;
 

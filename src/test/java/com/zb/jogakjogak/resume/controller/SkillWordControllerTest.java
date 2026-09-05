@@ -5,7 +5,7 @@ import com.github.javafaker.Faker;
 import com.zb.jogakjogak.resume.entity.SkillWord;
 import com.zb.jogakjogak.resume.repository.SkillWordRepository;
 import com.zb.jogakjogak.security.Role;
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import com.zb.jogakjogak.security.oauth2.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.repository.MemberRepository;
 import jakarta.persistence.EntityManager;

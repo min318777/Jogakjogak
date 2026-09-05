@@ -6,8 +6,8 @@ import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.security.Role;
 import com.zb.jogakjogak.security.config.EmailEncryptor;
-import com.zb.jogakjogak.security.dto.OAuth2ResponseDto;
-import com.zb.jogakjogak.security.dto.UpdateMemberRequestDto;
+import com.zb.jogakjogak.security.oauth2.OAuth2ResponseDto;
+import com.zb.jogakjogak.security.dto.request.UpdateMemberRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 

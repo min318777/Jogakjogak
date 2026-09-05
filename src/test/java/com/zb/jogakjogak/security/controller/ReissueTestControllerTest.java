@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.security.controller;
 
 import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
-import com.zb.jogakjogak.security.dto.ReissueResultDto;
+import com.zb.jogakjogak.security.dto.response.ReissueResultDto;
 import com.zb.jogakjogak.security.service.ReissueService;
 import jakarta.servlet.http.Cookie;
 import net.datafaker.Faker;

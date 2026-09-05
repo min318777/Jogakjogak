@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.security.dto;
+package com.zb.jogakjogak.security.dto.request;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;

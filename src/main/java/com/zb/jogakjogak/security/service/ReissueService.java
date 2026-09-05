@@ -4,7 +4,7 @@ package com.zb.jogakjogak.security.service;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.dto.ReissueResultDto;
+import com.zb.jogakjogak.security.dto.response.ReissueResultDto;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.repository.MemberRepository;

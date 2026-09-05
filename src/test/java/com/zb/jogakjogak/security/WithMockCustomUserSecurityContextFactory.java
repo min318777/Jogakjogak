@@ -1,6 +1,6 @@
 package com.zb.jogakjogak.security;
 
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import com.zb.jogakjogak.security.oauth2.CustomOAuth2User;
 import com.zb.jogakjogak.security.entity.Member;
 import com.zb.jogakjogak.security.entity.OAuth2Info;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

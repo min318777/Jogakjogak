@@ -2,9 +2,9 @@ package com.zb.jogakjogak.security.controller;
 
 
 import com.zb.jogakjogak.global.CommonResponse;
-import com.zb.jogakjogak.security.dto.MemberResponseDto;
-import com.zb.jogakjogak.security.dto.UpdateIsOnboardedResponseDto;
-import com.zb.jogakjogak.security.dto.UpdateMemberRequestDto;
+import com.zb.jogakjogak.security.dto.response.MemberResponseDto;
+import com.zb.jogakjogak.security.dto.response.UpdateIsOnboardedResponseDto;
+import com.zb.jogakjogak.security.dto.request.UpdateMemberRequestDto;
 import com.zb.jogakjogak.security.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
