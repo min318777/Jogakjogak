@@ -2,10 +2,6 @@ package com.zb.jogakjogak.jobdescription.entity;
 
 
 import com.zb.jogakjogak.global.BaseEntity;
-import com.zb.jogakjogak.jobdescription.dto.request.TodoListCreateRequestDto;
-import com.zb.jogakjogak.jobdescription.dto.request.ToDoListDto;
-import com.zb.jogakjogak.jobdescription.dto.request.TodoListBulkItemDto;
-import com.zb.jogakjogak.jobdescription.dto.request.TodoListUpdateRequestDto;
 import com.zb.jogakjogak.jobdescription.type.ToDoListType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,9 +10,8 @@ import org.slf4j.LoggerFactory;
 
 @Entity
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ToDoList extends BaseEntity {
 
@@ -32,10 +27,10 @@ public class ToDoList extends BaseEntity {
     @Column(nullable = false)
     private boolean isDone = false;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT", length = 1000)
     private String content;
 
     @Builder.Default
@@ -47,23 +42,21 @@ public class ToDoList extends BaseEntity {
     @JoinColumn(name = "jd_id", nullable = false)
     private JD jd;
 
-    public static ToDoList fromDto(ToDoListDto dto, JD jd) {
+    public static ToDoList fromDto(ToDoListType category, String title, String content, String memo,
+                                    boolean isDone, JD jd) {
 
         Logger logger = LoggerFactory.getLogger(ToDoList.class);
 
-        ToDoListType category = dto.getCategory();
         if (category == null) {
             logger.warn("LLM 응답에서 ToDoList category가 누락되었습니다. 기본값으로 설정합니다.");
             category = ToDoListType.SCHEDULE_MISC_ERROR;
         }
 
-        String title = dto.getTitle();
         if (title == null || title.isEmpty()) {
             logger.warn("LLM 응답에서 ToDoList title이 누락되었습니다. 기본값으로 설정합니다.");
             title = "제목 없음";
         }
 
-        String content = dto.getContent();
         if (content == null || content.isEmpty()) {
             logger.warn("LLM 응답에서 ToDoList content가 누락되었습니다. 기본값으로 설정합니다.");
             content = "내용 없음";
@@ -72,17 +65,17 @@ public class ToDoList extends BaseEntity {
                 .category(category)
                 .title(title)
                 .content(content)
-                .memo(dto.getMemo())
-                .isDone(dto.isDone())
+                .memo(memo)
+                .isDone(isDone)
                 .jd(jd)
                 .build();
     }
 
-    public static ToDoList createToDoList(TodoListCreateRequestDto toDoListDto, JD jd) {
+    public static ToDoList createToDoList(ToDoListType category, String title, String content, JD jd) {
         return ToDoList.builder()
-                .category(toDoListDto.getCategory())
-                .title(toDoListDto.getTitle())
-                .content(toDoListDto.getContent())
+                .category(category)
+                .title(title)
+                .content(content)
                 .memo("")
                 .isDone(false)
                 .jd(jd)
@@ -93,27 +86,27 @@ public class ToDoList extends BaseEntity {
         this.jd = jd;
     }
 
-    public void updateFromDto(TodoListUpdateRequestDto dto) {
-        if (dto.getCategory() != null) {
-            this.category = dto.getCategory();
+    public void updateFromDto(ToDoListType category, String title, String content, Boolean isDone) {
+        if (category != null) {
+            this.category = category;
         }
-        if (dto.getTitle() != null) {
-            this.title = dto.getTitle();
+        if (title != null) {
+            this.title = title;
         }
-        if (dto.getContent() != null) {
-            this.content = dto.getContent();
+        if (content != null) {
+            this.content = content;
         }
-        if (dto.getIsDone() != null) {
-            this.isDone = dto.getIsDone();
+        if (isDone != null) {
+            this.isDone = isDone;
         }
     }
 
-    public void updateFromBulkUpdateToDoLists(TodoListBulkItemDto dto, ToDoListType category) {
+    public void updateFromBulkUpdateToDoLists(String title, String content, boolean isDone, ToDoListType category) {
         this.category = category;
-        this.title = dto.getTitle();
-        this.content = dto.getContent();
+        this.title = title;
+        this.content = content;
         this.memo = "";
-        this.isDone = dto.isDone();
+        this.isDone = isDone;
     }
 
     public void updateToDoListIsDone(boolean isDone){

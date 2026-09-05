@@ -5,8 +5,6 @@ import com.zb.jogakjogak.jobdescription.entity.JD;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.member.config.EmailEncryptor;
-import com.zb.jogakjogak.security.dto.response.OAuth2ResponseDto;
-import com.zb.jogakjogak.member.dto.request.UpdateMemberRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,9 +14,8 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 public class Member {
 
@@ -26,27 +23,33 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String username;
 
     @Convert(converter = EmailEncryptor.class)
+    @Column(nullable = false)
     private String email;
 
+    @Column(nullable = false)
     private String password;
 
     private String name;
 
     private String nickname;
 
+    @Column(nullable = false)
     private boolean isNotificationEnabled;
 
     private String phoneNumber;
 
+    @Column(nullable = false)
     private boolean isOnboarded;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
-    private LocalDateTime registeredAt;
+    private LocalDateTime createdAt;
 
     private LocalDateTime lastLoginAt;
 
@@ -69,7 +72,7 @@ public class Member {
 
     @PrePersist
     public void prePersist() {
-        this.registeredAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     @PreUpdate
@@ -77,19 +80,31 @@ public class Member {
         this.lastLoginAt = LocalDateTime.now();
     }
 
-    public void updateExistingMember(OAuth2ResponseDto oAuth2ResponseDto) {
-        this.email = oAuth2ResponseDto.getEmail();
+    public void updateExistingMember(String email) {
+        this.email = email;
         this.lastLoginAt = LocalDateTime.now();
     }
 
-    public void updateMember(UpdateMemberRequestDto updateMemberRequestDto){
-        if(updateMemberRequestDto.getNickname() != null){
-            this.nickname = updateMemberRequestDto.getNickname();
+    public void updateMember(String nickname, Boolean isNotificationEnabled) {
+        if (nickname != null) {
+            this.nickname = nickname;
         }
 
-        if(updateMemberRequestDto.getIsNotificationEnabled() != null){
-            this.isNotificationEnabled = updateMemberRequestDto.getIsNotificationEnabled();
+        if (isNotificationEnabled != null) {
+            this.isNotificationEnabled = isNotificationEnabled;
         }
+    }
+
+    public void assignNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateNotificationEnabled(boolean isNotificationEnabled) {
+        this.isNotificationEnabled = isNotificationEnabled;
+    }
+
+    public void updateOnboarded(boolean isOnboarded) {
+        this.isOnboarded = isOnboarded;
     }
 
     public void setResume(Resume resume) {

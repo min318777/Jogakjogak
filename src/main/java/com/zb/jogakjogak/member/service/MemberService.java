@@ -42,7 +42,7 @@ public class MemberService {
                 && memberRepository.existsByNickname(newNickname)) {
             throw new AuthException(MemberErrorCode.ALREADY_EXISTING_NICKNAME);
         }
-        member.updateMember(updateMemberRequestDto);
+        member.updateMember(updateMemberRequestDto.getNickname(), updateMemberRequestDto.getIsNotificationEnabled());
         return MemberResponseDto.builder()
                 .nickname(member.getNickname())
                 .email(member.getEmail())
@@ -56,7 +56,7 @@ public class MemberService {
                 .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         boolean toggleOnboarded = !member.isOnboarded();
-        member.setOnboarded(toggleOnboarded);
+        member.updateOnboarded(toggleOnboarded);
         return UpdateIsOnboardedResponseDto.builder()
                 .isOnboarded(toggleOnboarded)
                 .build();

@@ -121,15 +121,16 @@ public class NotificationEmailJdbcCursorBatchConfig {
                     ps.setObject(3, batchStartTime);
                 })
                 .rowMapper((rs, rowNum) -> {
-                    Member member = new Member();
-                    member.setId(rs.getLong("mid"));
-                    member.setEmail(rs.getString("email"));
-                    member.setNickname(rs.getString("nickname"));
+                    Member member = Member.builder()
+                            .id(rs.getLong("mid"))
+                            .email(rs.getString("email"))
+                            .nickname(rs.getString("nickname"))
+                            .build();
 
-                    JD jd = new JD();
-                    jd.setId(rs.getLong("id"));
-                    jd.setMember(member);
-                    return jd;
+                    return JD.builder()
+                            .id(rs.getLong("id"))
+                            .member(member)
+                            .build();
                 })
                 .build();
     }
@@ -201,16 +202,18 @@ public class NotificationEmailJdbcCursorBatchConfig {
                 .sql(sql)
                 .fetchSize(CHUNK_SIZE)
                 .rowMapper((rs, rowNum) -> {
-                    Member member = new Member();
-                    member.setId(rs.getLong("mid"));
-                    member.setEmail(rs.getString("email"));
-                    member.setNickname(rs.getString("nickname"));
+                    Member member = Member.builder()
+                            .id(rs.getLong("mid"))
+                            .email(rs.getString("email"))
+                            .nickname(rs.getString("nickname"))
+                            .build();
 
-                    JD jd = new JD();
-                    jd.setId(rs.getLong("jid"));
-                    jd.setTitle(rs.getString("title"));
-                    jd.setCompanyName(rs.getString("company_name"));
-                    jd.setEndedAt(rs.getObject("ended_at", LocalDateTime.class));
+                    JD jd = JD.builder()
+                            .id(rs.getLong("jid"))
+                            .title(rs.getString("title"))
+                            .companyName(rs.getString("company_name"))
+                            .endedAt(rs.getObject("ended_at", LocalDateTime.class))
+                            .build();
 
                     return Notification.builder()
                             .id(rs.getLong("id"))

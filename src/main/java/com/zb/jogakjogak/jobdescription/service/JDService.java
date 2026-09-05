@@ -68,7 +68,8 @@ public class JDService {
         }
         JD jd = createdJd(jdRequestDto, member, hasResume);
         for (ToDoListDto dto : parsedAnalysisResult) {
-            ToDoList toDoList = ToDoList.fromDto(dto, jd);
+            ToDoList toDoList = ToDoList.fromDto(dto.getCategory(), dto.getTitle(), dto.getContent(),
+                    dto.getMemo(), dto.isDone(), jd);
             jd.addToDoList(toDoList);
         }
         JD savedJd = jdRepository.save(jd);
@@ -116,10 +117,10 @@ public class JDService {
         if (dto.isAlarmOn()) {
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
-            member.setNotificationEnabled(true);
+            member.updateNotificationEnabled(true);
             memberRepository.save(member);
         }
-        jd.isAlarmOn(dto.isAlarmOn());
+        jd.updateAlarmStatus(dto.isAlarmOn());
         return JDAlarmResponseDto.builder()
                 .isAlarmOn(jd.isAlarmOn())
                 .jdId(jd.getId())
@@ -184,7 +185,7 @@ public class JDService {
     @Transactional
     public MemoResponseDto updateMemo(Long jdId, JDMemoUpdateRequestDto dto, Long memberId) {
         JD jd = getAuthorizedJd(jdId, memberId);
-        jd.updateMemo(dto);
+        jd.updateMemo(dto.getMemo());
         return MemoResponseDto.builder()
                 .jd_id(jd.getId())
                 .memo(jd.getMemo())
@@ -194,7 +195,8 @@ public class JDService {
     @Transactional
     public JDResponseDto updateJd(Long jdId, JDUpdateRequestDto jdUpdateRequestDto, Long memberId) {
         JD jd = getAuthorizedJd(jdId, memberId);
-        jd.updateJd(jdUpdateRequestDto);
+        jd.updateJd(jdUpdateRequestDto.getTitle(), jdUpdateRequestDto.getCompanyName(),
+                jdUpdateRequestDto.getJob(), jdUpdateRequestDto.getJdUrl(), jdUpdateRequestDto.getEndedAt());
         return JDResponseDto.from(jd, jd.getMember());
     }
 

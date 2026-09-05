@@ -77,7 +77,7 @@ public class ResumeService {
 
         Resume resume = getAuthorizedResume(resumeId, memberId);
 
-        resume.modify(requestDto);
+        resume.modify(requestDto.getTitle(), requestDto.getContent());
         Resume savedResume = resumeRepository.save(resume);
         return ResumeResponseDto.builder()
                 .resumeId(savedResume.getId())
@@ -147,7 +147,7 @@ public class ResumeService {
                 .isNewcomer(requestDto.getIsNewcomer())
                 .build();
 
-        member.setOnboarded(true);
+        member.updateOnboarded(true);
         Resume saveResume = resumeRepository.save(newResume);
 
         return saveResumeDetails(saveResume, requestDto);
@@ -183,14 +183,14 @@ public class ResumeService {
             throw new ResumeException(NOT_ENTERED_CAREER);
         }
 
-        resume.update(requestDto);
+        resume.update(requestDto.getContent(), requestDto.getIsNewcomer());
         resumeRepository.save(resume);
 
         List<Career> careerList = existingCareerList;
         if (requestDto.getCareerList() != null) {
             resumeRepository.deleteCareersByResumeId(resume.getId());
             careerList = careerRepository.saveAll(requestDto.getCareerList().stream()
-                    .map(dto -> Career.of(dto, resume))
+                    .map(dto -> Career.of(dto.getJoinedAt(), dto.getQuitAt(), dto.getIsWorking(), dto.getCompanyName(), dto.getWorkPerformance(), resume))
                     .toList());
         }
 
@@ -198,7 +198,7 @@ public class ResumeService {
         if (requestDto.getEducationList() != null) {
             resumeRepository.deleteEducationsByResumeId(resume.getId());
             educationList = educationRepository.saveAll(requestDto.getEducationList().stream()
-                    .map(dto -> Education.of(dto, resume))
+                    .map(dto -> Education.of(dto.getLevel(), dto.getMajorField(), dto.getStatus(), resume))
                     .toList());
         }
 
@@ -221,14 +221,14 @@ public class ResumeService {
 
         if (requestDto.getCareerList() != null) {
             List<Career> careerList = requestDto.getCareerList().stream()
-                    .map(dto -> Career.of(dto, resume))
+                    .map(dto -> Career.of(dto.getJoinedAt(), dto.getQuitAt(), dto.getIsWorking(), dto.getCompanyName(), dto.getWorkPerformance(), resume))
                     .toList();
             savedCareerList = careerRepository.saveAll(careerList);
         }
 
         if (requestDto.getEducationList() != null) {
             List<Education> educationList = requestDto.getEducationList().stream()
-                    .map(dto -> Education.of(dto, resume))
+                    .map(dto -> Education.of(dto.getLevel(), dto.getMajorField(), dto.getStatus(), resume))
                     .toList();
             savedEducationList = educationRepository.saveAll(educationList);
         }

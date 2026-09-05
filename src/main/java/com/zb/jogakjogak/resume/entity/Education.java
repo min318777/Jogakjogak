@@ -1,9 +1,9 @@
 package com.zb.jogakjogak.resume.entity;
 
-import com.zb.jogakjogak.resume.dto.request.EducationDto;
 import com.zb.jogakjogak.resume.type.EducationLevel;
 import com.zb.jogakjogak.resume.type.EducationStatus;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 public class Education {
@@ -21,7 +21,7 @@ public class Education {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private EducationLevel level;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 225)
     private String majorField;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -31,11 +31,11 @@ public class Education {
     @JoinColumn(name = "resume_id", nullable = false)
     private Resume resume;
 
-    public static Education of(EducationDto dto, Resume resume){
+    public static Education of(EducationLevel level, String majorField, EducationStatus status, Resume resume) {
         return Education.builder()
-                .level(dto.getLevel())
-                .majorField(dto.getMajorField())
-                .status(dto.getStatus())
+                .level(level)
+                .majorField(majorField)
+                .status(status)
                 .resume(resume)
                 .build();
     }

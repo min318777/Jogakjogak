@@ -1,11 +1,9 @@
 package com.zb.jogakjogak.resume.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
-import com.zb.jogakjogak.resume.dto.request.ResumeCreateRequestDtoV2;
-import com.zb.jogakjogak.resume.dto.request.ResumeUpdateRequestDto;
-import com.zb.jogakjogak.resume.dto.request.ResumeUpdateRequestDtoV2;
 import com.zb.jogakjogak.member.entity.Member;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +14,7 @@ import java.util.Set;
 @Entity
 @Builder
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Resume extends BaseEntity {
 
@@ -27,6 +25,7 @@ public class Resume extends BaseEntity {
     private String title;
     @Column(nullable = false, length = 5000)
     private String content;
+    @Builder.Default
     @Column(nullable = false)
     private boolean isNewcomer = true;
 
@@ -41,35 +40,21 @@ public class Resume extends BaseEntity {
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Skill> skillList;
 
-    /**
-     * 사용자가 이력서를 수정할 때 사용하는 메서드
-     *
-     * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용.
-     */
-    public void modify(ResumeUpdateRequestDto requestDto) {
-        if (requestDto.getTitle() != null) {
-            this.title = requestDto.getTitle();
+    public void modify(String title, String content) {
+        if (title != null) {
+            this.title = title;
         }
-        if (requestDto.getContent() != null) {
-            this.content = requestDto.getContent();
+        if (content != null) {
+            this.content = content;
         }
     }
 
-    public void update(ResumeCreateRequestDtoV2 requestDto) {
-        if (requestDto.getContent() != null) {
-            this.content = requestDto.getContent();
+    public void update(String content, Boolean isNewcomer) {
+        if (content != null) {
+            this.content = content;
         }
-        if (requestDto.getIsNewcomer() != null) {
-            this.isNewcomer = requestDto.getIsNewcomer();
-        }
-    }
-
-    public void update(ResumeUpdateRequestDtoV2 requestDto) {
-        if (requestDto.getContent() != null) {
-            this.content = requestDto.getContent();
-        }
-        if (requestDto.getIsNewcomer() != null) {
-            this.isNewcomer = requestDto.getIsNewcomer();
+        if (isNewcomer != null) {
+            this.isNewcomer = isNewcomer;
         }
     }
 

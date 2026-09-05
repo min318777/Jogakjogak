@@ -21,7 +21,7 @@ public class NicknameInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         List<Member> membersWithoutNickname = memberRepository.findByNicknameIsNull();
         for (Member member : membersWithoutNickname) {
-            member.setNickname(nicknameCreator.createNickname());
+            member.assignNickname(nicknameCreator.createNickname());
         }
         memberRepository.saveAll(membersWithoutNickname);
     }

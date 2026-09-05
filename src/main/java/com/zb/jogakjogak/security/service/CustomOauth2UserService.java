@@ -72,21 +72,21 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .build();
 
             if(oAuth2ResponseDto.getProvider().equals("google")){
-                oAuth2Info.setAccessToken(accessToken);
+                oAuth2Info.updateAccessToken(accessToken);
             }
             member.getOauth2Info().add(oAuth2Info);
             member = memberRepository.save(member);
             return new CustomOAuth2User(member);
         } else{
             member = existMember.get();
-            member.updateExistingMember(oAuth2ResponseDto);
+            member.updateExistingMember(oAuth2ResponseDto.getEmail());
             if (member.getNickname() == null) {
-                member.setNickname(nicknameCreator.createNickname());
+                member.assignNickname(nicknameCreator.createNickname());
             }
 
             for (OAuth2Info info : member.getOauth2Info()) {
                 if (info.getProvider().equals("google")) {
-                    info.setAccessToken(accessToken);
+                    info.updateAccessToken(accessToken);
                 }
             }
             memberRepository.save(member);

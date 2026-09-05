@@ -9,27 +9,29 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Setter
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     @Builder.Default
+    @Column(nullable = false)
     private boolean sent = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @Column(nullable = false, length = 20)
     @Builder.Default
     private NotificationStatus status = NotificationStatus.PENDING;
 
     @Builder.Default
+    @Column(nullable = false)
     private int attemptCount = 0;
 
     private LocalDateTime sentAt;
@@ -38,11 +40,11 @@ public class Notification {
     private String errorMessage;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "jd_id")
+    @JoinColumn(name = "jd_id", nullable = false)
     private JD jd;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     public void markSent(LocalDateTime sentAt) {

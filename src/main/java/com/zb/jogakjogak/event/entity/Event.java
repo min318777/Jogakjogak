@@ -3,6 +3,7 @@ package com.zb.jogakjogak.event.entity;
 import com.zb.jogakjogak.event.type.EventType;
 import com.zb.jogakjogak.member.entity.Member;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +21,9 @@ public class Event {
     @Column(nullable = false)
     private String code;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private EventType type;
+    @Builder.Default
     @Column(nullable = false)
     private Boolean isFirst = true;
     @ManyToOne(fetch = FetchType.LAZY)

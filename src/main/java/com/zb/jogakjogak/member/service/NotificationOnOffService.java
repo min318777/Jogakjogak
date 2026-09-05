@@ -28,10 +28,10 @@ public class NotificationOnOffService {
         List<JD> jds = jdRepository.findAllByMember(member);
 
         boolean isNotificationOn = !member.isNotificationEnabled();
-        member.setNotificationEnabled(isNotificationOn);
+        member.updateNotificationEnabled(isNotificationOn);
         if(!member.isNotificationEnabled()){
             for(JD jd : jds){
-                jd.setAlarmOn(isNotificationOn);
+                jd.updateAlarmStatus(isNotificationOn);
             }
         }
 

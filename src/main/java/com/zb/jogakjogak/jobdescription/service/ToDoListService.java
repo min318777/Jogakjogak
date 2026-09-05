@@ -45,7 +45,7 @@ public class ToDoListService {
     public ToDoListResponseDto createToDoList(Long jdId, TodoListCreateRequestDto toDoListDto, Long memberId) {
 
         JD jd = getAuthorizedJd(jdId, memberId);
-        jd.setNotificationCount(0);
+        jd.markAsUpdated();
         ToDoListType newCategory = toDoListDto.getCategory();
 
         validateAllowedCategory(newCategory);
@@ -59,7 +59,8 @@ public class ToDoListService {
             throw new ToDoListException(ToDoListErrorCode.TODO_LIST_LIMIT_EXCEEDED_FOR_CATEGORY);
         }
 
-        ToDoList toDoList = ToDoList.createToDoList(toDoListDto, jd);
+        ToDoList toDoList = ToDoList.createToDoList(toDoListDto.getCategory(), toDoListDto.getTitle(),
+                toDoListDto.getContent(), jd);
         ToDoList savedToDoList = toDoListRepository.save(toDoList);
         return ToDoListResponseDto.from(savedToDoList);
     }
@@ -74,9 +75,10 @@ public class ToDoListService {
                                               Long memberId) {
 
         JD jd = getAuthorizedJd(jdId, memberId);
-        jd.setNotificationCount(0);
+        jd.markAsUpdated();
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
-        toDoList.updateFromDto(toDoListDto);
+        toDoList.updateFromDto(toDoListDto.getCategory(), toDoListDto.getTitle(),
+                toDoListDto.getContent(), toDoListDto.getIsDone());
         return ToDoListResponseDto.from(toDoList);
     }
 
@@ -86,7 +88,7 @@ public class ToDoListService {
     @Transactional
     public ToDoListResponseDto toggleComplete(Long jdId, Long toDoListId, @Valid TodoListIsDoneUpdateRequestDto dto, Long memberId) {
         JD jd = getAuthorizedJd(jdId, memberId);
-        jd.setNotificationCount(0);
+        jd.markAsUpdated();
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
         toDoList.updateToDoListIsDone(dto.isDone());
         return ToDoListResponseDto.from(toDoList);
@@ -109,7 +111,7 @@ public class ToDoListService {
     public void deleteToDoList(Long jdId, Long toDoListId, Long memberId) {
 
         JD jd = getAuthorizedJd(jdId, memberId);
-        jd.setNotificationCount(0);
+        jd.markAsUpdated();
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
         toDoListRepository.delete(toDoList);
     }
@@ -143,7 +145,7 @@ public class ToDoListService {
     @Transactional
     public void bulkUpdateToDoLists(Long jdId, TodoListBulkUpdateRequestDto dto, Long memberId) {
         JD jd = getAuthorizedJd(jdId, memberId);
-        jd.setNotificationCount(0);
+        jd.markAsUpdated();
         ToDoListType targetCategory = dto.getCategory();
         if (targetCategory == null) {
             throw new ToDoListException(ToDoListErrorCode.CATEGORY_REQUIRED);
@@ -228,7 +230,7 @@ public class ToDoListService {
                 if (!updateToDoList.getCategory().equals(targetCategory)) {
                     throw new ToDoListException(ToDoListErrorCode.TODO_LIST_NOT_BELONG_TO_JD);
                 }
-                updateToDoList.updateFromBulkUpdateToDoLists(dto, targetCategory);
+                updateToDoList.updateFromBulkUpdateToDoLists(dto.getTitle(), dto.getContent(), dto.isDone(), targetCategory);
                 updatedToDos.add(updateToDoList);
             } else {
                 ToDoList newToDoList = ToDoList.builder()

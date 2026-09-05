@@ -1,8 +1,6 @@
 package com.zb.jogakjogak.jobdescription.entity;
 
 import com.zb.jogakjogak.global.BaseEntity;
-import com.zb.jogakjogak.jobdescription.dto.request.JDUpdateRequestDto;
-import com.zb.jogakjogak.jobdescription.dto.request.JDMemoUpdateRequestDto;
 import com.zb.jogakjogak.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,12 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Setter
 @Table(name = "job_description")
 @Getter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class JD extends BaseEntity {
 
     @Id
@@ -27,16 +24,16 @@ public class JD extends BaseEntity {
     @Column(nullable = false, length = 30)
     private String title;
 
-    @Column
+    @Column(nullable = false)
     private boolean isBookmark;
 
-    @Column
+    @Column(nullable = false, length = 100)
     private String companyName;
 
-    @Column
+    @Column(nullable = false)
     private String job;
 
-    @Column(name = "content", columnDefinition = "TEXT")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT", length = 10000)
     private String content;
 
     @Column(nullable = false)
@@ -45,16 +42,17 @@ public class JD extends BaseEntity {
     @Column
     private String memo;
 
-    @Column
+    @Column(nullable = false)
     private boolean isAlarmOn;
 
     @Column
     private LocalDateTime applyAt;
 
-    @Column
+    @Builder.Default
+    @Column(nullable = false)
     private int notificationCount = 0;
 
-    @Column
+    @Column(nullable = false)
     private boolean isCreatedWithResume;
 
     @Column
@@ -79,7 +77,7 @@ public class JD extends BaseEntity {
         toDoList.setJd(this);
     }
 
-    public void isAlarmOn(boolean isAlarmOn) {
+    public void updateAlarmStatus(boolean isAlarmOn) {
         this.isAlarmOn = isAlarmOn;
     }
 
@@ -95,25 +93,25 @@ public class JD extends BaseEntity {
         this.applyAt = null;
     }
 
-    public void updateMemo(JDMemoUpdateRequestDto dto) {
-        this.memo = dto.getMemo();
+    public void updateMemo(String memo) {
+        this.memo = memo;
     }
 
-    public void updateJd(JDUpdateRequestDto dto){
-        if (dto.getTitle() != null) {
-            this.title = dto.getTitle();
+    public void updateJd(String title, String companyName, String job, String jdUrl, LocalDateTime endedAt) {
+        if (title != null) {
+            this.title = title;
         }
-        if (dto.getCompanyName() != null) {
-            this.companyName = dto.getCompanyName();
+        if (companyName != null) {
+            this.companyName = companyName;
         }
-        if (dto.getJob() != null) {
-            this.job = dto.getJob();
+        if (job != null) {
+            this.job = job;
         }
-        if (dto.getJdUrl() != null) {
-            this.jdUrl = dto.getJdUrl();
+        if (jdUrl != null) {
+            this.jdUrl = jdUrl;
         }
-        if (dto.getEndedAt() != null) {
-            this.endedAt = dto.getEndedAt();
+        if (endedAt != null) {
+            this.endedAt = endedAt;
         }
     }
 

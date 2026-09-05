@@ -186,7 +186,7 @@ class CustomOauth2UserServiceTest {
         } else {
             // 기존 회원 업데이트 로직
             member = optionalMember.get();
-            member.updateExistingMember(kakaoResponseDto);
+            member.updateExistingMember(kakaoResponseDto.getEmail());
         }
         member = memberRepository.save(member);
         return new CustomOAuth2User(member);
