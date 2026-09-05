@@ -30,11 +30,11 @@ public class SkillWordController {
     @GetMapping
     public ResponseEntity<CommonResponse<List<String>>> autoComplete(
             @RequestParam("q") String query) {
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(
-                                skillWordService.getAutocompleteSuggestions(query),
-                                "스킬 단어 검색 완료")
-                );
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        skillWordService.getAutocompleteSuggestions(query),
+                        "스킬 단어 검색 완료"
+                )
+        );
     }
 }

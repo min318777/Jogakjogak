@@ -38,11 +38,12 @@ public class MemberController {
     public ResponseEntity<CommonResponse<MemberResponseDto>> getMember(@AuthenticationPrincipal Long userId){
 
         MemberResponseDto memberResponseDto = memberService.getMember(userId);
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(memberResponseDto,
-                                "회원정보 조회 완료")
-                );
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        memberResponseDto,
+                        "회원정보 조회 완료"
+                )
+        );
     }
 
     @Operation(summary = "회원 상세정보 수정", description = "로그인된 회원의 정보를 수정합니다. 회원이 존재하지 않으면 404, 이미 사용 중인 닉네임이면 409를 반환합니다.")
@@ -56,11 +57,12 @@ public class MemberController {
     public ResponseEntity<CommonResponse<MemberResponseDto>> updateMember(@AuthenticationPrincipal Long userId,
                                                                            @Valid @RequestBody UpdateMemberRequestDto updateMemberRequestDto){
         MemberResponseDto memberResponseDto = memberService.updateMember(userId, updateMemberRequestDto);
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(memberResponseDto,
-                                "회원정보 수정 완료")
-                );
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        memberResponseDto,
+                        "회원정보 수정 완료"
+                )
+        );
     }
 
     @Operation(summary =  "회원 is_onboarded 수정", description = "회원의 is_onboarded 상태를 반전(toggle)합니다. 회원이 존재하지 않으면 404를 반환합니다.")
@@ -72,10 +74,11 @@ public class MemberController {
     public ResponseEntity<CommonResponse<UpdateIsOnboardedResponseDto>> updateIsOnboarded(@AuthenticationPrincipal Long userId) {
         UpdateIsOnboardedResponseDto updateIsOnboardedResponseDto = memberService.updateIsOnboarded(userId);
 
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(updateIsOnboardedResponseDto,
-                                "회원 is_onboarded를 " + updateIsOnboardedResponseDto.isOnboarded() + "로 수정 완료")
-                );
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        updateIsOnboardedResponseDto,
+                        "회원 is_onboarded를 " + updateIsOnboardedResponseDto.isOnboarded() + "로 수정 완료"
+                )
+        );
     }
 }

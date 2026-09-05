@@ -44,16 +44,16 @@ public class WithdrawalController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new CommonResponse<>(null,
-                            "회원 탈퇴 요청 실패: 인증되지 않은 사용자입니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new CommonResponse<>(null, "회원 탈퇴 요청 실패: 인증되지 않은 사용자입니다.")
+            );
         }
         withdrawalService.withdrawMember(userId);
         clearCookie(response);
         SecurityContextHolder.clearContext();
-        return ResponseEntity.ok()
-                .body(new CommonResponse<>(null,
-                        "회원탈퇴 완료"));
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(null, "회원탈퇴 완료")
+        );
     }
 
     private void clearCookie(HttpServletResponse response) {

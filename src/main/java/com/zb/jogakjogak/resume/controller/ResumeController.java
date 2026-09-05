@@ -73,13 +73,12 @@ public class ResumeController {
             @PathVariable("resume_id") Long resumeId,
             @Valid @RequestBody ResumeUpdateRequestDto requestDto,
             @AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(
-                                resumeService.modify(resumeId, requestDto, userId),
-                                "이력서 수정 완료"
-                        )
-                );
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        resumeService.modify(resumeId, requestDto, userId),
+                        "이력서 수정 완료"
+                )
+        );
     }
 
     /**
@@ -98,13 +97,12 @@ public class ResumeController {
     public ResponseEntity<CommonResponse<ResumeResponseDto>> get(
             @PathVariable Long resumeId,
             @AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(
-                                resumeService.get(resumeId, userId),
-                                "이력서 조회 성공"
-                        )
-                );
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        resumeService.get(resumeId, userId),
+                        "이력서 조회 성공"
+                )
+        );
     }
 
     @Operation(summary = "이력서 삭제", description = "사용자가 등록한 이력서를 삭제합니다. resumeId가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
@@ -159,13 +157,12 @@ public class ResumeController {
     @GetMapping("/v2/resume")
     public ResponseEntity<CommonResponse<ResumeGetResponseDto>> getResumeV2(
             @AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(
-                                resumeService.getResumeV2(userId),
-                                "이력서 조회 성공"
-                        )
-                );
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        resumeService.getResumeV2(userId),
+                        "이력서 조회 성공"
+                )
+        );
     }
 
     /**
@@ -184,12 +181,11 @@ public class ResumeController {
     public ResponseEntity<CommonResponse<ResumeGetResponseDto>> modifyV2(
             @Valid @RequestBody ResumeUpdateRequestDtoV2 requestDto,
             @AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(
-                                resumeService.modifyV2(requestDto, userId),
-                                "이력서 수정 완료"
-                        )
-                );
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        resumeService.modifyV2(requestDto, userId),
+                        "이력서 수정 완료"
+                )
+        );
     }
 }

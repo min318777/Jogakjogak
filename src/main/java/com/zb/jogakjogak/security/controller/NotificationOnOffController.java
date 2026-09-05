@@ -35,10 +35,11 @@ public class NotificationOnOffController {
     public ResponseEntity<CommonResponse<Boolean>> switchAllJdsNotification(@AuthenticationPrincipal Long userId){
 
         boolean notificationOnOff = notificationOnOffService.switchAllJdsNotification(userId);
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(notificationOnOff,
-                                "회원의 전체 이메일 알림기능 " + notificationOnOff + "로 수정 완료")
-                );
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        notificationOnOff,
+                        "회원의 전체 이메일 알림기능 " + notificationOnOff + "로 수정 완료"
+                )
+        );
     }
 }

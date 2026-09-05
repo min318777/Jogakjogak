@@ -38,10 +38,12 @@ public class ReissueController {
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
         ReissueResultDto reissueResultDto = reissueService.reissue(refreshToken);
         response.addHeader("Set-Cookie", createCookieHeader("refresh", reissueResultDto.getNewRefreshToken(), request));
-        return ResponseEntity.ok()
-                .body(
-                        new CommonResponse<>(reissueResultDto.getNewAccessToken(),
-                                "access token 재발급 완료"));
+        return ResponseEntity.ok().body(
+                new CommonResponse<>(
+                        reissueResultDto.getNewAccessToken(),
+                        "access token 재발급 완료"
+                )
+        );
     }
 
     private String extractRefreshTokenFromCookie(Cookie[] cookies) {
