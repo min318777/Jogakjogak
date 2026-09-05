@@ -2,9 +2,9 @@ package com.zb.jogakjogak.security.service;
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.dto.response.ReissueResultDto;
+import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
-import com.zb.jogakjogak.security.repository.MemberRepository;
+import com.zb.jogakjogak.member.repository.MemberRepository;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

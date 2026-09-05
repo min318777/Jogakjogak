@@ -1,11 +1,12 @@
-package com.zb.jogakjogak.security.service;
+package com.zb.jogakjogak.member.service;
 
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
-import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.entity.OAuth2Info;
-import com.zb.jogakjogak.security.repository.MemberRepository;
+import com.zb.jogakjogak.member.entity.Member;
+import com.zb.jogakjogak.member.entity.OAuth2Info;
+import com.zb.jogakjogak.member.repository.MemberRepository;
+import com.zb.jogakjogak.security.service.RefreshTokenRedisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

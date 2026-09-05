@@ -6,7 +6,7 @@ import com.zb.jogakjogak.event.repository.EventRepository;
 import com.zb.jogakjogak.event.type.EventType;
 import com.zb.jogakjogak.global.exception.EventErrorCode;
 import com.zb.jogakjogak.global.exception.EventException;
-import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.member.entity.Member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

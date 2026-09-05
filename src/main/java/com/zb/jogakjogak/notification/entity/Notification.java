@@ -2,7 +2,7 @@ package com.zb.jogakjogak.notification.entity;
 
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
-import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 

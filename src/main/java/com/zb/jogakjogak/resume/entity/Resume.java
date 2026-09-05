@@ -4,7 +4,7 @@ import com.zb.jogakjogak.global.BaseEntity;
 import com.zb.jogakjogak.resume.dto.request.ResumeCreateRequestDtoV2;
 import com.zb.jogakjogak.resume.dto.request.ResumeUpdateRequestDto;
 import com.zb.jogakjogak.resume.dto.request.ResumeUpdateRequestDtoV2;
-import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

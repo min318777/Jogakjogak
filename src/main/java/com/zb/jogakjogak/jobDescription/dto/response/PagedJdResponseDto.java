@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.jobDescription.dto.response;
 
 import com.zb.jogakjogak.resume.dto.response.ResumeResponseDto;
-import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

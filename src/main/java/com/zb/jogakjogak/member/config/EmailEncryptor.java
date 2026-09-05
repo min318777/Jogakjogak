@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.security.config;
+package com.zb.jogakjogak.member.config;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;

@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.security.service;
+package com.zb.jogakjogak.member.service;
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;

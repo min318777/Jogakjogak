@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import com.zb.jogakjogak.security.Token;
-import com.zb.jogakjogak.security.repository.MemberRepository;
+import com.zb.jogakjogak.member.repository.MemberRepository;
 import com.zb.jogakjogak.security.service.BlacklistService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;

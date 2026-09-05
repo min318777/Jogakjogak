@@ -1,6 +1,6 @@
 package com.zb.jogakjogak.security.oauth2;
 
-import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.member.entity.Member;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;

@@ -7,7 +7,7 @@ import com.zb.jogakjogak.notification.entity.NotificationStatus;
 import com.zb.jogakjogak.notification.repository.NotificationRepository;
 import com.zb.jogakjogak.notification.service.NotificationBatchService;
 import com.zb.jogakjogak.notification.service.NotificationEmailSender;
-import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.member.entity.Member;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;

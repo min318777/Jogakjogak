@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.jobDescription.repository;
 
 import com.zb.jogakjogak.jobDescription.entity.JD;
-import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

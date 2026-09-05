@@ -1,12 +1,12 @@
-package com.zb.jogakjogak.security.service;
+package com.zb.jogakjogak.member.service;
 
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.repository.JDRepository;
-import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.repository.MemberRepository;
+import com.zb.jogakjogak.member.entity.Member;
+import com.zb.jogakjogak.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

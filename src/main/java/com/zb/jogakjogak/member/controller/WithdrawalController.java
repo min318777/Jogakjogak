@@ -1,8 +1,8 @@
-package com.zb.jogakjogak.security.controller;
+package com.zb.jogakjogak.member.controller;
 
 
 import com.zb.jogakjogak.global.CommonResponse;
-import com.zb.jogakjogak.security.service.WithdrawalService;
+import com.zb.jogakjogak.member.service.WithdrawalService;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

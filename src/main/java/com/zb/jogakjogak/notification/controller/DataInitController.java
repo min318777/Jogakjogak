@@ -1,9 +1,9 @@
 package com.zb.jogakjogak.notification.controller;
 
 import com.zb.jogakjogak.notification.dto.DataInitResponseDto;
-import com.zb.jogakjogak.security.Role;
-import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.repository.MemberRepository;
+import com.zb.jogakjogak.member.entity.Role;
+import com.zb.jogakjogak.member.entity.Member;
+import com.zb.jogakjogak.member.repository.MemberRepository;
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

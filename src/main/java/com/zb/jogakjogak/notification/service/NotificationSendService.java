@@ -6,7 +6,7 @@ import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.notification.entity.NotificationStatus;
 import com.zb.jogakjogak.notification.repository.NotificationRepository;
-import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.member.entity.Member;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

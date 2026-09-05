@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.security.entity;
+package com.zb.jogakjogak.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

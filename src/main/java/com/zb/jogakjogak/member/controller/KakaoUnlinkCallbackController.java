@@ -1,6 +1,6 @@
-package com.zb.jogakjogak.security.controller;
+package com.zb.jogakjogak.member.controller;
 
-import com.zb.jogakjogak.security.service.WithdrawalService;
+import com.zb.jogakjogak.member.service.WithdrawalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

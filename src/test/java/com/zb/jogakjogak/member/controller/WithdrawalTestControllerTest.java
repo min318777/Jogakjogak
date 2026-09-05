@@ -1,7 +1,7 @@
-package com.zb.jogakjogak.security.controller;
+package com.zb.jogakjogak.member.controller;
 
 import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
-import com.zb.jogakjogak.security.service.WithdrawalService;
+import com.zb.jogakjogak.member.service.WithdrawalService;
 import jakarta.servlet.http.Cookie;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.DisplayName;

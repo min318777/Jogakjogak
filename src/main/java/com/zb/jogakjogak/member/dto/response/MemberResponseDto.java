@@ -1,4 +1,4 @@
-package com.zb.jogakjogak.security.dto.response;
+package com.zb.jogakjogak.member.dto.response;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -1,13 +1,12 @@
-package com.zb.jogakjogak.security.entity;
+package com.zb.jogakjogak.member.entity;
 
 import com.zb.jogakjogak.event.entity.Event;
 import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
-import com.zb.jogakjogak.security.Role;
-import com.zb.jogakjogak.security.config.EmailEncryptor;
+import com.zb.jogakjogak.member.config.EmailEncryptor;
 import com.zb.jogakjogak.security.oauth2.OAuth2ResponseDto;
-import com.zb.jogakjogak.security.dto.request.UpdateMemberRequestDto;
+import com.zb.jogakjogak.member.dto.request.UpdateMemberRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 

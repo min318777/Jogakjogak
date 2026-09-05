@@ -7,7 +7,7 @@ import com.zb.jogakjogak.jobDescription.entity.JD;
 import com.zb.jogakjogak.jobDescription.entity.QJD;
 import com.zb.jogakjogak.jobDescription.entity.QToDoList;
 import com.zb.jogakjogak.resume.entity.QResume;
-import com.zb.jogakjogak.security.entity.QMember;
+import com.zb.jogakjogak.member.entity.QMember;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

@@ -1,8 +1,9 @@
 package com.zb.jogakjogak.security;
 
 import com.zb.jogakjogak.security.oauth2.CustomOAuth2User;
-import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.entity.OAuth2Info;
+import com.zb.jogakjogak.member.entity.Member;
+import com.zb.jogakjogak.member.entity.OAuth2Info;
+import com.zb.jogakjogak.member.entity.Role;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;

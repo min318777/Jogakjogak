@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.event.entity;
 
 import com.zb.jogakjogak.event.type.EventType;
-import com.zb.jogakjogak.security.entity.Member;
+import com.zb.jogakjogak.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

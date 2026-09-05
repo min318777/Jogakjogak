@@ -1,13 +1,13 @@
-package com.zb.jogakjogak.security.service;
+package com.zb.jogakjogak.member.service;
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
-import com.zb.jogakjogak.security.config.NicknameCreator;
-import com.zb.jogakjogak.security.dto.response.MemberResponseDto;
-import com.zb.jogakjogak.security.dto.response.UpdateIsOnboardedResponseDto;
-import com.zb.jogakjogak.security.dto.request.UpdateMemberRequestDto;
-import com.zb.jogakjogak.security.entity.Member;
-import com.zb.jogakjogak.security.repository.MemberRepository;
+import com.zb.jogakjogak.member.config.NicknameCreator;
+import com.zb.jogakjogak.member.dto.response.MemberResponseDto;
+import com.zb.jogakjogak.member.dto.response.UpdateIsOnboardedResponseDto;
+import com.zb.jogakjogak.member.dto.request.UpdateMemberRequestDto;
+import com.zb.jogakjogak.member.entity.Member;
+import com.zb.jogakjogak.member.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

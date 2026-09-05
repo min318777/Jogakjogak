@@ -2,7 +2,7 @@ package com.zb.jogakjogak.security.controller;
 
 
 import com.zb.jogakjogak.global.CommonResponse;
-import com.zb.jogakjogak.security.dto.response.ReissueResultDto;
+import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.service.ReissueService;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;

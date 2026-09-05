@@ -1,7 +1,7 @@
-package com.zb.jogakjogak.security.config;
+package com.zb.jogakjogak.member.config;
 
 
-import com.zb.jogakjogak.security.repository.MemberRepository;
+import com.zb.jogakjogak.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

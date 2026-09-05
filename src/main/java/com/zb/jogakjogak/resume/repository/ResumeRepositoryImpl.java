@@ -2,7 +2,7 @@ package com.zb.jogakjogak.resume.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zb.jogakjogak.resume.entity.*;
-import com.zb.jogakjogak.security.entity.QMember;
+import com.zb.jogakjogak.member.entity.QMember;
 import jakarta.persistence.EntityManager;
 import org.springframework.transaction.annotation.Transactional;
 
