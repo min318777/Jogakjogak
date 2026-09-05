@@ -1,6 +1,6 @@
 package com.zb.jogakjogak.notification.config;
 
-import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.jobdescription.entity.JD;
 import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.notification.entity.NotificationStatus;

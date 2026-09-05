@@ -1,8 +1,8 @@
 package com.zb.jogakjogak.notification.service;
 
 import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
-import com.zb.jogakjogak.jobDescription.entity.JD;
-import com.zb.jogakjogak.jobDescription.repository.ToDoListRepository;
+import com.zb.jogakjogak.jobdescription.entity.JD;
+import com.zb.jogakjogak.jobdescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.member.entity.Member;
 import jakarta.mail.MessagingException;

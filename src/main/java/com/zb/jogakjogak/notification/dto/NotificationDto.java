@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.notification.dto;
 
 
-import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.jobdescription.entity.JD;
 import com.zb.jogakjogak.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

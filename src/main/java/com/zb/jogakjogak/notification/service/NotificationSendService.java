@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.notification.service;
 
-import com.zb.jogakjogak.jobDescription.entity.JD;
-import com.zb.jogakjogak.jobDescription.repository.JDRepository;
+import com.zb.jogakjogak.jobdescription.entity.JD;
+import com.zb.jogakjogak.jobdescription.repository.JDRepository;
 import com.zb.jogakjogak.notification.dto.NotificationDto;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.notification.entity.NotificationStatus;

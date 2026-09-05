@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.member.entity;
 
 import com.zb.jogakjogak.event.entity.Event;
-import com.zb.jogakjogak.jobDescription.entity.JD;
+import com.zb.jogakjogak.jobdescription.entity.JD;
 import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.member.config.EmailEncryptor;

@@ -19,7 +19,7 @@ import java.util.HashMap;
 @Configuration
 @EnableJpaRepositories(
         basePackages = {"com.zb.jogakjogak.member.repository",
-                        "com.zb.jogakjogak.jobDescription.repository",
+                        "com.zb.jogakjogak.jobdescription.repository",
                         "com.zb.jogakjogak.resume.repository",
                         "com.zb.jogakjogak.notification.repository",
                         "com.zb.jogakjogak.event.repository"
@@ -42,7 +42,7 @@ public class MainDBConfig {
 
         em.setDataSource(mainDBSource());
         em.setPackagesToScan(new String[]{"com.zb.jogakjogak.member.entity",
-                                            "com.zb.jogakjogak.jobDescription.entity",
+                                            "com.zb.jogakjogak.jobdescription.entity",
                                             "com.zb.jogakjogak.resume.entity",
                                             "com.zb.jogakjogak.notification.entity",
                                             "com.zb.jogakjogak.event.entity"

@@ -3,8 +3,8 @@ package com.zb.jogakjogak.member.service;
 
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
-import com.zb.jogakjogak.jobDescription.entity.JD;
-import com.zb.jogakjogak.jobDescription.repository.JDRepository;
+import com.zb.jogakjogak.jobdescription.entity.JD;
+import com.zb.jogakjogak.jobdescription.repository.JDRepository;
 import com.zb.jogakjogak.member.entity.Member;
 import com.zb.jogakjogak.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
