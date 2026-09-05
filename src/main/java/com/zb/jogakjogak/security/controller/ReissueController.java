@@ -1,7 +1,7 @@
 package com.zb.jogakjogak.security.controller;
 
 
-import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.global.CommonResponse;
 import com.zb.jogakjogak.security.dto.ReissueResultDto;
 import com.zb.jogakjogak.security.service.ReissueService;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
@@ -15,7 +15,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,17 +33,15 @@ public class ReissueController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 토큰 또는 회원", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/member/reissue")
-    public ResponseEntity<HttpApiResponse<String>> reissue(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<CommonResponse<String>> reissue(HttpServletRequest request, HttpServletResponse response) {
 
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());
         ReissueResultDto reissueResultDto = reissueService.reissue(refreshToken);
-        response.setHeader("Authorization", "Bearer " + reissueResultDto.getNewAccessToken());
         response.addHeader("Set-Cookie", createCookieHeader("refresh", reissueResultDto.getNewRefreshToken(), request));
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(reissueResultDto.getNewAccessToken(),
-                                "access token 재발급 완료",
-                                HttpStatus.OK));
+                        new CommonResponse<>(reissueResultDto.getNewAccessToken(),
+                                "access token 재발급 완료"));
     }
 
     private String extractRefreshTokenFromCookie(Cookie[] cookies) {

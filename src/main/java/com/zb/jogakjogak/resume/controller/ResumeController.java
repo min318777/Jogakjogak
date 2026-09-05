@@ -1,6 +1,6 @@
 package com.zb.jogakjogak.resume.controller;
 
-import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.global.CommonResponse;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDtoV2;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeCreateRequestDto;
 import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDto;
@@ -8,7 +8,6 @@ import com.zb.jogakjogak.resume.domain.requestDto.ResumeUpdateRequestDtoV2;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeGetResponseDto;
 import com.zb.jogakjogak.resume.domain.responseDto.ResumeResponseDto;
 import com.zb.jogakjogak.resume.service.ResumeService;
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,14 +43,13 @@ public class ResumeController {
             @ApiResponse(responseCode = "409", description = "이미 이력서를 가지고 있음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/resume")
-    public ResponseEntity<HttpApiResponse<ResumeResponseDto>> register(
+    public ResponseEntity<CommonResponse<ResumeResponseDto>> register(
             @Valid @RequestBody ResumeCreateRequestDto requestDto,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                new HttpApiResponse<>(
-                        resumeService.register(requestDto, customOAuth2User.getMember()),
-                        "이력서 등록 완료",
-                        HttpStatus.CREATED
+                new CommonResponse<>(
+                        resumeService.register(requestDto, userId),
+                        "이력서 등록 완료"
                 )
         );
     }
@@ -71,16 +69,15 @@ public class ResumeController {
             @ApiResponse(responseCode = "403", description = "해당 이력서에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/resume/{resume_id}")
-    public ResponseEntity<HttpApiResponse<ResumeResponseDto>> modify(
+    public ResponseEntity<CommonResponse<ResumeResponseDto>> modify(
             @PathVariable("resume_id") Long resumeId,
             @Valid @RequestBody ResumeUpdateRequestDto requestDto,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(
-                                resumeService.modify(resumeId, requestDto, customOAuth2User.getMember()),
-                                "이력서 수정 완료",
-                                HttpStatus.OK
+                        new CommonResponse<>(
+                                resumeService.modify(resumeId, requestDto, userId),
+                                "이력서 수정 완료"
                         )
                 );
     }
@@ -98,15 +95,14 @@ public class ResumeController {
             @ApiResponse(responseCode = "403", description = "해당 이력서에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/resume/{resumeId}")
-    public ResponseEntity<HttpApiResponse<ResumeResponseDto>> get(
+    public ResponseEntity<CommonResponse<ResumeResponseDto>> get(
             @PathVariable Long resumeId,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(
-                                resumeService.get(resumeId, customOAuth2User.getMember()),
-                                "이력서 조회 성공",
-                                HttpStatus.OK
+                        new CommonResponse<>(
+                                resumeService.get(resumeId, userId),
+                                "이력서 조회 성공"
                         )
                 );
     }
@@ -120,8 +116,8 @@ public class ResumeController {
     @DeleteMapping("/resume/{resumeId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long resumeId,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        resumeService.delete(resumeId, customOAuth2User.getMember());
+            @AuthenticationPrincipal Long userId) {
+        resumeService.delete(resumeId, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -138,15 +134,14 @@ public class ResumeController {
             @ApiResponse(responseCode = "409", description = "이미 이력서를 가지고 있음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/v2/resume")
-    public ResponseEntity<HttpApiResponse<ResumeGetResponseDto>> registerV2(
+    public ResponseEntity<CommonResponse<ResumeGetResponseDto>> registerV2(
             @Valid @RequestBody ResumeCreateRequestDtoV2 requestDto,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal Long userId) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                new HttpApiResponse<>(
-                        resumeService.registerV2(requestDto, customOAuth2User.getMember()),
-                        "이력서 등록 완료",
-                        HttpStatus.CREATED
+                new CommonResponse<>(
+                        resumeService.registerV2(requestDto, userId),
+                        "이력서 등록 완료"
                 )
         );
     }
@@ -162,14 +157,13 @@ public class ResumeController {
             @ApiResponse(responseCode = "404", description = "등록된 이력서 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/v2/resume")
-    public ResponseEntity<HttpApiResponse<ResumeGetResponseDto>> getResumeV2(
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+    public ResponseEntity<CommonResponse<ResumeGetResponseDto>> getResumeV2(
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(
-                                resumeService.getResumeV2(customOAuth2User.getMember()),
-                                "이력서 조회 성공",
-                                HttpStatus.OK
+                        new CommonResponse<>(
+                                resumeService.getResumeV2(userId),
+                                "이력서 조회 성공"
                         )
                 );
     }
@@ -187,15 +181,14 @@ public class ResumeController {
             @ApiResponse(responseCode = "400", description = "신입이 아닌데 경력이 비어있음, 입력값 검증 실패 등", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/v2/resume")
-    public ResponseEntity<HttpApiResponse<ResumeGetResponseDto>> modifyV2(
+    public ResponseEntity<CommonResponse<ResumeGetResponseDto>> modifyV2(
             @Valid @RequestBody ResumeUpdateRequestDtoV2 requestDto,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(
-                                resumeService.modifyV2(requestDto, customOAuth2User.getMember()),
-                                "이력서 수정 완료",
-                                HttpStatus.OK
+                        new CommonResponse<>(
+                                resumeService.modifyV2(requestDto, userId),
+                                "이력서 수정 완료"
                         )
                 );
     }

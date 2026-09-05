@@ -1,8 +1,7 @@
 package com.zb.jogakjogak.security.controller;
 
 
-import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import com.zb.jogakjogak.global.CommonResponse;
 import com.zb.jogakjogak.security.service.WithdrawalService;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,22 +40,20 @@ public class WithdrawalController {
             @ApiResponse(responseCode = "417", description = "카카오/구글 계정 연결 해제 실패로 회원탈퇴 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping
-    public ResponseEntity<HttpApiResponse<?>> oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+    public ResponseEntity<CommonResponse<?>> oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal Long userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new HttpApiResponse<>(null,
-                            "회원 탈퇴 요청 실패: 인증되지 않은 사용자입니다.",
-                            HttpStatus.UNAUTHORIZED));
+                    .body(new CommonResponse<>(null,
+                            "회원 탈퇴 요청 실패: 인증되지 않은 사용자입니다."));
         }
-        withdrawalService.withdrawMember(customOAuth2User.getName());
+        withdrawalService.withdrawMember(userId);
         clearCookie(response);
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok()
-                .body(new HttpApiResponse<>(null,
-                        "회원탈퇴 완료",
-                        HttpStatus.OK));
+                .body(new CommonResponse<>(null,
+                        "회원탈퇴 완료"));
     }
 
     private void clearCookie(HttpServletResponse response) {

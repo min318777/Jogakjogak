@@ -1,8 +1,7 @@
 package com.zb.jogakjogak.security.controller;
 
 
-import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import com.zb.jogakjogak.global.CommonResponse;
 import com.zb.jogakjogak.security.dto.MemberResponseDto;
 import com.zb.jogakjogak.security.dto.UpdateIsOnboardedResponseDto;
 import com.zb.jogakjogak.security.dto.UpdateMemberRequestDto;
@@ -17,7 +16,6 @@ import com.zb.jogakjogak.global.exception.ErrorResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.units.qual.C;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -37,16 +35,13 @@ public class MemberController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 회원", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<HttpApiResponse<MemberResponseDto>> getMember(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
+    public ResponseEntity<CommonResponse<MemberResponseDto>> getMember(@AuthenticationPrincipal Long userId){
 
-        String username = customOAuth2User.getName();
-
-        MemberResponseDto memberResponseDto = memberService.getMember(username);
+        MemberResponseDto memberResponseDto = memberService.getMember(userId);
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(memberResponseDto,
-                                "회원정보 조회 완료",
-                                HttpStatus.OK)
+                        new CommonResponse<>(memberResponseDto,
+                                "회원정보 조회 완료")
                 );
     }
 
@@ -58,16 +53,13 @@ public class MemberController {
             @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/update")
-    public ResponseEntity<HttpApiResponse<MemberResponseDto>> updateMember(@AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+    public ResponseEntity<CommonResponse<MemberResponseDto>> updateMember(@AuthenticationPrincipal Long userId,
                                                                            @Valid @RequestBody UpdateMemberRequestDto updateMemberRequestDto){
-        String username = customOAuth2User.getName();
-
-        MemberResponseDto memberResponseDto = memberService.updateMember(username, updateMemberRequestDto);
+        MemberResponseDto memberResponseDto = memberService.updateMember(userId, updateMemberRequestDto);
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(memberResponseDto,
-                                "회원정보 수정 완료",
-                                HttpStatus.OK)
+                        new CommonResponse<>(memberResponseDto,
+                                "회원정보 수정 완료")
                 );
     }
 
@@ -77,15 +69,13 @@ public class MemberController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 회원", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/update-is-onboarded")
-    public ResponseEntity<HttpApiResponse<UpdateIsOnboardedResponseDto>> updateIsOnboarded(@AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        String username = customOAuth2User.getName();
-        UpdateIsOnboardedResponseDto updateIsOnboardedResponseDto = memberService.updateIsOnboarded(username);
+    public ResponseEntity<CommonResponse<UpdateIsOnboardedResponseDto>> updateIsOnboarded(@AuthenticationPrincipal Long userId) {
+        UpdateIsOnboardedResponseDto updateIsOnboardedResponseDto = memberService.updateIsOnboarded(userId);
 
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(updateIsOnboardedResponseDto,
-                                "회원 is_onboarded를 " + updateIsOnboardedResponseDto.isOnboarded() + "로 수정 완료",
-                                HttpStatus.OK)
+                        new CommonResponse<>(updateIsOnboardedResponseDto,
+                                "회원 is_onboarded를 " + updateIsOnboardedResponseDto.isOnboarded() + "로 수정 완료")
                 );
     }
 }

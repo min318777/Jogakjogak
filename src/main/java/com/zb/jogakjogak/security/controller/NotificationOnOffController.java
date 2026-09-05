@@ -1,8 +1,7 @@
 package com.zb.jogakjogak.security.controller;
 
 
-import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import com.zb.jogakjogak.global.CommonResponse;
 import com.zb.jogakjogak.security.service.NotificationOnOffService;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,15 +32,13 @@ public class NotificationOnOffController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 회원", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
-    public ResponseEntity<HttpApiResponse<Boolean>> switchAllJdsNotification(@AuthenticationPrincipal CustomOAuth2User customOAuth2User){
+    public ResponseEntity<CommonResponse<Boolean>> switchAllJdsNotification(@AuthenticationPrincipal Long userId){
 
-        String username = customOAuth2User.getName();
-        boolean notificationOnOff = notificationOnOffService.switchAllJdsNotification(username);
+        boolean notificationOnOff = notificationOnOffService.switchAllJdsNotification(userId);
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(notificationOnOff,
-                                "회원의 전체 이메일 알림기능 " + notificationOnOff + "로 수정 완료",
-                                HttpStatus.OK)
+                        new CommonResponse<>(notificationOnOff,
+                                "회원의 전체 이메일 알림기능 " + notificationOnOff + "로 수정 완료")
                 );
     }
 }

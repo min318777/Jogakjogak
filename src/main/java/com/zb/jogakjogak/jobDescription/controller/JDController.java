@@ -1,10 +1,9 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
-import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.global.CommonResponse;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.*;
 import com.zb.jogakjogak.jobDescription.service.JDService;
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,14 +36,13 @@ public class JDController {
             @ApiResponse(responseCode = "400", description = "JD 개수 초과, 유효하지 않은 분석 요청, 입력값 검증 실패 등", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/jds")
-    public ResponseEntity<HttpApiResponse<JDResponseDto>> llmAnalyze(
+    public ResponseEntity<CommonResponse<JDResponseDto>> llmAnalyze(
             @Valid @RequestBody JDCreateRequestDto jdRequestDto,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                new HttpApiResponse<>(
-                        jdService.llmAnalyze(jdRequestDto, customOAuth2User.getMember()),
-                        "JD 분석하기 완료",
-                        HttpStatus.CREATED
+                new CommonResponse<>(
+                        jdService.llmAnalyze(jdRequestDto, userId),
+                        "JD 분석하기 완료"
                 )
         );
     }
@@ -56,14 +54,13 @@ public class JDController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/jds/{jd_id}")
-    public ResponseEntity<HttpApiResponse<JDResponseDto>> getJd(
+    public ResponseEntity<CommonResponse<JDResponseDto>> getJd(
             @PathVariable("jd_id") Long jdId,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        jdService.getJd(jdId, customOAuth2User.getMember()),
-                        "나의 분석 내용 단일 조회 완료",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        jdService.getJd(jdId, userId),
+                        "나의 분석 내용 단일 조회 완료"
                 )
         );
     }
@@ -75,15 +72,14 @@ public class JDController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/jds/{jd_id}/alarm")
-    public ResponseEntity<HttpApiResponse<JDAlarmResponseDto>> alarm(
+    public ResponseEntity<CommonResponse<JDAlarmResponseDto>> alarm(
             @PathVariable("jd_id") Long jdId,
             @RequestBody JDAlarmUpdateRequestDto dto,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        jdService.alarm(jdId, dto, customOAuth2User.getMember()),
-                        "알람 설정 완료",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        jdService.alarm(jdId, dto, userId),
+                        "알람 설정 완료"
                 )
         );
     }
@@ -97,8 +93,8 @@ public class JDController {
     @DeleteMapping("/jds/{jd_id}")
     public ResponseEntity<Void> deleteJd(
             @PathVariable("jd_id") Long jdId,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        jdService.deleteJd(jdId, customOAuth2User.getMember());
+            @AuthenticationPrincipal Long userId) {
+        jdService.deleteJd(jdId, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -111,7 +107,7 @@ public class JDController {
      *                         - size: 한 페이지당 항목 수 (기본값 11)
      *                         - sort: 정렬 기준 필드 (기본값 "createdAt")
      *                         - direction: 정렬 방향 (기본값 DESC, 즉 최신순)
-     * @param customOAuth2User 현재 인증된 사용자의 OAuth2 정보를 포함하는 Principal 객체.
+     * @param userId 현재 인증된 사용자의 id.
      * @return 페이징된 JD 목록과 API 응답 상태를 포함하는 ResponseDto
      */
     @Operation(summary = "모든 분석 목록 조회", description = "모든 분석 목록을 페이징하여 조회합니다. 기본 정렬은 생성일(createdAt) 내림차순이며, size/sort/direction 파라미터로 조정할 수 있습니다.")
@@ -119,22 +115,21 @@ public class JDController {
             @ApiResponse(responseCode = "200", description = "나의 분석 내용 전체 조회 성공")
     })
     @GetMapping("/jds")
-    public ResponseEntity<HttpApiResponse<PagedJdResponseDto>> getPaginatedJds(
+    public ResponseEntity<CommonResponse<PagedJdResponseDto>> getPaginatedJds(
             @PageableDefault(
                     size = 11,
                     sort = "createdAt",
                     direction = Sort.Direction.DESC) Pageable pageable,
             @RequestParam(defaultValue = "normal") String showOnly,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User
+            @AuthenticationPrincipal Long userId
     ) {
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
+                new CommonResponse<>(
                         jdService.getAllJds(
-                                customOAuth2User.getMember(),
+                                userId,
                                 pageable,
                                 showOnly),
-                        "나의 분석 내용 전체 조회 성공",
-                        HttpStatus.OK
+                        "나의 분석 내용 전체 조회 성공"
                 )
         );
     }
@@ -147,15 +142,14 @@ public class JDController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/jds/{jd_id}/bookmark")
-    public ResponseEntity<HttpApiResponse<BookmarkResponseDto>> toggleBookmark
+    public ResponseEntity<CommonResponse<BookmarkResponseDto>> toggleBookmark
             (@PathVariable("jd_id") Long jdId,
              @RequestBody JDBookmarkUpdateRequestDto dto,
-             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+             @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        jdService.updateBookmarkStatus(jdId, dto, customOAuth2User.getMember()),
-                        "즐겨찾기 설정 완료",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        jdService.updateBookmarkStatus(jdId, dto, userId),
+                        "즐겨찾기 설정 완료"
                 )
         );
     }
@@ -167,16 +161,15 @@ public class JDController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/jds/{jd_id}/apply")
-    public ResponseEntity<HttpApiResponse<ApplyStatusResponseDto>> toggleApplyStatus(
+    public ResponseEntity<CommonResponse<ApplyStatusResponseDto>> toggleApplyStatus(
             @PathVariable("jd_id") Long jdId,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
-        ApplyStatusResponseDto response = jdService.toggleApplyStatus(jdId, customOAuth2User.getMember());
+            @AuthenticationPrincipal Long userId) {
+        ApplyStatusResponseDto response = jdService.toggleApplyStatus(jdId, userId);
         String message = (response.getApplyAt() != null) ? "지원 완료 성공" : "지원 완료 취소 성공";
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
+                new CommonResponse<>(
                         response,
-                        message,
-                        HttpStatus.OK
+                        message
                 )
         );
     }
@@ -188,15 +181,14 @@ public class JDController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/jds/{jd_id}/memo")
-    public ResponseEntity<HttpApiResponse<MemoResponseDto>> updateMemo(
+    public ResponseEntity<CommonResponse<MemoResponseDto>> updateMemo(
             @PathVariable("jd_id") Long jdId,
             @Valid @RequestBody JDMemoUpdateRequestDto dto,
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        jdService.updateMemo(jdId, dto, customOAuth2User.getMember()),
-                        "메모 수정 성공",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        jdService.updateMemo(jdId, dto, userId),
+                        "메모 수정 성공"
                 )
         );
     }
@@ -208,15 +200,14 @@ public class JDController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/jds/{jd_id}")
-    public ResponseEntity<HttpApiResponse<JDResponseDto>> updateJd
+    public ResponseEntity<CommonResponse<JDResponseDto>> updateJd
             (@PathVariable("jd_id") Long jdId,
              @Valid @RequestBody JDUpdateRequestDto dto,
-             @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+             @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        jdService.updateJd(jdId, dto, customOAuth2User.getMember()),
-                        "JD 수정 완료",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        jdService.updateJd(jdId, dto, userId),
+                        "JD 수정 완료"
                 )
         );
     }

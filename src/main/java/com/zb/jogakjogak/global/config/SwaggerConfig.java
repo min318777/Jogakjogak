@@ -51,7 +51,7 @@ public class SwaggerConfig {
                         Map.Entry<String, Schema> entry = iterator.next();
                         String schemaName = entry.getKey();
 
-                        if (schemaName.contains("HttpApiResponse")) {
+                        if (schemaName.contains("CommonResponse")) {
                             iterator.remove();
                             continue;
                         }

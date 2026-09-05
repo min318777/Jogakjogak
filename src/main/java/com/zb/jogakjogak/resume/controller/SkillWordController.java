@@ -1,13 +1,12 @@
 package com.zb.jogakjogak.resume.controller;
 
-import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.global.CommonResponse;
 import com.zb.jogakjogak.resume.service.SkillWordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,14 +28,13 @@ public class SkillWordController {
             @ApiResponse(responseCode = "200", description = "스킬 단어 검색 완료")
     })
     @GetMapping
-    public ResponseEntity<HttpApiResponse<List<String>>> autoComplete(
+    public ResponseEntity<CommonResponse<List<String>>> autoComplete(
             @RequestParam("q") String query) {
         return ResponseEntity.ok()
                 .body(
-                        new HttpApiResponse<>(
+                        new CommonResponse<>(
                                 skillWordService.getAutocompleteSuggestions(query),
-                                "스킬 단어 검색 완료",
-                                HttpStatus.OK)
+                                "스킬 단어 검색 완료")
                 );
     }
 }

@@ -1,13 +1,12 @@
 package com.zb.jogakjogak.jobDescription.controller;
 
-import com.zb.jogakjogak.global.HttpApiResponse;
+import com.zb.jogakjogak.global.CommonResponse;
 import com.zb.jogakjogak.jobDescription.domain.requestDto.*;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListGetByCategoryResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.ToDoListResponseDto;
 import com.zb.jogakjogak.jobDescription.domain.responseDto.UpdateIsDoneTodoListsResponseDto;
 import com.zb.jogakjogak.jobDescription.service.ToDoListService;
 import com.zb.jogakjogak.jobDescription.type.ToDoListType;
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,17 +41,16 @@ public class ToDoListController {
             @ApiResponse(responseCode = "400", description = "허용되지 않는 카테고리, 카테고리별 개수 제한(10개) 초과, 또는 입력값 검증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
-    public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> createToDoList(
+    public ResponseEntity<CommonResponse<ToDoListResponseDto>> createToDoList(
             @PathVariable("jd_id") Long jdId,
             @RequestBody @Valid TodoListCreateRequestDto dto,
-            @AuthenticationPrincipal CustomOAuth2User customUser) {
-        ToDoListResponseDto response = toDoListService.createToDoList(jdId, dto, customUser.getMember());
+            @AuthenticationPrincipal Long userId) {
+        ToDoListResponseDto response = toDoListService.createToDoList(jdId, dto, userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                new HttpApiResponse<>(
+                new CommonResponse<>(
                         response,
-                        "체크리스트 추가 완료",
-                        HttpStatus.CREATED
+                        "체크리스트 추가 완료"
                 )
         );
     }
@@ -68,17 +66,16 @@ public class ToDoListController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한이 없거나, toDoListId가 해당 JD에 속하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/{toDoListId}")
-    public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> updateToDoList(
+    public ResponseEntity<CommonResponse<ToDoListResponseDto>> updateToDoList(
             @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @RequestBody @Valid TodoListUpdateRequestDto toDoListDto,
-            @AuthenticationPrincipal CustomOAuth2User customUser) {
-        ToDoListResponseDto response = toDoListService.updateToDoList(jdId, toDoListId, toDoListDto, customUser.getMember());
+            @AuthenticationPrincipal Long userId) {
+        ToDoListResponseDto response = toDoListService.updateToDoList(jdId, toDoListId, toDoListDto, userId);
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
+                new CommonResponse<>(
                         response,
-                        "체크리스트 수정 완료",
-                        HttpStatus.OK
+                        "체크리스트 수정 완료"
                 )
         );
     }
@@ -91,17 +88,16 @@ public class ToDoListController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한이 없거나, toDoListId가 해당 JD에 속하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PatchMapping("/{toDoListId}/isDone")
-    public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> toggleComplete(
+    public ResponseEntity<CommonResponse<ToDoListResponseDto>> toggleComplete(
             @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
             @RequestBody @Valid TodoListIsDoneUpdateRequestDto toggleTodolist,
-            @AuthenticationPrincipal CustomOAuth2User customUser) {
-        ToDoListResponseDto response = toDoListService.toggleComplete(jdId, toDoListId, toggleTodolist, customUser.getMember());
+            @AuthenticationPrincipal Long userId) {
+        ToDoListResponseDto response = toDoListService.toggleComplete(jdId, toDoListId, toggleTodolist, userId);
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
+                new CommonResponse<>(
                         response,
-                        "체크리스트 완료 여부 수정 완료",
-                        HttpStatus.OK
+                        "체크리스트 완료 여부 수정 완료"
                 )
         );
     }
@@ -117,15 +113,14 @@ public class ToDoListController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한이 없거나, toDoListId가 해당 JD에 속하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping("/{toDoListId}")
-    public ResponseEntity<HttpApiResponse<ToDoListResponseDto>> getToDoList(
+    public ResponseEntity<CommonResponse<ToDoListResponseDto>> getToDoList(
             @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
-            @AuthenticationPrincipal CustomOAuth2User customUser) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        toDoListService.getToDoList(jdId, toDoListId, customUser.getMember()),
-                        "체크리스트 조회 성공",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        toDoListService.getToDoList(jdId, toDoListId, userId),
+                        "체크리스트 조회 성공"
                 )
         );
     }
@@ -144,8 +139,8 @@ public class ToDoListController {
     public ResponseEntity<Void> deleteToDoList(
             @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
-            @AuthenticationPrincipal CustomOAuth2User customUser) {
-        toDoListService.deleteToDoList(jdId, toDoListId, customUser.getMember());
+            @AuthenticationPrincipal Long userId) {
+        toDoListService.deleteToDoList(jdId, toDoListId, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -160,15 +155,14 @@ public class ToDoListController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping
-    public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> getToDoListsByCategory(
+    public ResponseEntity<CommonResponse<ToDoListGetByCategoryResponseDto>> getToDoListsByCategory(
             @PathVariable("jd_id")  Long jdId,
             @RequestParam(name = "category") ToDoListType category,
-            @AuthenticationPrincipal CustomOAuth2User customUser) {
+            @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        toDoListService.getToDoListsByJdAndCategory(jdId, category, customUser.getMember()),
-                        "카테고리별 투두리스트 조회 성공",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        toDoListService.getToDoListsByJdAndCategory(jdId, category, userId),
+                        "카테고리별 투두리스트 조회 성공"
                 )
         );
     }
@@ -185,16 +179,15 @@ public class ToDoListController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한이 없거나, 대상 투두리스트가 해당 JD에 속하지 않음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/bulk-update")
-    public ResponseEntity<HttpApiResponse<ToDoListGetByCategoryResponseDto>> bulkUpdateToDoLists(
+    public ResponseEntity<CommonResponse<ToDoListGetByCategoryResponseDto>> bulkUpdateToDoLists(
             @PathVariable("jd_id")  Long jdId,
             @RequestBody @Valid TodoListBulkUpdateRequestDto dto,
-            @AuthenticationPrincipal CustomOAuth2User customUser) {
-        toDoListService.bulkUpdateToDoLists(jdId, dto, customUser.getMember());
+            @AuthenticationPrincipal Long userId) {
+        toDoListService.bulkUpdateToDoLists(jdId, dto, userId);
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        toDoListService.getToDoListsByJdAndCategory(jdId, dto.getCategory(), customUser.getMember()),
-                        "다중 투두리스트 수정 성공",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        toDoListService.getToDoListsByJdAndCategory(jdId, dto.getCategory(), userId),
+                        "다중 투두리스트 수정 성공"
                 )
         );
     }
@@ -206,15 +199,14 @@ public class ToDoListController {
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/update-is-done")
-    public ResponseEntity<HttpApiResponse<UpdateIsDoneTodoListsResponseDto>> updateIsDoneTodoLists(
+    public ResponseEntity<CommonResponse<UpdateIsDoneTodoListsResponseDto>> updateIsDoneTodoLists(
             @PathVariable("jd_id")  Long jdId,
             @RequestBody TodoListIsDoneBulkUpdateRequestDto dto,
-            @AuthenticationPrincipal CustomOAuth2User customUser){
+            @AuthenticationPrincipal Long userId){
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        toDoListService.updateIsDoneTodoLists(jdId, dto, customUser.getMember()),
-                        "다중 투두리스트 완료여부 수정 성공",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        toDoListService.updateIsDoneTodoLists(jdId, dto, userId),
+                        "다중 투두리스트 완료여부 수정 성공"
                 )
         );
     }

@@ -2,8 +2,7 @@ package com.zb.jogakjogak.event.controller;
 
 import com.zb.jogakjogak.event.domain.responseDto.EventResponseDto;
 import com.zb.jogakjogak.event.service.EventService;
-import com.zb.jogakjogak.global.HttpApiResponse;
-import com.zb.jogakjogak.security.dto.CustomOAuth2User;
+import com.zb.jogakjogak.global.CommonResponse;
 import com.zb.jogakjogak.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,14 +32,13 @@ public class EventController {
             @ApiResponse(responseCode = "400", description = "존재하지 않는 이벤트 코드", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping()
-    public ResponseEntity<HttpApiResponse<EventResponseDto>> getNewMemberEvent(
-            @AuthenticationPrincipal CustomOAuth2User customOAuth2User
+    public ResponseEntity<CommonResponse<EventResponseDto>> getNewMemberEvent(
+            @AuthenticationPrincipal Long userId
     ){
         return ResponseEntity.ok().body(
-                new HttpApiResponse<>(
-                        eventService.getNewMemberEvent(customOAuth2User.getMember()),
-                        "새 이용자 이벤트 조회 성공",
-                        HttpStatus.OK
+                new CommonResponse<>(
+                        eventService.getNewMemberEvent(userId),
+                        "새 이용자 이벤트 조회 성공"
                 )
         );
     }
