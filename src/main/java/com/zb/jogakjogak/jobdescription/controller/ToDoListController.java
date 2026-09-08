@@ -31,7 +31,6 @@ public class ToDoListController {
 
     /**
      * 특정 JD에 새로운 ToDoList를 생성합니다.
-     *
      */
     @Operation(summary = "특정 분석/카테고리의 Todolist 생성", description = "jd_id와 category를 통해 todolist를 생성합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403, 허용되지 않는 카테고리거나 해당 카테고리에 10개를 초과하면 400을 반환합니다.")
     @ApiResponses({
@@ -91,9 +90,9 @@ public class ToDoListController {
     public ResponseEntity<CommonResponse<ToDoListResponseDto>> toggleComplete(
             @PathVariable("jd_id") Long jdId,
             @PathVariable Long toDoListId,
-            @RequestBody @Valid TodoListIsDoneUpdateRequestDto toggleTodolist,
+            @RequestParam boolean isDone,
             @AuthenticationPrincipal Long userId) {
-        ToDoListResponseDto response = toDoListService.toggleComplete(jdId, toDoListId, toggleTodolist, userId);
+        ToDoListResponseDto response = toDoListService.toggleComplete(jdId, toDoListId, isDone, userId);
         return ResponseEntity.ok().body(
                 new CommonResponse<>(
                         response,
@@ -104,7 +103,6 @@ public class ToDoListController {
 
     /**
      * 특정 JD에 속한 단일 ToDoList의 상세 정보를 조회합니다.
-
      */
     @Operation(summary = "특정 분석/카테고리의 Todolist 조회", description = "jd_id와 toDoList_id를 통해 todolist를 조회합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니거나 toDoListId가 해당 jd에 속하지 않으면 403을 반환합니다.")
     @ApiResponses({
@@ -127,7 +125,6 @@ public class ToDoListController {
 
     /**
      * 특정 JD에 속한 단일 ToDoList를 삭제합니다.
-     *
      */
     @Operation(summary = "특정 분석/카테고리의 Todolist 삭제", description = "jd_id와 toDoList_id를 통해 todolist를 삭제합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니거나 toDoListId가 해당 jd에 속하지 않으면 403을 반환합니다.")
     @ApiResponses({
@@ -146,7 +143,6 @@ public class ToDoListController {
 
     /**
      * 특정 JD에 속한 특정 카테고리의 모든 ToDoList들을 조회합니다.
-     *
      */
     @Operation(summary = "특정 분석/카테고리의 모든 Todolist 조회", description = "jd_id와 category를 통해 해당되는 모든 todolist를 조회합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({

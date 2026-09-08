@@ -6,7 +6,6 @@ import lombok.*;
 
 @Schema(description = "회원 상세정보 응답 DTO")
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

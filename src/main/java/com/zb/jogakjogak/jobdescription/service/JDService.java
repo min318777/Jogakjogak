@@ -68,7 +68,7 @@ public class JDService {
         }
         JD jd = createdJd(jdRequestDto, member, hasResume);
         for (ToDoListDto dto : parsedAnalysisResult) {
-            ToDoList toDoList = ToDoList.fromDto(dto.getCategory(), dto.getTitle(), dto.getContent(),
+            ToDoList toDoList = ToDoList.from(dto.getCategory(), dto.getTitle(), dto.getContent(),
                     dto.getMemo(), dto.isDone(), jd);
             jd.addToDoList(toDoList);
         }
@@ -111,16 +111,16 @@ public class JDService {
     }
 
     @Transactional
-    public JDAlarmResponseDto alarm(Long jdId, JDAlarmUpdateRequestDto dto, Long memberId) {
+    public JDAlarmResponseDto alarm(Long jdId, boolean isAlarmOn, Long memberId) {
 
         JD jd = getAuthorizedJd(jdId, memberId);
-        if (dto.isAlarmOn()) {
+        if (isAlarmOn) {
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new AuthException(MemberErrorCode.NOT_FOUND_MEMBER));
             member.updateNotificationEnabled(true);
             memberRepository.save(member);
         }
-        jd.updateAlarmStatus(dto.isAlarmOn());
+        jd.updateAlarmStatus(isAlarmOn);
         return JDAlarmResponseDto.builder()
                 .isAlarmOn(jd.isAlarmOn())
                 .jdId(jd.getId())
@@ -156,11 +156,11 @@ public class JDService {
     }
 
     @Transactional
-    public BookmarkResponseDto updateBookmarkStatus(Long jdId, JDBookmarkUpdateRequestDto dto, Long memberId) {
+    public BookmarkResponseDto updateBookmarkStatus(Long jdId, boolean isBookmark, Long memberId) {
 
         JD jd = getAuthorizedJd(jdId, memberId);
 
-        jd.updateBookmarkStatus(dto.isBookmark());
+        jd.updateBookmarkStatus(isBookmark);
         return BookmarkResponseDto.builder()
                 .jd_id(jdId)
                 .isBookmark(jd.isBookmark())

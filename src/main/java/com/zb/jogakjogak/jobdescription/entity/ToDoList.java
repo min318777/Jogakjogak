@@ -42,8 +42,8 @@ public class ToDoList extends BaseEntity {
     @JoinColumn(name = "jd_id", nullable = false)
     private JD jd;
 
-    public static ToDoList fromDto(ToDoListType category, String title, String content, String memo,
-                                    boolean isDone, JD jd) {
+    public static ToDoList from(ToDoListType category, String title, String content, String memo,
+                                boolean isDone, JD jd) {
 
         Logger logger = LoggerFactory.getLogger(ToDoList.class);
 

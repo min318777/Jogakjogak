@@ -74,11 +74,11 @@ public class JDController {
     @PatchMapping("/jds/{jd_id}/alarm")
     public ResponseEntity<CommonResponse<JDAlarmResponseDto>> alarm(
             @PathVariable("jd_id") Long jdId,
-            @RequestBody JDAlarmUpdateRequestDto dto,
+            @RequestParam boolean isAlarmOn,
             @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
                 new CommonResponse<>(
-                        jdService.alarm(jdId, dto, userId),
+                        jdService.alarm(jdId, isAlarmOn, userId),
                         "알람 설정 완료"
                 )
         );
@@ -144,11 +144,11 @@ public class JDController {
     @PatchMapping("/jds/{jd_id}/bookmark")
     public ResponseEntity<CommonResponse<BookmarkResponseDto>> toggleBookmark
             (@PathVariable("jd_id") Long jdId,
-             @RequestBody JDBookmarkUpdateRequestDto dto,
+             @RequestParam boolean isBookmark,
              @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
                 new CommonResponse<>(
-                        jdService.updateBookmarkStatus(jdId, dto, userId),
+                        jdService.updateBookmarkStatus(jdId, isBookmark, userId),
                         "즐겨찾기 설정 완료"
                 )
         );

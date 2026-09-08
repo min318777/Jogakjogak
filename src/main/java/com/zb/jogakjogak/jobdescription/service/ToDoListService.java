@@ -13,7 +13,6 @@ import com.zb.jogakjogak.jobdescription.entity.ToDoList;
 import com.zb.jogakjogak.jobdescription.repository.JDRepository;
 import com.zb.jogakjogak.jobdescription.repository.ToDoListRepository;
 import com.zb.jogakjogak.jobdescription.type.ToDoListType;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,11 +85,11 @@ public class ToDoListService {
      * 특정 JD에 속한 ToDoList에 대한 완료 여부를 수정하는 메서드
      */
     @Transactional
-    public ToDoListResponseDto toggleComplete(Long jdId, Long toDoListId, @Valid TodoListIsDoneUpdateRequestDto dto, Long memberId) {
+    public ToDoListResponseDto toggleComplete(Long jdId, Long toDoListId, boolean isDone, Long memberId) {
         JD jd = getAuthorizedJd(jdId, memberId);
         jd.markAsUpdated();
         ToDoList toDoList = findToDoListInJd(jd, toDoListId);
-        toDoList.updateToDoListIsDone(dto.isDone());
+        toDoList.updateToDoListIsDone(isDone);
         return ToDoListResponseDto.from(toDoList);
     }
 

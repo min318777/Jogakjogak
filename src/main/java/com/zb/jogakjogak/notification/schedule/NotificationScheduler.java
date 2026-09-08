@@ -21,7 +21,6 @@ public class NotificationScheduler {
     private final JobRegistry jobRegistry;
     private final NotificationSendService notificationSendService;
 
-    // 신규 심플 구현(오전 8시)로 대체, 중복 발송 방지를 위해 비활성화
     // @Scheduled(cron = "0 0 10 * * *", zone = "Asia/Seoul")
     public void runEmailNotificationJob() throws Exception {
         JobParameters params = new JobParametersBuilder()

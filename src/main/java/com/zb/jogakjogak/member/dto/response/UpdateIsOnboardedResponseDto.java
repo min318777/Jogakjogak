@@ -6,7 +6,6 @@ import lombok.*;
 
 @Schema(description = "회원 온보딩 상태 수정 응답 DTO")
 @Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
