@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @Tag(name = "회원 관리 API", description = "회원 정보 조회/수정, 알림 설정, 탈퇴 등 회원 관련 API")
-@RequestMapping("/member/my-page")
+@RequestMapping("/member")
 @RequiredArgsConstructor
 @RestController
 public class MemberController {
@@ -53,7 +53,7 @@ public class MemberController {
             @ApiResponse(responseCode = "404", description = "존재하지 않는 회원", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "409", description = "이미 존재하는 닉네임", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PatchMapping("/update")
+    @PatchMapping
     public ResponseEntity<CommonResponse<MemberResponseDto>> updateMember(@AuthenticationPrincipal Long userId,
                                                                            @Valid @RequestBody UpdateMemberRequestDto updateMemberRequestDto){
         MemberResponseDto memberResponseDto = memberService.updateMember(userId, updateMemberRequestDto);
@@ -70,7 +70,7 @@ public class MemberController {
             @ApiResponse(responseCode = "200", description = "회원 is_onboarded 수정 완료"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 회원", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PatchMapping("/update-is-onboarded")
+    @PatchMapping("/onboarded")
     public ResponseEntity<CommonResponse<UpdateIsOnboardedResponseDto>> updateIsOnboarded(@AuthenticationPrincipal Long userId) {
         UpdateIsOnboardedResponseDto updateIsOnboardedResponseDto = memberService.updateIsOnboarded(userId);
 

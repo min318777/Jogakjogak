@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BookmarkResponseDto {
     @Schema(description = "분석 아이디", example = "1")
-    private Long jd_id;
+    private Long jdId;
     @Schema(description = "즐겨찾기 설정 여부", example = "true")
     private boolean isBookmark;
 }

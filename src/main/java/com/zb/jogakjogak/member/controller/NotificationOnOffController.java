@@ -13,14 +13,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
 @Tag(name = "회원 관리 API", description = "회원 정보 조회/수정, 알림 설정, 탈퇴 등 회원 관련 API")
 @RestController
-@RequestMapping("/member/notification/on-off")
+@RequestMapping("/member/notification-setting")
 @RequiredArgsConstructor
 public class NotificationOnOffController {
 
@@ -31,7 +31,7 @@ public class NotificationOnOffController {
             @ApiResponse(responseCode = "200", description = "전체 이메일 알림기능 수정 완료"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 회원", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping
+    @PatchMapping
     public ResponseEntity<CommonResponse<Boolean>> switchAllJdsNotification(@AuthenticationPrincipal Long userId){
 
         boolean notificationOnOff = notificationOnOffService.switchAllJdsNotification(userId);

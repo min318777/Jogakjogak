@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MemoResponseDto {
     @Schema(description = "분석 아이디", example = "1")
-    private Long jd_id;
+    private Long jdId;
     @Schema(description = "메모", example = "1일차 - 조각 3개 완료, 2일차 - 조각 2개 완료")
     private String memo;
 }

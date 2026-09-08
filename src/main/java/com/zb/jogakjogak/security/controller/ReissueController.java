@@ -32,7 +32,7 @@ public class ReissueController {
             @ApiResponse(responseCode = "401", description = "만료/탈취되었거나 유효하지 않은 토큰", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 토큰 또는 회원", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/member/reissue")
+    @PostMapping("/tokens")
     public ResponseEntity<CommonResponse<String>> reissue(HttpServletRequest request, HttpServletResponse response) {
 
         String refreshToken = extractRefreshTokenFromCookie(request.getCookies());

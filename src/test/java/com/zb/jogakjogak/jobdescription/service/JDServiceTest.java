@@ -475,12 +475,12 @@ class JDServiceTest {
 
 
         AllGetJDResponseDto dto1 = resultPage.getJds().get(0);
-        assertEquals(101L, dto1.getJd_id());
+        assertEquals(101L, dto1.getJdId());
         assertEquals(2L, dto1.getTotalPieces());
         assertEquals(1L, dto1.getCompletedPieces());
 
         AllGetJDResponseDto dto2 = resultPage.getJds().get(1);
-        assertEquals(102L, dto2.getJd_id());
+        assertEquals(102L, dto2.getJdId());
         assertEquals(1L, dto2.getTotalPieces());
         assertEquals(1L, dto2.getCompletedPieces());
 
@@ -526,7 +526,7 @@ class JDServiceTest {
 
         // Then
         assertNotNull(response);
-        assertEquals(testJd.getId(), response.getJd_id());
+        assertEquals(testJd.getId(), response.getJdId());
         assertEquals(isBookmark, response.isBookmark());
         assertEquals(isBookmark, testJd.isBookmark());
 
@@ -578,7 +578,7 @@ class JDServiceTest {
 
         // Then
         assertNotNull(response);
-        assertEquals(testJd.getId(), response.getJd_id());
+        assertEquals(testJd.getId(), response.getJdId());
         assertNotNull(response.getApplyAt());
         assertNotNull(testJd.getApplyAt());
 
@@ -597,7 +597,7 @@ class JDServiceTest {
 
         // Then
         assertNotNull(response);
-        assertEquals(testJd.getId(), response.getJd_id());
+        assertEquals(testJd.getId(), response.getJdId());
         assertNull(response.getApplyAt());
         assertNull(testJd.getApplyAt());
 

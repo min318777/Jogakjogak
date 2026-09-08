@@ -51,7 +51,7 @@ public class DataInitController {
                 .filter(m -> m.getUsername() != null && m.getUsername().startsWith(TEST_USERNAME_PREFIX))
                 .count();
         if (existing > 0) {
-            return new DataInitResponseDto("이미 테스트 Member가 존재합니다. /biz/init/clean 후 재시도하세요.");
+            return new DataInitResponseDto("이미 테스트 Member가 존재합니다. DELETE /biz/init 후 재시도하세요.");
         }
 
         List<Member> members = new ArrayList<>(TOTAL_MEMBERS);
@@ -94,7 +94,7 @@ public class DataInitController {
         return new DataInitResponseDto("JD " + total + "건 삽입 완료");
     }
 
-@PostMapping("/large")
+@PostMapping("/jds/large")
     public DataInitResponseDto initLarge() {
         List<Long> memberIds = memberRepository.findAll().stream()
                 .filter(m -> m.getUsername() != null && m.getUsername().startsWith(TEST_USERNAME_PREFIX))
@@ -114,7 +114,7 @@ public class DataInitController {
         return new DataInitResponseDto("JD " + total + "건 삽입 완료");
     }
 
-    @DeleteMapping("/clean")
+    @DeleteMapping
     public DataInitResponseDto clean() {
         List<Long> memberIds = memberRepository.findAll().stream()
                 .filter(m -> m.getUsername() != null &&

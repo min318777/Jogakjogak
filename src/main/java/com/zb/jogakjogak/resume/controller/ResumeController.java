@@ -61,16 +61,16 @@ public class ResumeController {
      * @param requestDto 수정할 이력서 이름, 수정할 이력서 내용
      * @return data(수정한 이력서 id, 수정된 이력서 이름, 수정된 이력서 내용), 성공 여부 메세지, 상태코드
      */
-    @Operation(summary = "이력서 수정", description = "사용자가 등록한 이력서를 수정합니다. 요청 바디에 보낸 필드만 부분 수정되며, 보내지 않은 필드는 기존 값이 유지됩니다. resume_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "이력서 수정", description = "사용자가 등록한 이력서를 수정합니다. 요청 바디에 보낸 필드만 부분 수정되며, 보내지 않은 필드는 기존 값이 유지됩니다. resumeId가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "이력서 수정 완료"),
             @ApiResponse(responseCode = "400", description = "입력값 검증 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 이력서", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "해당 이력서에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PatchMapping("/resume/{resume_id}")
+    @PatchMapping("/resume/{resumeId}")
     public ResponseEntity<CommonResponse<ResumeResponseDto>> modify(
-            @PathVariable("resume_id") Long resumeId,
+            @PathVariable Long resumeId,
             @Valid @RequestBody ResumeUpdateRequestDto requestDto,
             @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(

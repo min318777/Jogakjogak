@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class JDResponseDto {
     @Schema(description = "분석 아이디", example = "1")
-    private Long jd_id;
+    private Long jdId;
     @Schema(description = "분석 제목", example = "J사 백엔드 취업 해보자!")
     private String title;
     @Schema(description = "분석 즐겨찾기 여부", example = "true")
@@ -92,7 +92,7 @@ public class JDResponseDto {
         }
 
         return JDResponseDto.builder()
-                .jd_id(jd.getId())
+                .jdId(jd.getId())
                 .title(jd.getTitle())
                 .isBookmark(jd.isBookmark())
                 .companyName(jd.getCompanyName())

@@ -47,15 +47,15 @@ public class JDController {
         );
     }
 
-    @Operation(summary = "특정 분석 내용 단건 조회", description = "jd_id를 통해 해당 분석 내용을 단건으로 조회합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "특정 분석 내용 단건 조회", description = "jdId를 통해 해당 분석 내용을 단건으로 조회합니다. jdId가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "나의 분석 내용 단일 조회 완료"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 JD", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/jds/{jd_id}")
+    @GetMapping("/jds/{jdId}")
     public ResponseEntity<CommonResponse<JDResponseDto>> getJd(
-            @PathVariable("jd_id") Long jdId,
+            @PathVariable Long jdId,
             @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
                 new CommonResponse<>(
@@ -65,15 +65,15 @@ public class JDController {
         );
     }
 
-    @Operation(summary = "특정 분석 알림 설정", description = "jd_id를 통해 특정 분석에 대한 이메일 알림에 대한 설정/미설정합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "특정 분석 알림 설정", description = "jdId를 통해 특정 분석에 대한 이메일 알림에 대한 설정/미설정합니다. jdId가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "알람 설정 완료"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 JD", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PatchMapping("/jds/{jd_id}/alarm")
+    @PatchMapping("/jds/{jdId}/alarm")
     public ResponseEntity<CommonResponse<JDAlarmResponseDto>> alarm(
-            @PathVariable("jd_id") Long jdId,
+            @PathVariable Long jdId,
             @RequestParam boolean isAlarmOn,
             @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
@@ -84,15 +84,15 @@ public class JDController {
         );
     }
 
-    @Operation(summary = "특정 분석 삭제", description = "jd_id를 통해 특정 분석을 삭제합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "특정 분석 삭제", description = "jdId를 통해 특정 분석을 삭제합니다. jdId가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "나의 분석 내용 삭제 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 JD", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @DeleteMapping("/jds/{jd_id}")
+    @DeleteMapping("/jds/{jdId}")
     public ResponseEntity<Void> deleteJd(
-            @PathVariable("jd_id") Long jdId,
+            @PathVariable Long jdId,
             @AuthenticationPrincipal Long userId) {
         jdService.deleteJd(jdId, userId);
         return ResponseEntity.noContent().build();
@@ -135,15 +135,15 @@ public class JDController {
     }
 
 
-    @Operation(summary = "특정 분석 즐겨찾기 설정", description = "jd_id를 통해 분석을 즐겨찾기로 설정/미설정합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "특정 분석 즐겨찾기 설정", description = "jdId를 통해 분석을 즐겨찾기로 설정/미설정합니다. jdId가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "즐겨찾기 설정 완료"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 JD", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PatchMapping("/jds/{jd_id}/bookmark")
+    @PatchMapping("/jds/{jdId}/bookmark")
     public ResponseEntity<CommonResponse<BookmarkResponseDto>> toggleBookmark
-            (@PathVariable("jd_id") Long jdId,
+            (@PathVariable Long jdId,
              @RequestParam boolean isBookmark,
              @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
@@ -154,15 +154,15 @@ public class JDController {
         );
     }
 
-    @Operation(summary = "특정 분석 지원 완료 설정", description = "jd_id를 통해 분석된 채용공고에 지원을 완료/미완료로 설정합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "특정 분석 지원 완료 설정", description = "jdId를 통해 분석된 채용공고에 지원을 완료/미완료로 설정합니다. jdId가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "지원 완료/취소 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 JD", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PatchMapping("/jds/{jd_id}/apply")
+    @PatchMapping("/jds/{jdId}/apply-status")
     public ResponseEntity<CommonResponse<ApplyStatusResponseDto>> toggleApplyStatus(
-            @PathVariable("jd_id") Long jdId,
+            @PathVariable Long jdId,
             @AuthenticationPrincipal Long userId) {
         ApplyStatusResponseDto response = jdService.toggleApplyStatus(jdId, userId);
         String message = (response.getApplyAt() != null) ? "지원 완료 성공" : "지원 완료 취소 성공";
@@ -174,15 +174,15 @@ public class JDController {
         );
     }
 
-    @Operation(summary = "특정 분석 메모 수정", description = "jd_id를 통해 분석의 메모를 수정합니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "특정 분석 메모 수정", description = "jdId를 통해 분석의 메모를 수정합니다. jdId가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "메모 수정 성공"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 JD", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PatchMapping("/jds/{jd_id}/memo")
+    @PatchMapping("/jds/{jdId}/memo")
     public ResponseEntity<CommonResponse<MemoResponseDto>> updateMemo(
-            @PathVariable("jd_id") Long jdId,
+            @PathVariable Long jdId,
             @Valid @RequestBody JDMemoUpdateRequestDto dto,
             @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(
@@ -193,15 +193,15 @@ public class JDController {
         );
     }
 
-    @Operation(summary = "특정 채용공고 수정", description = "jd_id를 통해 Jd를 수정합니다. 요청 바디에 보낸 필드만 부분 수정되며, 보내지 않은 필드는 기존 값이 유지됩니다. jd_id가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
+    @Operation(summary = "특정 채용공고 수정", description = "jdId를 통해 Jd를 수정합니다. 요청 바디에 보낸 필드만 부분 수정되며, 보내지 않은 필드는 기존 값이 유지됩니다. jdId가 존재하지 않으면 404, 본인 소유가 아니면 403을 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "JD 수정 완료"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 JD", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "403", description = "해당 JD에 대한 권한 없음", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PatchMapping("/jds/{jd_id}")
+    @PatchMapping("/jds/{jdId}")
     public ResponseEntity<CommonResponse<JDResponseDto>> updateJd
-            (@PathVariable("jd_id") Long jdId,
+            (@PathVariable Long jdId,
              @Valid @RequestBody JDUpdateRequestDto dto,
              @AuthenticationPrincipal Long userId) {
         return ResponseEntity.ok().body(

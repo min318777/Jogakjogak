@@ -31,7 +31,7 @@ public class EventController {
             @ApiResponse(responseCode = "200", description = "새 이용자 이벤트 조회 성공"),
             @ApiResponse(responseCode = "400", description = "존재하지 않는 이벤트 코드", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<CommonResponse<EventResponseDto>> getNewMemberEvent(
             @AuthenticationPrincipal Long userId
     ){

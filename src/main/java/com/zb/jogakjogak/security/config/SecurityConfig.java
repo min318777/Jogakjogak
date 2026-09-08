@@ -95,7 +95,7 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/oauth2/**",
                                 "/login/oauth2/code/**",
-                                "/member/reissue",
+                                "/tokens",
                                 "/member/logout",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",

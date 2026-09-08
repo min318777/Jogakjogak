@@ -162,7 +162,7 @@ public class JDService {
 
         jd.updateBookmarkStatus(isBookmark);
         return BookmarkResponseDto.builder()
-                .jd_id(jdId)
+                .jdId(jdId)
                 .isBookmark(jd.isBookmark())
                 .build();
     }
@@ -177,7 +177,7 @@ public class JDService {
             updateJd.unMarkJdAsApplied();
         }
         return ApplyStatusResponseDto.builder()
-                .jd_id(jdId)
+                .jdId(jdId)
                 .applyAt(updateJd.getApplyAt())
                 .build();
     }
@@ -187,7 +187,7 @@ public class JDService {
         JD jd = getAuthorizedJd(jdId, memberId);
         jd.updateMemo(dto.getMemo());
         return MemoResponseDto.builder()
-                .jd_id(jd.getId())
+                .jdId(jd.getId())
                 .memo(jd.getMemo())
                 .build();
     }

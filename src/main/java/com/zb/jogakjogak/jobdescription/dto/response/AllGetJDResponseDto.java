@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class AllGetJDResponseDto {
     @Schema(description = "분석 아이디", example = "1")
-    private Long jd_id;
+    private Long jdId;
     @Schema(description = "채용공고 제목", example = "백엔드 신입 개발자 채용")
     private String title;
     @Schema(description = "즐겨찾기 설정 여부", example = "true")
@@ -49,7 +49,7 @@ public class AllGetJDResponseDto {
                 .count();
 
         return AllGetJDResponseDto.builder()
-                .jd_id(jd.getId())
+                .jdId(jd.getId())
                 .title(jd.getTitle())
                 .isBookmark(jd.isBookmark())
                 .isAlarmOn(jd.isAlarmOn())

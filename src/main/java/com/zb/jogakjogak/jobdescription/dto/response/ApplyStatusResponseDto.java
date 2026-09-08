@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ApplyStatusResponseDto {
     @Schema(description = "분석 아이디",example = "1")
-    private Long jd_id;
+    private Long jdId;
     @Schema(description = "지원 완료 시간",example = "2025-06-22T10:30:00Z")
     private LocalDateTime applyAt;
 }
