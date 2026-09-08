@@ -11,10 +11,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -40,7 +39,7 @@ public class WithdrawalController {
             @ApiResponse(responseCode = "417", description = "카카오/구글 계정 연결 해제 실패로 회원탈퇴 실패", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping
-    public ResponseEntity<CommonResponse<?>> oauth2Withdrawal(HttpServletResponse response, @AuthenticationPrincipal Long userId) {
+    public ResponseEntity<CommonResponse<?>> oauth2Withdrawal(HttpServletRequest request, HttpServletResponse response, @AuthenticationPrincipal Long userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -48,12 +47,20 @@ public class WithdrawalController {
                     new CommonResponse<>(null, "회원 탈퇴 요청 실패: 인증되지 않은 사용자입니다.")
             );
         }
-        withdrawalService.withdrawMember(userId);
+        withdrawalService.withdrawMember(userId, extractAccessToken(request));
         clearCookie(response);
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok().body(
                 new CommonResponse<>(null, "회원탈퇴 완료")
         );
+    }
+
+    private String extractAccessToken(HttpServletRequest request) {
+        String authorization = request.getHeader("Authorization");
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7);
+        }
+        return null;
     }
 
     private void clearCookie(HttpServletResponse response) {
