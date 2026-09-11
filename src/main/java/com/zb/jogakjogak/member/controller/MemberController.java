@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @Tag(name = "회원 관리 API", description = "회원 정보 조회/수정, 알림 설정, 탈퇴 등 회원 관련 API")
-@RequestMapping("/member")
+@RequestMapping("/members")
 @RequiredArgsConstructor
 @RestController
 public class MemberController {
@@ -65,7 +65,7 @@ public class MemberController {
         );
     }
 
-    @Operation(summary =  "회원 is_onboarded 수정", description = "회원의 is_onboarded 상태를 반전(toggle)합니다. 회원이 존재하지 않으면 404를 반환합니다.")
+    @Operation(summary = "회원 is_onboarded 수정", description = "회원의 is_onboarded 상태를 반전(toggle)합니다. 회원이 존재하지 않으면 404를 반환합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "회원 is_onboarded 수정 완료"),
             @ApiResponse(responseCode = "404", description = "존재하지 않는 회원", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "회원 관리 API", description = "회원 정보 조회/수정, 알림 설정, 탈퇴 등 회원 관련 API")
 @RestController
-@RequestMapping("/member/notification-setting")
+@RequestMapping("/members/notification-setting")
 @RequiredArgsConstructor
 public class NotificationOnOffController {
 

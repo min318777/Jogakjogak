@@ -25,7 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
         if (measurementId != null && !measurementId.trim().isEmpty() 
             && apiSecret != null && !apiSecret.trim().isEmpty()) {
             registry.addInterceptor(gaApiCallInterceptor).addPathPatterns("/jds/**");
-            registry.addInterceptor(gaApiCallInterceptor).addPathPatterns("/member/**");
+            registry.addInterceptor(gaApiCallInterceptor).addPathPatterns("/members/**");
             registry.addInterceptor(gaApiCallInterceptor).addPathPatterns("/resume/**");
         }
     }

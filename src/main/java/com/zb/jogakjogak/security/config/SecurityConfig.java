@@ -50,9 +50,7 @@ public class SecurityConfig {
                         corsConfiguration.setAllowedOrigins(Arrays.asList(
                                 "http://localhost:3000",
                                 "https://jogakjogak.com",
-                                "https://jogakjogak-front.vercel.app",
-                                "https://www.jogakjogak.com",
-                                "https://api.jogakjogak.com"
+                                "https://www.jogakjogak.com"
                                 ));
                         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                         corsConfiguration.setAllowCredentials(true);
@@ -96,7 +94,7 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/login/oauth2/code/**",
                                 "/tokens",
-                                "/member/logout",
+                                "/members/logout",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",

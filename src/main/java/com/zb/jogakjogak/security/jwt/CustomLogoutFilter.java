@@ -24,7 +24,7 @@ public class CustomLogoutFilter extends OncePerRequestFilter {
     private final RefreshTokenRedisService refreshTokenRedisService;
     private final JWTUtil jwtUtil;
     private final BlacklistService blacklistService;
-    private static final String LOGOUT_URI = "/member/logout";
+    private static final String LOGOUT_URI = "/members/logout";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
