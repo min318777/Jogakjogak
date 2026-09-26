@@ -130,6 +130,7 @@ class ResumeServiceTest {
 
         assertThat(exception.getMemberErrorCode()).isEqualTo(MemberErrorCode.ALREADY_HAVE_RESUME);
         verify(resumeRepository, never()).save(any(Resume.class));
+        verify(resumeRepository, never()).saveAndFlush(any(Resume.class));
     }
 
     @Test
@@ -266,7 +267,7 @@ class ResumeServiceTest {
 
         given(memberRepository.findById(1L))
                 .willReturn(Optional.of(mockMember));
-        given(resumeRepository.save(any(Resume.class))).willReturn(mockResume);
+        given(resumeRepository.saveAndFlush(any(Resume.class))).willReturn(mockResume);
 
         // When
         ResumeGetResponseDto responseDto = resumeService.registerV2(requestDto, 1L);
@@ -275,7 +276,7 @@ class ResumeServiceTest {
         assertThat(responseDto).isNotNull();
         assertThat(responseDto.getContent()).isEqualTo(requestDto.getContent());
 
-        verify(resumeRepository, times(1)).save(any(Resume.class));
+        verify(resumeRepository, times(1)).saveAndFlush(any(Resume.class));
     }
 
     static Stream<Arguments> registerV2SuccessCases() {
@@ -367,6 +368,7 @@ class ResumeServiceTest {
         // Then
         assertThat(exception.getErrorCode()).isEqualTo(ResumeErrorCode.NOT_ENTERED_CAREER);
         verify(resumeRepository, times(0)).save(any(Resume.class));
+        verify(resumeRepository, times(0)).saveAndFlush(any(Resume.class));
     }
 
     @Test

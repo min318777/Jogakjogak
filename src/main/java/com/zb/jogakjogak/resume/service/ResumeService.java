@@ -21,6 +21,7 @@ import com.zb.jogakjogak.member.entity.Member;
 import com.zb.jogakjogak.member.repository.MemberRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,7 +63,12 @@ public class ResumeService {
                 .member(member)
                 .build();
 
-        Resume resume = resumeRepository.save(newResume);
+        Resume resume;
+        try {
+            resume = resumeRepository.saveAndFlush(newResume);
+        } catch (DataIntegrityViolationException e) {
+            throw new AuthException(MemberErrorCode.ALREADY_HAVE_RESUME);
+        }
         return ResumeResponseDto.builder()
                 .resumeId(resume.getId())
                 .title(resume.getTitle())
@@ -148,7 +154,12 @@ public class ResumeService {
                 .build();
 
         member.updateOnboarded(true);
-        Resume saveResume = resumeRepository.save(newResume);
+        Resume saveResume;
+        try {
+            saveResume = resumeRepository.saveAndFlush(newResume);
+        } catch (DataIntegrityViolationException e) {
+            throw new AuthException(MemberErrorCode.ALREADY_HAVE_RESUME);
+        }
 
         return saveResumeDetails(saveResume, requestDto);
     }
