@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -31,6 +33,11 @@ public class NotificationService implements NotificationEmailSender {
     private final ToDoListRepository toDoListRepository;
     private final GaMeasurementProtocolService gaService;
 
+    @Retryable(
+            retryFor = MessagingException.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     public void sendNotificationEmail(NotificationDto notificationDto) throws MessagingException {
         String email = notificationDto.getMember().getEmail();
         String userId = notificationDto.getMember().getId().toString();
@@ -58,8 +65,6 @@ public class NotificationService implements NotificationEmailSender {
             log.info("Thymeleaf HTML 메일 전송 성공: {}", email);
 
         } catch (Exception e) {
-            // GA 이벤트 전송 (실패)
-            sendGaFailureEvent(emailType, campaignName, hashedEmail, userId, e.getMessage());
             log.warn("메일전송 실패 - 사유: {}", e.getMessage());
             throw new MessagingException("이메일 전송 실패", e);
         }
@@ -142,22 +147,4 @@ public class NotificationService implements NotificationEmailSender {
         gaService.sendGaEvent(gaClientId, userId, "email_sent", eventParams).subscribe();
     }
 
-    /**
-     * GA 실패 이벤트 전송
-     */
-    private void sendGaFailureEvent(String emailType, String campaignName, String hashedEmail,
-                                    String userId, String errorMessage) {
-        Map<String, Object> eventParams = new HashMap<>();
-        eventParams.put("email_type", emailType);
-        eventParams.put("campaign_name", campaignName);
-        eventParams.put("send_status", "failure");
-        eventParams.put("recipient_email", hashedEmail);
-        eventParams.put("recipient_user_id", userId);
-        eventParams.put("error_message_summary",
-                errorMessage != null ? errorMessage.substring(0, Math.min(errorMessage.length(), 250)) : "Unknown email error");
-        eventParams.put("error_code_custom", "EMAIL_SEND_FAILED");
-
-        String gaClientId = "backend_notification_error_" + UUID.randomUUID();
-        gaService.sendGaEvent(gaClientId, userId, "email_send_failed", eventParams).subscribe();
-    }
 }

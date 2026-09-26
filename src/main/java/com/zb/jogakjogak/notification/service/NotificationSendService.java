@@ -1,5 +1,7 @@
 package com.zb.jogakjogak.notification.service;
 
+import com.zb.jogakjogak.ga.service.GaMeasurementProtocolService;
+import com.zb.jogakjogak.global.util.HashingUtil;
 import com.zb.jogakjogak.jobdescription.entity.JD;
 import com.zb.jogakjogak.jobdescription.repository.JDRepository;
 import com.zb.jogakjogak.notification.dto.NotificationDto;
@@ -17,8 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,6 +36,7 @@ public class NotificationSendService {
     private final JDRepository jdRepository;
     private final NotificationEmailSender emailSender;
     private final NotificationRepository notificationRepository;
+    private final GaMeasurementProtocolService gaService;
 
     public void sendDailyNotifications() {
         LocalDateTime now = LocalDateTime.now();
@@ -79,7 +84,26 @@ public class NotificationSendService {
                 notification.markFailed(e.getMessage(), MAX_ATTEMPTS);
                 notificationRepository.save(notification);
             }
+            sendGaFailureEvent(member, e.getMessage());
             log.error("[DailyNotification] 발송 실패: memberId={}, reason={}", member.getId(), e.getMessage());
         }
+    }
+
+    private void sendGaFailureEvent(Member member, String errorMessage) {
+        String userId = member.getId().toString();
+        String hashedEmail = HashingUtil.sha256(member.getEmail());
+
+        Map<String, Object> eventParams = new HashMap<>();
+        eventParams.put("email_type", "notification_jd_reminder");
+        eventParams.put("campaign_name", "jd_deadline_reminder");
+        eventParams.put("send_status", "failure");
+        eventParams.put("recipient_email", hashedEmail);
+        eventParams.put("recipient_user_id", userId);
+        eventParams.put("error_message_summary",
+                errorMessage != null ? errorMessage.substring(0, Math.min(errorMessage.length(), 250)) : "Unknown email error");
+        eventParams.put("error_code_custom", "EMAIL_SEND_FAILED");
+
+        String gaClientId = "backend_notification_error_" + UUID.randomUUID();
+        gaService.sendGaEvent(gaClientId, userId, "email_send_failed", eventParams).subscribe();
     }
 }

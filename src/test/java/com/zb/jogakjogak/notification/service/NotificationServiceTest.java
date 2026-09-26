@@ -91,7 +91,7 @@ class NotificationServiceTest {
     }
 
     @Test
-    @DisplayName("이메일 발송 실패 - GA 실패 이벤트 호출 후 MessagingException 발생")
+    @DisplayName("이메일 발송 실패 - MessagingException 발생")
     void sendNotificationEmail_fail() throws MessagingException {
         // given
         MimeMessage mimeMessage = new MimeMessage((Session) null);
@@ -99,7 +99,6 @@ class NotificationServiceTest {
         given(templateEngine.process(any(String.class), any(Context.class))).willReturn("<html>test</html>");
         given(toDoListRepository.countByIsDoneTrueAndJd_Id(1L)).willReturn(0);
         given(toDoListRepository.countByJd_Id(1L)).willReturn(0);
-        given(gaService.sendGaEvent(any(), any(), any(), any())).willReturn(Mono.empty());
         willThrow(new MailSendException("SMTP 연결 실패")).given(javaMailSender).send(any(MimeMessage.class));
 
         // when & then
@@ -107,6 +106,6 @@ class NotificationServiceTest {
                 .isInstanceOf(MessagingException.class)
                 .hasMessageContaining("이메일 전송 실패");
 
-        then(gaService).should().sendGaEvent(any(), eq("1"), eq("email_send_failed"), any());
+        then(gaService).should(never()).sendGaEvent(any(), any(), any(), any());
     }
 }
