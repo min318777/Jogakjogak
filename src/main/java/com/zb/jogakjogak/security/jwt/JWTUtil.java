@@ -72,6 +72,7 @@ public class JWTUtil {
                 .audience().add(jwtConfig.audience()).and()
                 .add("typ", Token.ACCESS_TOKEN.name())
                 .add("role", role)
+                .id(UUID.randomUUID().toString())
                 .build();
 
         return issue(claims, jwtConfig.accessTtlMs());

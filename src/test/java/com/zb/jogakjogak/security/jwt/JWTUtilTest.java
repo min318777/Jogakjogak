@@ -25,7 +25,7 @@ class JWTUtilTest {
         Claims claims = jwtUtil.validateToken(access, Token.ACCESS_TOKEN);
 
         assertThat(claims.getSubject()).isEqualTo("1");
-        assertThat(claims.getId()).isNull();
+        assertThat(claims.getId()).isNotNull();
         assertThat(jwtUtil.getRole(claims)).isEqualTo("USER");
     }
 
