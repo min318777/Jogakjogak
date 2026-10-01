@@ -60,11 +60,6 @@ public class SecurityConfig {
                                 "X-Client-ID"
                         ));
                         corsConfiguration.setMaxAge(600L);
-                        corsConfiguration.setExposedHeaders(Arrays.asList(
-                                "Set-Cookie",
-                                "Authorization",
-                                "Access-Control-Allow-Credentials"
-                        ));
                         return corsConfiguration;
                     }}));
         http.
