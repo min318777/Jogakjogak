@@ -1,11 +1,14 @@
 package com.zb.jogakjogak.member.service;
 
 
+import com.zb.jogakjogak.event.repository.EventRepository;
 import com.zb.jogakjogak.global.exception.AuthException;
 import com.zb.jogakjogak.global.exception.MemberErrorCode;
+import com.zb.jogakjogak.jobdescription.repository.JDRepository;
 import com.zb.jogakjogak.member.entity.Member;
 import com.zb.jogakjogak.member.entity.OAuth2Info;
 import com.zb.jogakjogak.member.repository.MemberRepository;
+import com.zb.jogakjogak.notification.repository.NotificationRepository;
 import com.zb.jogakjogak.security.jwt.JWTUtil;
 import com.zb.jogakjogak.security.service.BlacklistService;
 import com.zb.jogakjogak.security.service.RefreshTokenRedisService;
@@ -21,6 +24,9 @@ public class WithdrawalService {
     private final JWTUtil jwtUtil;
     private final KakaoWithdrawalService kakaoWithdrawalService;
     private final GoogleWithdrawalService googleWithdrawalService;
+    private final JDRepository jdRepository;
+    private final NotificationRepository notificationRepository;
+    private final EventRepository eventRepository;
 
     public void withdrawMember(Long userId, String accessToken) {
         Member member = memberRepository.findById(userId)
@@ -40,6 +46,9 @@ public class WithdrawalService {
 
         refreshTokenRedisService.revokeAll(member.getId());
         blacklistAccessToken(accessToken);
+        notificationRepository.deleteAllByMember(member);
+        eventRepository.deleteAllByMember(member);
+        jdRepository.deleteAllByMember(member);
         memberRepository.delete(member);
     }
 

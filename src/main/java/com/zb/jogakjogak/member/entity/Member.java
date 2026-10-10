@@ -1,8 +1,5 @@
 package com.zb.jogakjogak.member.entity;
 
-import com.zb.jogakjogak.event.entity.Event;
-import com.zb.jogakjogak.jobdescription.entity.JD;
-import com.zb.jogakjogak.notification.entity.Notification;
 import com.zb.jogakjogak.resume.entity.Resume;
 import com.zb.jogakjogak.member.config.EmailEncryptor;
 import jakarta.persistence.*;
@@ -57,16 +54,6 @@ public class Member {
 
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Resume resume;
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<JD> jdList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Notification> notification;
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Event> eventList;
 
     @PrePersist
     public void prePersist() {

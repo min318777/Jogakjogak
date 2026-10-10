@@ -61,7 +61,6 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
                     .email(oAuth2ResponseDto.getEmail())
                     .lastLoginAt(LocalDateTime.now())
                     .oauth2Info(new ArrayList<>())
-                    .jdList(new ArrayList<>())
                     .password("temp_password")
                     .role(Role.USER)
                     .build();

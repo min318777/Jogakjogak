@@ -18,6 +18,8 @@ public interface JDRepository extends JpaRepository<JD, Long>, JDRepositoryCusto
 
     void deleteAllByMemberAndIsCreatedWithResumeFalse(Member member);
 
+    void deleteAllByMember(Member member);
+
     @Modifying
     @Query("UPDATE JD j SET j.notificationCount = j.notificationCount + 1, j.lastNotifiedAt = :lastNotifiedAt WHERE j.id IN :ids")
     void updateNotificationFields(@Param("ids") List<Long> ids, @Param("lastNotifiedAt") LocalDateTime lastNotifiedAt);
